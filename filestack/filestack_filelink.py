@@ -1,6 +1,3 @@
-from filestack.version import __version__
-
-
 class Filelink(object):
 
     def __init__(self, handle, apikey=None):

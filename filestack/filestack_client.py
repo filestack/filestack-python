@@ -1,6 +1,3 @@
-from filestack.version import __version__
-
-
 class Client(object):
 
     def __init__(self, apikey):
