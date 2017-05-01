@@ -62,5 +62,6 @@ class SecurityTest(unittest2.TestCase):
         self.assertTrue(policy['policy'])
         self.assertTrue(policy['signature'])
 
+
 if __name__ == '__main__':
     unittest2.main()
