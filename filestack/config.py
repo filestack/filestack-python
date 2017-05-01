@@ -1,3 +1,5 @@
+from filestack.version import __version__
+
 ACCEPTED_SECURITY_TYPES = {'expiry': int, 'call': list,
                            'handle': str, 'url': str,
                            'maxSize': int, 'minSize': int,
