@@ -14,8 +14,9 @@ def validate(policy):
 
         if type(value) != ACCEPTED_SECURITY_TYPES[param]:
             raise PolicyError('Invalid Parameter Data Type for {}, '
-                            'Expecting: {} Received: {}'.format(
-                                param, ACCEPTED_SECURITY_TYPES[param], type(value)))
+                              'Expecting: {} Received: {}'.format(
+                                param, ACCEPTED_SECURITY_TYPES[param],
+                                type(value)))
 
 
 def security(policy, app_secret):
@@ -23,7 +24,7 @@ def security(policy, app_secret):
     policy_enc = base64.urlsafe_b64encode(json.dumps(policy).encode('utf-8'))
 
     signature = hmac.new(app_secret.encode('utf-8'),
-                            policy_enc,
-                            hashlib.sha256).hexdigest()
+                         policy_enc,
+                         hashlib.sha256).hexdigest()
 
     return {'policy': policy_enc, 'signature': signature}
