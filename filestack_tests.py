@@ -1,6 +1,8 @@
 from __future__ import print_function
 
 import unittest2
+import json
+from base64 import b64decode
 
 try:
     from filestack import Client, Filelink, security
@@ -61,6 +63,10 @@ class SecurityTest(unittest2.TestCase):
         policy = security(self.good_policy, self.secret)
         self.assertTrue(policy['policy'])
         self.assertTrue(policy['signature'])
+
+    def test_correct_encoding(self):
+        policy = security(self.good_policy, self.secret)
+        self.assertEqual(b64decode(policy['policy']), json.dumps(self.good_policy))
 
 
 if __name__ == '__main__':
