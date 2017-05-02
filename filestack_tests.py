@@ -66,7 +66,7 @@ class SecurityTest(unittest2.TestCase):
 
     def test_correct_encoding(self):
         policy = security(self.good_policy, self.secret)
-        self.assertEqual(b64decode(policy['policy']), json.dumps(self.good_policy))
+        self.assertEqual(b64decode(policy['policy']).decode('utf-8'), json.dumps(self.good_policy))
 
 
 if __name__ == '__main__':
