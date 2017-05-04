@@ -8,3 +8,5 @@ ACCEPTED_SECURITY_TYPES = {'expiry': int, 'call': list,
 API_URL = 'https://www.filestackapi.com/api'
 FILESTACK_CDN_URL = 'https://cdn.filestackcontent.com/'
 HEADERS = {'User-Agent': 'filestack-python {}'.format(__version__)}
+STORE_PATH = 'store'
+FILE_PATH = 'file'
