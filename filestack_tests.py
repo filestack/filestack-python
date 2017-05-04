@@ -1,9 +1,12 @@
 from __future__ import print_function
 
 import unittest2
+import json
+from base64 import b64decode
 
 try:
-    from filestack import Client, Filelink
+    from filestack import Client, Filelink, security
+    from filestack.exceptions import PolicyError
 except ImportError as e:
     print(e)
 
@@ -44,6 +47,26 @@ class FilelinkTest(unittest2.TestCase):
     def test_url(self):
         url = self.FILESTACK_CDN_URL + self.handle
         self.assertEqual(url, self.filelink.url)
+
+
+class SecurityTest(unittest2.TestCase):
+
+    def setUp(self):
+        self.good_policy = {'call': ['read'], 'expiry': 154323, 'minSize': 293042}
+        self.bad_policy = {'call': ['read'], 'expiry': 154323, 'minSize': '293042'}
+        self.secret = 'APPSECRET'
+
+    def test_bad_policy(self):
+        self.assertRaises(PolicyError, security, self.bad_policy, self.secret)
+
+    def test_good_policy_json(self):
+        policy = security(self.good_policy, self.secret)
+        self.assertTrue(policy['policy'])
+        self.assertTrue(policy['signature'])
+
+    def test_correct_encoding(self):
+        policy = security(self.good_policy, self.secret)
+        self.assertEqual(b64decode(policy['policy']).decode('utf-8'), json.dumps(self.good_policy))
 
 
 if __name__ == '__main__':

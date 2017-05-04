@@ -1,14 +1,11 @@
-from filestack.version import __version__
-
+from filestack.config import FILESTACK_CDN_URL
 
 class Filelink(object):
-
-    FILESTACK_CDN_URL = 'https://cdn.filestackcontent.com/'
-    HEADERS = {'User-Agent': 'filestack-python {}'.format(__version__)}
 
     def __init__(self, handle, apikey=None):
         self._apikey = apikey
         self._handle = handle
+        self.FILESTACK_CDN_URL = FILESTACK_CDN_URL
 
     @property
     def handle(self):
