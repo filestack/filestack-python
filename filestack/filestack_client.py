@@ -1,6 +1,7 @@
 from filestack.config import API_URL, HEADERS, STORE_PATH, FILE_PATH
-from filestack_common import CommonMixin
-from .filestack_filelink import Filelink
+from filestack.filestack_common import CommonMixin
+from filestack.filestack_filelink import Filelink
+from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 
 import re
 import json
@@ -12,9 +13,13 @@ class Client(CommonMixin):
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
         self._security = security
+        STORE_LOCATION_SCHEMA.check(storage)
         self._storage = storage
 
     def store(self, url=None, filepath=None, params=None):
+        if params:
+            STORE_SCHEMA.check(params)
+
         files, data = None, None
         if url:
             data = {'url': url}
@@ -30,7 +35,13 @@ class Client(CommonMixin):
 
         path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-        response = self._make_call(API_URL, 'post', path=path, params=params, data=data, files=files)
+        response = self._make_call(API_URL, 'post',
+                                   path=path,
+                                   params=params,
+                                   data=data,
+                                   files=files,
+                                   security_required=self.security)
+
         if response.ok:
             data = json.loads(response.text)
             handle = re.match(r'(?:https:\/\/)'
@@ -39,6 +50,8 @@ class Client(CommonMixin):
                               r'(\w+)',
                               data['url']).group(1)
             return Filelink(handle, apikey=self.apikey, security=self.security)
+        else:
+            raise Exception(response.text)
 
     @property
     def security(self):
