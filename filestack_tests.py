@@ -47,6 +47,9 @@ class ClientTest(unittest2.TestCase):
         kwargs = {'params': {'access': True}, 'url': 'someurl'}
         self.assertRaises(DataError, self.client.store, **kwargs)
 
+    def test_invalid_client_method(self):
+        self.assertRaises(AttributeError, self.client.delete)
+
 class FilelinkTest(unittest2.TestCase):
 
     def setUp(self):
