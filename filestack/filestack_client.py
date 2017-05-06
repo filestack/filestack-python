@@ -1,4 +1,4 @@
-from filestack.config import API_URL, HEADERS, STORE_PATH, FILE_PATH
+from filestack.config import API_URL, HEADERS, STORE_PATH, FILE_PATH, ALLOWED_CLIENT_METHODS
 from filestack.filestack_common import CommonMixin
 from filestack.filestack_filelink import Filelink
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
@@ -64,3 +64,9 @@ class Client(CommonMixin):
     @property
     def apikey(self):
         return self._apikey
+
+    def __getattr__(self, attr_name):
+        if attr_name not in ALLOWED_CLIENT_METHODS:
+            raise AttributeError
+        return getattr(self, attr_name)
+
