@@ -12,7 +12,7 @@ class CommonMixin(object):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
         with open(destination_path, 'wb') as f:
-            response = self._make_call(CDN_URL, 'get',
+            response = self._make_call(API_URL, 'get',
                                        path=FILE_PATH,
                                        handle=self.handle,
                                        params=params,
@@ -28,7 +28,7 @@ class CommonMixin(object):
     def get_content(self, params=None, security=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
-        response = self._make_call(CDN_URL, 'get',
+        response = self._make_call(API_URL, 'get',
                                    path=FILE_PATH,
                                    handle=self.handle,
                                    params=params,
