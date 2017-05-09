@@ -125,9 +125,6 @@ class FilelinkTest(unittest2.TestCase):
 
         self.assertEqual(delete_response.status_code, 200)
 
-    def test_delete_security_fail(self):
-        self.assertRaises(SecurityError, self.filelink.delete)
-
     """ TEST OVEWRITE """
 
     def test_overwrite_content(self):
@@ -136,14 +133,9 @@ class FilelinkTest(unittest2.TestCase):
             return response(200, {'handle': self.handle})
 
         with HTTMock(api_delete):
-            filelink = self.secure_filelink.overwrite(url="http://www.someurl.com")
+            filelink_response = self.secure_filelink.overwrite(url="http://www.someurl.com")
 
-        self.assertIsInstance(filelink, Filelink)
-        self.assertEqual(filelink.handle, self.handle)
-
-    def test_overwrite_security_fail(self):
-        kwargs = {'url': 'someurl'}
-        self.assertRaises(SecurityError, self.filelink.overwrite, **kwargs)
+        self.assertEqual(filelink_response.status_code, 200)
 
     def test_overwrite_argument_fail(self):
         # passing in neither the url or filepath parameter
