@@ -12,5 +12,4 @@ HEADERS = {'User-Agent': 'filestack-python {}'.format(__version__)}
 STORE_PATH = 'store'
 FILE_PATH = 'file'
 
-# want client to use CommonMixin but only have access to a few functions
 ALLOWED_CLIENT_METHODS = ['store']
