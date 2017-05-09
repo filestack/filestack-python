@@ -1,6 +1,6 @@
+import json
 import trafaret as t
 
-import json
 POLICY_SCHEMA = t.Dict({
     'call': t.List(t.Enum('call', 'handle', 'url', 'maxSize', 'minSize', 'path', 'container')),
     'handle': t.String(),

@@ -3,10 +3,11 @@ from filestack.filestack_common import CommonMixin
 from filestack.filestack_filelink import Filelink
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 
-import re
 import json
-import os
 import mimetypes
+import os
+import re
+
 
 class Client(CommonMixin):
 
@@ -65,4 +66,3 @@ class Client(CommonMixin):
         if attr_name not in ALLOWED_CLIENT_METHODS:
             raise AttributeError
         return getattr(self, attr_name)
-

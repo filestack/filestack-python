@@ -1,6 +1,7 @@
 from filestack.config import CDN_URL
-from filestack.version import __version__
 from filestack.filestack_common import CommonMixin
+from filestack.version import __version__
+
 
 class Filelink(CommonMixin):
 

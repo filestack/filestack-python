@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-import unittest2
 import json
+import unittest2
 
 from base64 import b64decode
 from httmock import urlmatch, HTTMock, response, all_requests
@@ -50,6 +50,7 @@ class ClientTest(unittest2.TestCase):
     def test_invalid_client_method(self):
         self.assertRaises(AttributeError, self.client.delete)
 
+
 class FilelinkTest(unittest2.TestCase):
 
     def setUp(self):
@@ -81,7 +82,6 @@ class FilelinkTest(unittest2.TestCase):
     def test_url(self):
         url = self.FILESTACK_CDN_URL + self.handle
         self.assertEqual(url, self.filelink.url)
-
 
     """ TEST GET CONTENT AND DOWNLOAD """
 

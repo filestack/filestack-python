@@ -1,10 +1,11 @@
-import requests
-import os
 import mimetypes
+import os
+import requests
 
 from filestack.config import CDN_URL, API_URL, FILE_PATH, HEADERS
 from filestack.exceptions import SecurityError
 from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA, METADATA_SCHEMA
+
 
 class CommonMixin(object):
 
@@ -49,7 +50,7 @@ class CommonMixin(object):
             OVERWRITE_SCHEMA.check(params)
         data, files = None, None
         if url:
-            data ={'url': url}
+            data = {'url': url}
         elif filepath:
             filename = os.path.basename(filepath)
             mimetype = mimetypes.guess_type(filepath)[0]

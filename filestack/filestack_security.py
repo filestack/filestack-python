@@ -1,9 +1,10 @@
-import json
-import base64
-import hmac
-import hashlib
 from filestack.config import ACCEPTED_SECURITY_TYPES
 from filestack.exceptions import SecurityError
+
+import base64
+import hashlib
+import hmac
+import json
 
 
 def validate(policy):
@@ -14,9 +15,9 @@ def validate(policy):
 
         if type(value) != ACCEPTED_SECURITY_TYPES[param]:
             raise SecurityError('Invalid Parameter Data Type for {}, '
-                              'Expecting: {} Received: {}'.format(
-                                param, ACCEPTED_SECURITY_TYPES[param],
-                                type(value)))
+                                'Expecting: {} Received: {}'.format(
+                                    param, ACCEPTED_SECURITY_TYPES[param],
+                                    type(value)))
 
 
 def security(policy, app_secret):
