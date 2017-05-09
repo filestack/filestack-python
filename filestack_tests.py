@@ -34,18 +34,18 @@ class ClientTest(unittest2.TestCase):
             return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(self.handle)})
 
         with HTTMock(api_store):
-            filelink = self.client.store(url="someurl")
+            filelink = self.client.upload(url="someurl")
 
         self.assertIsInstance(filelink, Filelink)
         self.assertEqual(filelink.handle, self.handle)
 
     def test_wrong_store_params(self):
         kwargs = {'params': {'call': 'someparameter'}, 'url': 'someurl'}
-        self.assertRaises(DataError, self.client.store, **kwargs)
+        self.assertRaises(DataError, self.client.upload, **kwargs)
 
     def test_bad_store_params(self):
         kwargs = {'params': {'access': True}, 'url': 'someurl'}
-        self.assertRaises(DataError, self.client.store, **kwargs)
+        self.assertRaises(DataError, self.client.upload, **kwargs)
 
     def test_invalid_client_method(self):
         self.assertRaises(AttributeError, self.client.delete)
