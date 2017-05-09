@@ -16,7 +16,7 @@ class Client(CommonMixin):
         STORE_LOCATION_SCHEMA.check(storage)
         self._storage = storage
 
-    def store(self, url=None, filepath=None, params=None):
+    def upload(self, url=None, filepath=None, params=None):
         if params:
             STORE_SCHEMA.check(params)
 
