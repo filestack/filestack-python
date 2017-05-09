@@ -15,8 +15,7 @@ class CommonMixin(object):
             response = self._make_call(API_URL, 'get',
                                        path=FILE_PATH,
                                        handle=self.handle,
-                                       params=params,
-                                       security_required=self.security)
+                                       params=params)
 
             if response.ok:
                 for chunk in response.iter_content(1024):
@@ -31,8 +30,7 @@ class CommonMixin(object):
         response = self._make_call(API_URL, 'get',
                                    path=FILE_PATH,
                                    handle=self.handle,
-                                   params=params,
-                                   security_required=self.security)
+                                   params=params)
 
         return response.content
 
@@ -44,8 +42,7 @@ class CommonMixin(object):
         return self._make_call(API_URL, 'delete',
                                path=FILE_PATH,
                                handle=self.handle,
-                               params=params,
-                               security_required=True)
+                               params=params)
 
     def overwrite(self, url=None, filepath=None, params=None):
         if params:
@@ -60,26 +57,17 @@ class CommonMixin(object):
         else:
             raise ValueError("You must include a url or filepath parameter")
 
-        response = self._make_call(API_URL, 'post',
-                                   path=FILE_PATH,
-                                   params=params,
-                                   data=data,
-                                   files=files,
-                                   security_required=True)
+        return self._make_call(API_URL, 'post',
+                               path=FILE_PATH,
+                               params=params,
+                               data=data,
+                               files=files)
 
-        new_file_info = response.json()
-        return self.__class__(handle=new_file_info.get('handle'),
-                              apikey=self.apikey,
-                              security=self.security)
-
-    def _make_call(self, base, action, handle=None, path=None, params=None, security_required=None, data=None, files=None):
+    def _make_call(self, base, action, handle=None, path=None, params=None, data=None, files=None):
         request_func = getattr(requests, action)
-        if security_required is not None:
-            if self.security is not None:
-                url = self._get_url(base, path=path, handle=handle, security=self.security)
-            else:
-                raise SecurityError("Please provide either a signature/policy or a username/password")
 
+        if self.security is not None:
+            url = self._get_url(base, path=path, handle=handle, security=self.security)
         else:
             url = self._get_url(base, path=path, handle=handle)
 

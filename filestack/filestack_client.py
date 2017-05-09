@@ -39,15 +39,11 @@ class Client(CommonMixin):
                                    path=path,
                                    params=params,
                                    data=data,
-                                   files=files,
-                                   security_required=self.security)
+                                   files=files)
 
         if response.ok:
             data = json.loads(response.text)
-            handle = re.match(r'(?:https:\/\/)'
-                              r'(?:www\.|cdn\.)'
-                              r'(?:file\w+\.\w+\/)'
-                              r'(\w+)',
+            handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
                               data['url']).group(1)
             return Filelink(handle, apikey=self.apikey, security=self.security)
         else:
