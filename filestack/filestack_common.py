@@ -8,7 +8,7 @@ from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA, METAD
 
 class CommonMixin(object):
 
-    def download(self, destination_path, params=None, security=None):
+    def download(self, destination_path, params=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
         with open(destination_path, 'wb') as f:
@@ -24,7 +24,7 @@ class CommonMixin(object):
                     f.write(chunk)
             return response
 
-    def get_content(self, params=None, security=None):
+    def get_content(self, params=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
         response = self._make_call(API_URL, 'get',
