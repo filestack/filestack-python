@@ -1,11 +1,14 @@
-from filestack.config import FILESTACK_CDN_URL
+from filestack.config import CDN_URL
+from filestack.filestack_common import CommonMixin
+from filestack.version import __version__
 
-class Filelink(object):
 
-    def __init__(self, handle, apikey=None):
+class Filelink(CommonMixin):
+
+    def __init__(self, handle, apikey=None, security=None):
         self._apikey = apikey
         self._handle = handle
-        self.FILESTACK_CDN_URL = FILESTACK_CDN_URL
+        self._security = security
 
     @property
     def handle(self):
@@ -13,7 +16,11 @@ class Filelink(object):
 
     @property
     def url(self):
-        return self.FILESTACK_CDN_URL + self._handle
+        return CDN_URL + self._handle
+
+    @property
+    def security(self):
+        return self._security
 
     @property
     def apikey(self):
