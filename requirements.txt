@@ -1,5 +1,5 @@
 future==0.16.0
 httmock==1.2.6
+pytest==3.0.7
 requests==2.13.0
 trafaret==0.9.0
-unittest2==1.1.0
