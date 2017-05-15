@@ -13,4 +13,4 @@ STORE_PATH = 'store'
 FILE_PATH = 'file'
 
 ALLOWED_CLIENT_METHODS = ['upload', 'transform_external']
-ALLOWED_TRANFORMATION_METHODS = ['store', 'get_transformation_url', 'get_content', 'download', 'debug']
+ALLOWED_TRANFORMATION_METHODS = ['store', 'get_transformation_url', 'get_content', 'download', 'debug', 'get_url']
