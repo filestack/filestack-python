@@ -84,8 +84,8 @@ class ImageTransformationMixin(object):
     def partial_pixelate(self, amount=None, blur=None, type=None, objects=None):
         return self.add_transform_task('partial_pixelate', locals())
 
-    def partial_bur(self, amount=None, blur=None, type=None, objects=None):
-        return self.add_transform_task('partial_bur', locals())
+    def partial_blur(self, amount=None, blur=None, type=None, objects=None):
+        return self.add_transform_task('partial_blur', locals())
 
     def collage(self, files=None, margin=None, width=None, height=None, color=None, fit=None, autorotate=None):
         return self.add_transform_task('collage', locals())
