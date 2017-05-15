@@ -63,6 +63,14 @@ class CommonMixin(object):
                                data=data,
                                files=files)
 
+    def get_url(self):
+        if self.security is not None:
+            url = self._get_url(CDN_URL, handle=self.handle, security=self.security)
+        else:
+            url = self._get_url(CDN_URL, handle=self.handle)
+
+        return url
+
     def _make_call(self, base, action, handle=None, path=None, params=None, data=None, files=None):
         request_func = getattr(requests, action)
 
@@ -82,15 +90,12 @@ class CommonMixin(object):
         if path:
             url_components.append(path)
 
+        if security:
+            url_components.append('security=policy:{policy},signature:{signature}'.format(policy=self.security['policy'],
+                                                                                          signature=self.security['signature']))
         if handle:
             url_components.append(handle)
 
-        url_base = '/'.join(url_components)
 
-        if security:
-            return "{base}?policy={policy}&signature={signature}".format(
-                base=url_base,
-                policy=security['policy'],
-                signature=security['signature'])
+        return '/'.join(url_components)
 
-        return url_base
