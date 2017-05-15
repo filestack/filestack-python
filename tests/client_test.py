@@ -1,7 +1,8 @@
 import pytest
 
 from filestack import Client, Filelink
-from httmock import urlmatch, HTTMock, response, all_requests
+from filestack.exceptions import FilestackException
+from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
 
 
@@ -39,4 +40,4 @@ def test_bad_store_params(client):
     pytest.raises(DataError, client.upload, **kwargs)
 
 def test_invalid_client_method(client):
-    pytest.raises(AttributeError, client.delete)
+    pytest.raises(FilestackException, client.delete)
