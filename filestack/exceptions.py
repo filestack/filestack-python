@@ -3,6 +3,7 @@ class SecurityError(Exception):
 
         super(SecurityError, self).__init__(message)
 
+
 class FilestackException(Exception):
     def __init__(self, message):
 

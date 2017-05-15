@@ -5,37 +5,46 @@ from filestack.config import CDN_URL
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
 
-APIKEY  = 'APIKEY'
+APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
+
 
 @pytest.fixture
 def filelink():
     return Filelink(HANDLE, apikey=APIKEY)
 
+
 SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
+
 
 @pytest.fixture
 def secure_filelink():
     return Filelink(HANDLE, apikey=APIKEY, security=SECURITY)
 
+
 def test_handle(filelink):
     assert filelink.handle == HANDLE
+
 
 def test_apikey_default():
     filelink_default = Filelink(HANDLE)
     assert filelink_default.apikey == None
 
+
 def test_api_get(filelink):
     assert APIKEY == filelink.apikey
+
 
 def test_api_set(filelink):
     NEW_APIKEY = 'ANOTHER_APIKEY'
     filelink.apikey = NEW_APIKEY
     assert NEW_APIKEY == filelink.apikey
 
+
 def test_url(filelink):
     url = CDN_URL + '/' + HANDLE
     assert url == filelink.url
+
 
 def test_get_content(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
@@ -47,6 +56,7 @@ def test_get_content(filelink):
 
     assert content == b'SOMEBYTESCONTENT'
 
+
 def test_get_content_params(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
@@ -57,21 +67,26 @@ def test_get_content_params(filelink):
 
     assert content == b'SOMEBYTESCONTENT'
 
+
 def test_get_content_bad_params(filelink):
     kwargs = {'params': {'call': ['read']}}
     pytest.raises(DataError, filelink.get_content, **kwargs)
+
 
 def test_get_content_bad_param_value(filelink):
     kwargs = {'params': {'dl': 'true'}}
     pytest.raises(DataError, filelink.get_content, **kwargs)
 
+
 def test_download_bad_params(filelink):
     kwargs = {'params': {'call': ['read']}}
     pytest.raises(DataError, filelink.download, 'somepath', **kwargs)
 
+
 def test_download_bad_param_value(filelink):
     kwargs = {'params': {'dl': 'true'}}
     pytest.raises(DataError, filelink.download, 'somepath', **kwargs)
+
 
 def test_overwrite_content(secure_filelink):
     @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
@@ -83,13 +98,16 @@ def test_overwrite_content(secure_filelink):
 
     assert filelink_response.status_code == 200
 
+
 def test_overwrite_argument_fail(filelink):
     # passing in neither the url or filepath parameter
     pytest.raises(ValueError, filelink.overwrite)
 
+
 def test_overwrite_bad_params(secure_filelink):
     kwargs = {'params': {'call': ['read']}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+
 
 def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}

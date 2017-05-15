@@ -96,6 +96,4 @@ class CommonMixin(object):
         if handle:
             url_components.append(handle)
 
-
         return '/'.join(url_components)
-

@@ -1,4 +1,3 @@
-import json
 import trafaret as t
 
 POLICY_SCHEMA = t.Dict({
