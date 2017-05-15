@@ -121,9 +121,12 @@ class ImageTransformationMixin(object):
 
             if type(v) == list:
                 v = str(v).replace("'", "").replace('"', '').replace(" ", "")
+            if type(v) == bool:
+                v = str(v).lower()
 
-            tasks[k] = v
             transform_tasks.append('{}:{}'.format(k, v))
+
+        transform_tasks = sorted(transform_tasks)
 
         if len(transform_tasks) > 0:
             transformation_url = '{}={}'.format(transformation, ','.join(transform_tasks))
@@ -137,7 +140,9 @@ class ImageTransformationMixin(object):
         url_components = [CDN_URL]
         if self.external_url:
             url_components.append(self.apikey)
-
+        if self.security:
+            url_components.insert(0, 'security=policy:{},signature:{}'.format(self.security['policy'],
+                                                                              self.security['signature']))
         url_components.append('/'.join(self._transformation_tasks))
         url_components.append(self.handle or self.external_url)
 
