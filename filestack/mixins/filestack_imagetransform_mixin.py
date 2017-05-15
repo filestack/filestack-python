@@ -141,7 +141,7 @@ class ImageTransformationMixin(object):
         if self.external_url:
             url_components.append(self.apikey)
         if self.security:
-            url_components.insert(0, 'security=policy:{},signature:{}'.format(self.security['policy'],
+            url_components.append('security=policy:{},signature:{}'.format(self.security['policy'],
                                                                               self.security['signature']))
         url_components.append('/'.join(self._transformation_tasks))
         url_components.append(self.handle or self.external_url)
