@@ -24,7 +24,7 @@ def test_resize(transform):
                                                                APIKEY,
                                                                EXTERNAL_URL)
     resize = transform.resize(width=500, height=500)
-    assert resize.get_transformation_url() == target_url
+    assert resize.url == target_url
 
 
 def test_crop(transform):
@@ -32,7 +32,7 @@ def test_crop(transform):
                                                 APIKEY,
                                                 EXTERNAL_URL)
     crop = transform.crop(dim=500)
-    assert crop.get_transformation_url() == target_url
+    assert crop.url == target_url
 
 
 def test_rotate(transform):
@@ -40,7 +40,7 @@ def test_rotate(transform):
                                                  APIKEY,
                                                  EXTERNAL_URL)
     rotate = transform.rotate(deg=90)
-    assert rotate.get_transformation_url() == target_url
+    assert rotate.url == target_url
 
 
 def test_flip(transform):
@@ -48,7 +48,7 @@ def test_flip(transform):
                                         APIKEY,
                                         EXTERNAL_URL)
     flip = transform.flip()
-    assert flip.get_transformation_url() == target_url
+    assert flip.url == target_url
 
 
 def test_flop(transform):
@@ -56,7 +56,7 @@ def test_flop(transform):
                                         APIKEY,
                                         EXTERNAL_URL)
     flop = transform.flop()
-    assert flop.get_transformation_url() == target_url
+    assert flop.url == target_url
 
 
 def test_watermark(transform):
@@ -64,7 +64,7 @@ def test_watermark(transform):
                                                                APIKEY,
                                                                EXTERNAL_URL)
     watermark = transform.watermark(file="somefile.jpg")
-    assert watermark.get_transformation_url() == target_url
+    assert watermark.url == target_url
 
 
 def test_detect_faces(transform):
@@ -72,7 +72,7 @@ def test_detect_faces(transform):
                                                             APIKEY,
                                                             EXTERNAL_URL)
     detect_faces = transform.detect_faces(minsize=100)
-    assert detect_faces.get_transformation_url() == target_url
+    assert detect_faces.url == target_url
 
 
 def test_crop_faces(transform):
@@ -81,7 +81,7 @@ def test_crop_faces(transform):
                                                         APIKEY,
                                                         EXTERNAL_URL)
     crop_faces = transform.crop_faces(width=100)
-    assert crop_faces.get_transformation_url() == target_url
+    assert crop_faces.url == target_url
 
 
 def test_pixelate_faces(transform):
@@ -89,7 +89,7 @@ def test_pixelate_faces(transform):
                                                               APIKEY,
                                                               EXTERNAL_URL)
     pixelate_faces = transform.pixelate_faces(minsize=100)
-    assert pixelate_faces.get_transformation_url() == target_url
+    assert pixelate_faces.url == target_url
 
 
 def test_round_corners(transform):
@@ -97,7 +97,7 @@ def test_round_corners(transform):
                                                             APIKEY,
                                                             EXTERNAL_URL)
     round_corners = transform.round_corners(radius=100)
-    assert round_corners.get_transformation_url() == target_url
+    assert round_corners.url == target_url
 
 
 def test_vignette(transform):
@@ -105,7 +105,7 @@ def test_vignette(transform):
                                                       APIKEY,
                                                       EXTERNAL_URL)
     vignette = transform.vignette(amount=50)
-    assert vignette.get_transformation_url() == target_url
+    assert vignette.url == target_url
 
 
 def test_polaroid(transform):
@@ -113,7 +113,7 @@ def test_polaroid(transform):
                                                        APIKEY,
                                                        EXTERNAL_URL)
     polaroid = transform.polaroid(color='blue')
-    assert polaroid.get_transformation_url() == target_url
+    assert polaroid.url == target_url
 
 
 def test_torn_edges(transform):
@@ -121,7 +121,7 @@ def test_torn_edges(transform):
                                               APIKEY,
                                               EXTERNAL_URL)
     torn_edges = transform.torn_edges()
-    assert torn_edges.get_transformation_url() == target_url
+    assert torn_edges.url == target_url
 
 
 def test_shadow(transform):
@@ -129,7 +129,7 @@ def test_shadow(transform):
                                                     APIKEY,
                                                     EXTERNAL_URL)
     shadow = transform.shadow(blur=True)
-    assert shadow.get_transformation_url() == target_url
+    assert shadow.url == target_url
 
 
 def test_circle(transform):
@@ -137,7 +137,7 @@ def test_circle(transform):
                                                           APIKEY,
                                                           EXTERNAL_URL)
     circle = transform.circle(background=True)
-    assert circle.get_transformation_url() == target_url
+    assert circle.url == target_url
 
 
 def test_border(transform):
@@ -145,7 +145,7 @@ def test_border(transform):
                                                     APIKEY,
                                                     EXTERNAL_URL)
     border = transform.border(width=500)
-    assert border.get_transformation_url() == target_url
+    assert border.url == target_url
 
 
 def test_sharpen(transform):
@@ -153,7 +153,7 @@ def test_sharpen(transform):
                                                      APIKEY,
                                                      EXTERNAL_URL)
     sharpen = transform.sharpen(amount=50)
-    assert sharpen.get_transformation_url() == target_url
+    assert sharpen.url == target_url
 
 
 def test_blur(transform):
@@ -161,7 +161,7 @@ def test_blur(transform):
                                                   APIKEY,
                                                   EXTERNAL_URL)
     blur = transform.blur(amount=10)
-    assert blur.get_transformation_url() == target_url
+    assert blur.url == target_url
 
 
 def test_monochrome(transform):
@@ -169,7 +169,7 @@ def test_monochrome(transform):
                                               APIKEY,
                                               EXTERNAL_URL)
     monochrome = transform.monochrome()
-    assert monochrome.get_transformation_url() == target_url
+    assert monochrome.url == target_url
 
 
 def test_blackwhite(transform):
@@ -177,7 +177,7 @@ def test_blackwhite(transform):
                                                            APIKEY,
                                                            EXTERNAL_URL)
     blackwhite = transform.blackwhite(threshold=50)
-    assert blackwhite.get_transformation_url() == target_url
+    assert blackwhite.url == target_url
 
 
 def test_sepia(transform):
@@ -185,7 +185,7 @@ def test_sepia(transform):
                                                  APIKEY,
                                                  EXTERNAL_URL)
     sepia = transform.sepia(tone=80)
-    assert sepia.get_transformation_url() == target_url
+    assert sepia.url == target_url
 
 
 def test_pixelate(transform):
@@ -193,7 +193,7 @@ def test_pixelate(transform):
                                                       APIKEY,
                                                       EXTERNAL_URL)
     pixelate = transform.pixelate(amount=10)
-    assert pixelate.get_transformation_url() == target_url
+    assert pixelate.url == target_url
 
 
 def test_oil_paint(transform):
@@ -201,7 +201,7 @@ def test_oil_paint(transform):
                                                        APIKEY,
                                                        EXTERNAL_URL)
     oil_paint = transform.oil_paint(amount=10)
-    assert oil_paint.get_transformation_url() == target_url
+    assert oil_paint.url == target_url
 
 
 def test_negative(transform):
@@ -209,7 +209,7 @@ def test_negative(transform):
                                             APIKEY,
                                             EXTERNAL_URL)
     negative = transform.negative()
-    assert negative.get_transformation_url() == target_url
+    assert negative.url == target_url
 
 
 def test_modulate(transform):
@@ -217,7 +217,7 @@ def test_modulate(transform):
                                                                                   APIKEY,
                                                                                   EXTERNAL_URL)
     modulate = transform.modulate(brightness=155, hue=155, saturation=155)
-    assert modulate.get_transformation_url() == target_url
+    assert modulate.url == target_url
 
 
 def test_partial_pixelate(transform):
@@ -228,7 +228,7 @@ def test_partial_pixelate(transform):
 
     partial_pixelate = transform.partial_pixelate(amount=10, blur=10,
                                                   type='rect', objects='[[x,y,width,height],[x,y,width,height]]')
-    assert partial_pixelate.get_transformation_url() == target_url
+    assert partial_pixelate.url == target_url
 
 
 def test_partial_blur(transform):
@@ -239,7 +239,7 @@ def test_partial_blur(transform):
 
     partial_blur = transform.partial_blur(amount=10, blur=10,
                                           type='rect', objects='[[x,y,width,height],[x,y,width,height]]')
-    assert partial_blur.get_transformation_url() == target_url
+    assert partial_blur.url == target_url
 
 
 def test_collage(transform):
@@ -252,13 +252,15 @@ def test_collage(transform):
     collage = transform.collage(files='[FILEHANDLE,FILEHANDLE2,FILEHANDLE3]',
                                 margin=50, width=1000, height=1000, color='white',
                                 fit='crop', autorotate=True)
-    assert collage.get_transformation_url() == target_url
+    assert collage.url == target_url
 
 
 def test_upscale(transform):
-    target_url = '{}/{}/upscale=noise:low,style:artwork/{}'.format(CDN_URL, APIKEY, EXTERNAL_URL)
+    target_url = '{}/{}/upscale=noise:low,style:artwork/{}'.format(CDN_URL,
+                                                                   APIKEY,
+                                                                   EXTERNAL_URL)
     upscale = transform.upscale(noise='low', style='artwork')
-    assert upscale.get_transformation_url() == target_url
+    assert upscale.url == target_url
 
 
 def test_enhance(transform):
@@ -266,7 +268,7 @@ def test_enhance(transform):
                                            APIKEY,
                                            EXTERNAL_URL)
     enhance = transform.enhance()
-    assert enhance.get_transformation_url() == target_url
+    assert enhance.url == target_url
 
 
 def test_redeye(transform):
@@ -274,7 +276,7 @@ def test_redeye(transform):
                                           APIKEY,
                                           EXTERNAL_URL)
     redeye = transform.redeye()
-    assert redeye.get_transformation_url() == target_url
+    assert redeye.url == target_url
 
 
 def test_urlscreenshot(transform):
@@ -282,9 +284,8 @@ def test_urlscreenshot(transform):
                   'height:1080,mode:window,width:1920/{}').format(CDN_URL,
                                                                   APIKEY,
                                                                   EXTERNAL_URL)
-
     urlscreenshot = transform.urlscreenshot(agent='desktop', mode='window', width=1920, height=1080, delay=3000)
-    assert urlscreenshot.get_transformation_url() == target_url
+    assert urlscreenshot.url == target_url
 
 
 def test_ascii(transform):
@@ -293,4 +294,4 @@ def test_ascii(transform):
                                                                                                               EXTERNAL_URL)
 
     ascii = transform.ascii(background='black', foreground='black', colored=True, size=100, reverse=True)
-    assert ascii.get_transformation_url() == target_url
+    assert ascii.url == target_url

@@ -44,7 +44,3 @@ def test_wrong_store_params(client):
 def test_bad_store_params(client):
     kwargs = {'params': {'access': True}, 'url': 'someurl'}
     pytest.raises(DataError, client.upload, **kwargs)
-
-
-def test_invalid_client_method(client):
-    pytest.raises(FilestackException, client.delete)

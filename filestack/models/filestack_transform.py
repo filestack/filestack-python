@@ -1,8 +1,5 @@
-from filestack.config import ALLOWED_TRANFORMATION_METHODS
-from filestack.exceptions import FilestackException
-from filestack.mixins.filestack_imagetransform_mixin import ImageTransformationMixin
-from filestack.mixins.filestack_common import CommonMixin
-
+from filestack.config import CDN_URL
+from filestack.mixins import ImageTransformationMixin, CommonMixin
 
 class Transform(ImageTransformationMixin, CommonMixin):
 
@@ -29,8 +26,15 @@ class Transform(ImageTransformationMixin, CommonMixin):
     def security(self):
         return self._security
 
-    def __get_attr__(self, attr_name):
-        if attr_name not in ALLOWED_TRANFORMATION_METHODS:
-            raise FilestackException('Method not allowed on Transform object')
-        else:
-            return getattr(self, attr_name)
+    @property
+    def url(self):
+        url_components = [CDN_URL]
+        if self.external_url:
+            url_components.append(self.apikey)
+        if self.security:
+            url_components.append('security=policy:{},signature:{}'.format(self.security['policy'],
+                                                                           self.security['signature']))
+        url_components.append('/'.join(self._transformation_tasks))
+        url_components.append(self.handle or self.external_url)
+
+        return '/'.join(url_components)

@@ -1,11 +1,10 @@
 from filestack.config import CDN_URL
+from filestack.utils import utils
+
 import filestack.models
 
 
 class ImageTransformationMixin(object):
-    def __init__(self):
-        self._transformation_tasks = []
-
     def resize(self, width=None, height=None, fit=None, align=None):
         return self.add_transform_task('resize', locals())
 
@@ -135,15 +134,3 @@ class ImageTransformationMixin(object):
 
         instance._transformation_tasks.append(transformation_url)
         return instance
-
-    def get_transformation_url(self):
-        url_components = [CDN_URL]
-        if self.external_url:
-            url_components.append(self.apikey)
-        if self.security:
-            url_components.append('security=policy:{},signature:{}'.format(self.security['policy'],
-                                                                           self.security['signature']))
-        url_components.append('/'.join(self._transformation_tasks))
-        url_components.append(self.handle or self.external_url)
-
-        return '/'.join(url_components)

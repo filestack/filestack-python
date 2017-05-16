@@ -1,35 +1,39 @@
-import filestack.models
 import mimetypes
 import os
-import requests
 
-from filestack.config import CDN_URL, API_URL, FILE_PATH, HEADERS
+import filestack.models
+
+from filestack.config import CDN_URL, API_URL, FILE_PATH
 from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA
-
+from filestack.utils import utils
 
 class CommonMixin(object):
 
     def download(self, destination_path, params=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
-        with open(destination_path, 'wb') as f:
-            response = self._make_call(CDN_URL, 'get',
+        with open(destination_path, 'wb') as new_file:
+            response = utils.make_call(CDN_URL, 'get',
                                        handle=self.handle,
-                                       params=params)
+                                       params=params,
+                                       security=self.security,
+                                       transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
 
             if response.ok:
                 for chunk in response.iter_content(1024):
                     if not chunk:
                         break
-                    f.write(chunk)
+                    new_file.write(chunk)
             return response
 
     def get_content(self, params=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
-        response = self._make_call(CDN_URL, 'get',
+        response = utils.make_call(CDN_URL, 'get',
                                    handle=self.handle,
-                                   params=params)
+                                   params=params,
+                                   security=self.security,
+                                   transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
 
         return response.content
 
@@ -38,10 +42,12 @@ class CommonMixin(object):
             params['key'] = self.apikey
         else:
             params = {'key': self.apikey}
-        return self._make_call(API_URL, 'delete',
+        return utils.make_call(API_URL, 'delete',
                                path=FILE_PATH,
                                handle=self.handle,
-                               params=params)
+                               params=params,
+                               security=self.security,
+                               transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
 
     def overwrite(self, url=None, filepath=None, params=None):
         if params:
@@ -56,44 +62,11 @@ class CommonMixin(object):
         else:
             raise ValueError("You must include a url or filepath parameter")
 
-        return self._make_call(API_URL, 'post',
+        return utils.make_call(API_URL, 'post',
                                path=FILE_PATH,
                                params=params,
                                handle=self.handle,
                                data=data,
-                               files=files)
-
-    def get_url(self):
-        if self.security is not None:
-            url = self._get_url(CDN_URL, handle=self.handle, security=self.security)
-        else:
-            url = self._get_url(CDN_URL, handle=self.handle)
-
-        return url
-
-    def _make_call(self, base, action, handle=None, path=None, params=None, data=None, files=None):
-        request_func = getattr(requests, action)
-
-        if isinstance(self, filestack.models.Transform):
-            return request_func(self.get_transformation_url(), params=params, headers=HEADERS, data=data, files=files)
-
-        if self.security is not None:
-            url = self._get_url(base, path=path, handle=handle, security=self.security)
-        else:
-            url = self._get_url(base, path=path, handle=handle)
-
-        return request_func(url, params=params, headers=HEADERS, data=data, files=files)
-
-    def _get_url(self, base, handle=None, path=None, security=None):
-        url_components = [base]
-
-        if path:
-            url_components.append(path)
-
-        if security:
-            url_components.append('security=policy:{policy},signature:{signature}'.format(policy=self.security['policy'],
-                                                                                          signature=self.security['signature']))
-        if handle:
-            url_components.append(handle)
-
-        return '/'.join(url_components)
+                               files=files,
+                               security=self.security,
+                               transform_url=self.url if isinstance(self, filestack.models.Transform) else None)

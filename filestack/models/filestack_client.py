@@ -1,16 +1,16 @@
-from filestack.config import API_URL, STORE_PATH, ALLOWED_CLIENT_METHODS
-from filestack.exceptions import FilestackException
-from filestack.mixins import CommonMixin, ImageTransformationMixin
-from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
-
 import json
-import filestack.models
 import mimetypes
 import os
 import re
 
+import filestack.models
 
-class Client(ImageTransformationMixin, CommonMixin):
+from filestack.config import API_URL, STORE_PATH
+from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
+from filestack.utils import utils
+
+
+class Client():
 
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
@@ -40,7 +40,7 @@ class Client(ImageTransformationMixin, CommonMixin):
 
         path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-        response = self._make_call(API_URL, 'post',
+        response = utils.make_call(API_URL, 'post',
                                    path=path,
                                    params=params,
                                    data=data,
@@ -65,9 +65,3 @@ class Client(ImageTransformationMixin, CommonMixin):
     @property
     def apikey(self):
         return self._apikey
-
-    def __getattr__(self, attr_name):
-        if attr_name not in ALLOWED_CLIENT_METHODS:
-            raise FilestackException('Method not allowed on Client object')
-        else:
-            return getattr(self, attr_name)
