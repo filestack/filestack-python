@@ -98,9 +98,6 @@ class ImageTransformationMixin(object):
     def redeye(self):
         return self.add_transform_task('redeye', locals())
 
-    def urlscreenshot(self, agent=None, mode=None, width=None, height=None, delay=None):
-        return self.add_transform_task('urlscreenshot', locals())
-
     def ascii(self, background=None, foreground=None, colored=None, size=None, reverse=None):
         return self.add_transform_task('ascii', locals())
 

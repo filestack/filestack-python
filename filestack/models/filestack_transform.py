@@ -38,3 +38,6 @@ class Transform(ImageTransformationMixin, CommonMixin):
         url_components.append(self.handle or self.external_url)
 
         return '/'.join(url_components)
+
+    def urlscreenshot(self, agent=None, mode=None, width=None, height=None, delay=None):
+        return self.add_transform_task('urlscreenshot', locals())
