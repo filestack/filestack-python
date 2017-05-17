@@ -2,6 +2,7 @@ from filestack.config import HEADERS
 
 import requests
 
+
 def get_url(base, handle=None, path=None, security=None):
     url_components = [base]
 
@@ -13,7 +14,6 @@ def get_url(base, handle=None, path=None, security=None):
                                                                                       signature=security['signature']))
     if handle:
         url_components.append(handle)
-
 
     return '/'.join(url_components)
 
