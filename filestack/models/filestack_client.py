@@ -5,7 +5,7 @@ import re
 
 import filestack.models
 
-from filestack.config import API_URL, STORE_PATH
+from filestack.config import API_URL, CDN_URL, STORE_PATH
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils
 
@@ -20,6 +20,21 @@ class Client():
 
     def transform_external(self, external_url):
         return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+
+
+    def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
+        params = locals()
+        params.pop('self')
+        params.pop('external_url')
+
+        params = {k: v for k, v in params.items() if v is not None}
+
+        url_task = utils.return_transform_task('urlscreenshot', params)
+
+        new_transform = filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        new_transform._transformation_tasks.append(url_task)
+
+        return new_transform
 
     def upload(self, url=None, filepath=None, params=None):
         if params:
@@ -65,3 +80,4 @@ class Client():
     @property
     def apikey(self):
         return self._apikey
+
