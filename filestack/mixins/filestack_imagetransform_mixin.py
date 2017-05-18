@@ -111,23 +111,7 @@ class ImageTransformationMixin(object):
         params.pop('self')
         params = {k: v for k, v in params.items() if v is not None}
 
-        transform_tasks = []
-
-        for k, v in params.items():
-
-            if type(v) == list:
-                v = str(v).replace("'", "").replace('"', '').replace(" ", "")
-            if type(v) == bool:
-                v = str(v).lower()
-
-            transform_tasks.append('{}:{}'.format(k, v))
-
-        transform_tasks = sorted(transform_tasks)
-
-        if len(transform_tasks) > 0:
-            transformation_url = '{}={}'.format(transformation, ','.join(transform_tasks))
-        else:
-            transformation_url = transformation
-
+        transformation_url = utils.return_transform_task(transformation, params)
         instance._transformation_tasks.append(transformation_url)
+
         return instance
