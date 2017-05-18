@@ -1,5 +1,6 @@
 from filestack.config import CDN_URL
 from filestack.mixins import ImageTransformationMixin, CommonMixin
+from filestack.utils import utils
 
 class Transform(ImageTransformationMixin, CommonMixin):
 
@@ -28,16 +29,8 @@ class Transform(ImageTransformationMixin, CommonMixin):
 
     @property
     def url(self):
-        url_components = [CDN_URL]
-        if self.external_url:
-            url_components.append(self.apikey)
-        if self.security:
-            url_components.append('security=policy:{},signature:{}'.format(self.security['policy'],
-                                                                           self.security['signature']))
-        url_components.append('/'.join(self._transformation_tasks))
-        url_components.append(self.handle or self.external_url)
-
-        return '/'.join(url_components)
-
-    def urlscreenshot(self, agent=None, mode=None, width=None, height=None, delay=None):
-        return self.add_transform_task('urlscreenshot', locals())
+        return utils.get_transform_url(self._transformation_tasks,
+                                       external_url=self.external_url,
+                                       handle=self.handle,
+                                       security=self.security,
+                                       apikey=self.apikey)
