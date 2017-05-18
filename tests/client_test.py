@@ -1,3 +1,4 @@
+import filestack.models
 import pytest
 
 from filestack import Client, Filelink
@@ -44,3 +45,9 @@ def test_wrong_store_params(client):
 def test_bad_store_params(client):
     kwargs = {'params': {'access': True}, 'url': 'someurl'}
     pytest.raises(DataError, client.upload, **kwargs)
+
+def test_url_screenshot(client):
+    external_url = 'https//www.someexternalurl'
+    transform = client.urlscreenshot(external_url)
+    assert isinstance(transform, filestack.models.Transform)
+    assert transform.apikey == APIKEY

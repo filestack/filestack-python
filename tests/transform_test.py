@@ -279,15 +279,6 @@ def test_redeye(transform):
     assert redeye.url == target_url
 
 
-def test_urlscreenshot(transform):
-    target_url = ('{}/{}/urlscreenshot=agent:desktop,delay:3000,'
-                  'height:1080,mode:window,width:1920/{}').format(CDN_URL,
-                                                                  APIKEY,
-                                                                  EXTERNAL_URL)
-    urlscreenshot = transform.urlscreenshot(agent='desktop', mode='window', width=1920, height=1080, delay=3000)
-    assert urlscreenshot.url == target_url
-
-
 def test_ascii(transform):
     target_url = '{}/{}/ascii=background:black,colored:true,foreground:black,reverse:true,size:100/{}'.format(CDN_URL,
                                                                                                               APIKEY,
