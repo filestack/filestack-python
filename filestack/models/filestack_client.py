@@ -1,21 +1,40 @@
-from filestack.config import API_URL, HEADERS, STORE_PATH, FILE_PATH, ALLOWED_CLIENT_METHODS
-from filestack.filestack_common import CommonMixin
-from filestack.filestack_filelink import Filelink
-from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
-
 import json
 import mimetypes
 import os
 import re
 
+import filestack.models
 
-class Client(CommonMixin):
+from filestack.config import API_URL, CDN_URL, STORE_PATH
+from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
+from filestack.utils import utils
+
+
+class Client():
 
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
         self._security = security
         STORE_LOCATION_SCHEMA.check(storage)
         self._storage = storage
+
+    def transform_external(self, external_url):
+        return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+
+
+    def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
+        params = locals()
+        params.pop('self')
+        params.pop('external_url')
+
+        params = {k: v for k, v in params.items() if v is not None}
+
+        url_task = utils.return_transform_task('urlscreenshot', params)
+
+        new_transform = filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        new_transform._transformation_tasks.append(url_task)
+
+        return new_transform
 
     def upload(self, url=None, filepath=None, params=None):
         if params:
@@ -36,7 +55,7 @@ class Client(CommonMixin):
 
         path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-        response = self._make_call(API_URL, 'post',
+        response = utils.make_call(API_URL, 'post',
                                    path=path,
                                    params=params,
                                    data=data,
@@ -46,7 +65,7 @@ class Client(CommonMixin):
             data = json.loads(response.text)
             handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
                               data['url']).group(1)
-            return Filelink(handle, apikey=self.apikey, security=self.security)
+            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception(response.text)
 
@@ -62,7 +81,3 @@ class Client(CommonMixin):
     def apikey(self):
         return self._apikey
 
-    def __getattr__(self, attr_name):
-        if attr_name not in ALLOWED_CLIENT_METHODS:
-            raise AttributeError
-        return getattr(self, attr_name)

@@ -1,12 +1,13 @@
 from filestack.config import CDN_URL
-from filestack.filestack_common import CommonMixin
-from filestack.filestack_imagetransform_mixin import ImageTransformationMixin
+from filestack.mixins import CommonMixin
+from filestack.mixins import ImageTransformationMixin
 from filestack.version import __version__
 
 
 class Filelink(ImageTransformationMixin, CommonMixin):
 
     def __init__(self, handle, apikey=None, security=None):
+        # super(Filelink, self).__init__()
         self._apikey = apikey
         self._handle = handle
         self._security = security
@@ -17,7 +18,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
 
     @property
     def url(self):
-        return CDN_URL + self._handle
+        return "{}/{}".format(CDN_URL, self._handle)
 
     @property
     def security(self):

@@ -1,2 +1,0 @@
-class ImageTransformationMixin(object):
-    pass
