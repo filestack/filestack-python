@@ -106,6 +106,9 @@ class ImageTransformationMixin(object):
                             docinfo=None, pageformat=None, pageorientation=None):
         return self.add_transform_task('output', locals())
 
+    def no_metadata(self):
+        return self.add_transform_task('no_metadata', locals())
+
     def add_transform_task(self, transformation, params):
 
         if not isinstance(self, filestack.models.Transform):
