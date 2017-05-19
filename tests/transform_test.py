@@ -290,12 +290,12 @@ def test_ascii(transform):
 
 def test_filetype_conversion(transform):
     target_url = ('{}/{}/output=background:white,colorspace:input,compress:true,density:50,docinfo:true,format:png,'
-                  'no_metadata:true,page:1,pageformat:legal,pageorientation:landscape,quality:80,secure:true,'
+                  'page:1,pageformat:legal,pageorientation:landscape,quality:80,secure:true,'
                   'strip:true/{}').format(CDN_URL,
                                           APIKEY,
                                           EXTERNAL_URL)
 
     filetype_conversion = transform.filetype_conversion(format='png', background='white', page=1, density=50, compress=True,
-                                                        quality=80, strip=True, no_metadata=True, colorspace='input', secure=True,
+                                                        quality=80, strip=True, colorspace='input', secure=True,
                                                         docinfo=True, pageformat='legal', pageorientation='landscape')
     assert filetype_conversion.url == target_url
