@@ -299,3 +299,12 @@ def test_filetype_conversion(transform):
                                                         quality=80, strip=True, colorspace='input', secure=True,
                                                         docinfo=True, pageformat='legal', pageorientation='landscape')
     assert filetype_conversion.url == target_url
+
+
+def test_no_metadata(transform):
+    target_url = ('{}/{}/no_metadata/{}').format(CDN_URL,
+                                                 APIKEY,
+                                                 EXTERNAL_URL)
+
+    no_metadata = transform.no_metadata()
+    assert no_metadata.url == target_url
