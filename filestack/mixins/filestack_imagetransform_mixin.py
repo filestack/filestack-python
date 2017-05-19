@@ -102,7 +102,7 @@ class ImageTransformationMixin(object):
         return self.add_transform_task('ascii', locals())
 
     def filetype_conversion(self, format=None, background=None, page=None, density=None, compress=None,
-                            quality=None, strip=None, no_metadata=None, colorspace=None, secure=None,
+                            quality=None, strip=None, colorspace=None, secure=None,
                             docinfo=None, pageformat=None, pageorientation=None):
         return self.add_transform_task('output', locals())
 
