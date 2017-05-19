@@ -50,7 +50,7 @@ class ImageTransformationMixin(object):
     def circle(self, background=None):
         return self.add_transform_task('circle', locals())
 
-    def border(self, width=None, color=None, backgrond=None):
+    def border(self, width=None, color=None, background=None):
         return self.add_transform_task('border', locals())
 
     def sharpen(self, amount=None):
