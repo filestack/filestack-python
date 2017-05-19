@@ -101,6 +101,11 @@ class ImageTransformationMixin(object):
     def ascii(self, background=None, foreground=None, colored=None, size=None, reverse=None):
         return self.add_transform_task('ascii', locals())
 
+    def filetype_conversion(self, format=None, background=None, page=None, density=None, compress=None,
+                            quality=None, strip=None, no_metadata=None, colorspace=None, secure=None,
+                            docinfo=None, pageformat=None, pageorientation=None):
+        return self.add_transform_task('output', locals())
+
     def add_transform_task(self, transformation, params):
 
         if not isinstance(self, filestack.models.Transform):
