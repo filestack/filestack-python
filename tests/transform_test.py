@@ -286,3 +286,25 @@ def test_ascii(transform):
 
     ascii = transform.ascii(background='black', foreground='black', colored=True, size=100, reverse=True)
     assert ascii.url == target_url
+
+
+def test_filetype_conversion(transform):
+    target_url = ('{}/{}/output=background:white,colorspace:input,compress:true,density:50,docinfo:true,format:png,'
+                  'page:1,pageformat:legal,pageorientation:landscape,quality:80,secure:true,'
+                  'strip:true/{}').format(CDN_URL,
+                                          APIKEY,
+                                          EXTERNAL_URL)
+
+    filetype_conversion = transform.filetype_conversion(format='png', background='white', page=1, density=50, compress=True,
+                                                        quality=80, strip=True, colorspace='input', secure=True,
+                                                        docinfo=True, pageformat='legal', pageorientation='landscape')
+    assert filetype_conversion.url == target_url
+
+
+def test_no_metadata(transform):
+    target_url = ('{}/{}/no_metadata/{}').format(CDN_URL,
+                                                 APIKEY,
+                                                 EXTERNAL_URL)
+
+    no_metadata = transform.no_metadata()
+    assert no_metadata.url == target_url
