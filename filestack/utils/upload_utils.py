@@ -12,7 +12,6 @@ def get_file_info(filepath):
     filename = os.path.split(filepath)[1]
     filesize = os.path.getsize(filepath)
     mimetype = mimetypes.guess_type(filepath)[0]
-
     return filename, filesize, mimetype
 
 
