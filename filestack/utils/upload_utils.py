@@ -3,6 +3,7 @@ import mimetypes
 import hashlib
 import requests
 
+from base64 import b64encode
 from filestack.config import MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL, DEFAULT_CHUNK_SIZE
 from functools import partial
 from multiprocessing import Pool
@@ -59,7 +60,7 @@ def upload_chunk(storage, job):
         'apikey': job['apikey'],
         'part': job['part'],
         'size': len(chunk),
-        'md5': hashlib.md5(chunk).digest().encode('base64').strip(),
+        'md5': b64encode(hashlib.md5(chunk).digest()).strip(),
         'uri': job['uri'],
         'region': job['region'],
         'upload_id': job['upload_id'],
