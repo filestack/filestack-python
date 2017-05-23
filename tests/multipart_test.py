@@ -1,16 +1,9 @@
-import base64
-import hashlib
 import json
-import mimetypes
-import mock
-import os.path
 import pytest
-import requests
 import responses
 
-from filestack import Client, Filelink
+from filestack import Client
 from filestack.config import MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL
-from filestack.utils import upload_utils
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
@@ -19,7 +12,7 @@ URL = "https://cdn.filestackcontent.com/{}".format(HANDLE)
 
 def chunk_put_callback(request):
     body = {'url': URL}
-    return (200, {'ETag': 'someetags'}, json.dumps(body))
+    return 200, {'ETag': 'someetags'}, json.dumps(body)
 
 
 @pytest.fixture
@@ -27,9 +20,8 @@ def client():
     return Client(APIKEY)
 
 
-
 @responses.activate
-def test_upload_multipart(monkeypatch, client):
+def test_upload_multipart(client):
 
     # add the different HTTP responses that are called during the multipart upload
     responses.add(responses.POST, MULTIPART_START_URL, status=200, content_type="application/json",
