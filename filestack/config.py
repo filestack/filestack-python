@@ -7,9 +7,14 @@ ACCEPTED_SECURITY_TYPES = {'expiry': int, 'call': list,
 
 API_URL = 'https://www.filestackapi.com/api'
 CDN_URL = 'https://cdn.filestackcontent.com'
+
+MULTIPART_START_URL = 'https://upload.filestackapi.com/multipart/start'
+MULTIPART_UPLOAD_URL = 'https://upload.filestackapi.com/multipart/upload'
+MULTIPART_COMPLETE_URL = 'https://upload.filestackapi.com/multipart/complete'
+
 HEADERS = {'User-Agent': 'filestack-python {}'.format(__version__)}
+
+DEFAULT_CHUNK_SIZE = 5 * 1024 ** 2
 
 STORE_PATH = 'store'
 FILE_PATH = 'file'
-
-ALLOWED_TRANFORMATION_METHODS = ['store', 'get_transformation_url', 'get_content', 'download', 'debug', 'get_url']
