@@ -50,7 +50,7 @@ class ImageTransformationMixin(object):
     def circle(self, background=None):
         return self.add_transform_task('circle', locals())
 
-    def border(self, width=None, color=None, backgrond=None):
+    def border(self, width=None, color=None, background=None):
         return self.add_transform_task('border', locals())
 
     def sharpen(self, amount=None):
@@ -100,6 +100,14 @@ class ImageTransformationMixin(object):
 
     def ascii(self, background=None, foreground=None, colored=None, size=None, reverse=None):
         return self.add_transform_task('ascii', locals())
+
+    def filetype_conversion(self, format=None, background=None, page=None, density=None, compress=None,
+                            quality=None, strip=None, colorspace=None, secure=None,
+                            docinfo=None, pageformat=None, pageorientation=None):
+        return self.add_transform_task('output', locals())
+
+    def no_metadata(self):
+        return self.add_transform_task('no_metadata', locals())
 
     def add_transform_task(self, transformation, params):
 
