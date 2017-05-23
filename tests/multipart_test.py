@@ -17,11 +17,6 @@ HANDLE = 'SOMEHANDLE'
 URL = "https://cdn.filestackcontent.com/{}".format(HANDLE)
 
 
-class FakeHash(object):
-    def digest(bytes):
-        return b'this is some string code'
-
-
 def chunk_put_callback(request):
     body = {'url': URL}
     return (200, {'ETag': 'someetags'}, json.dumps(body))
