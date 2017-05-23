@@ -28,9 +28,9 @@ def test_upload_multipart(monkeypatch, client):
     def mock_mimetype(path):
         return [None, 'image/jpeg']
 
-    monkeypatch.setattr('os.path.split', mock_filename)
-    monkeypatch.setattr('os.path.getsize', mock_filesize)
-    monkeypatch.setattr('mimetypes.guess_type', mock_mimetype)
+    monkeypatch.setattr(os.path, 'split', mock_filename)
+    monkeypatch.setattr(os.path, 'getsize', mock_filesize)
+    monkeypatch.setattr(mimetypes, 'guess_type', mock_mimetype)
 
     responses.add(responses.POST, MULTIPART_START_URL, status=200, content_type="application/json",
                   json={"region": "us-east-1", "upload_id": "someuuid", "uri": "someuri", "location_url": "somelocation"})
