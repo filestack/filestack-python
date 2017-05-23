@@ -65,9 +65,15 @@ def test_upload_multipart(monkeypatch, client):
 
     # we also need to mock opening a file
     open_mock = mock.MagicMock()
-    with mock.patch('__builtin__.open', open_mock):
+    try:
+        with mock.patch('__builtin__.open', open_mock):
 
-        new_filelink = client.upload(filepath='bird.jpg')
+            new_filelink = client.upload(filepath='bird.jpg')
 
-        assert new_filelink.handle == HANDLE
+            assert new_filelink.handle == HANDLE
+    except ImportError:
+        with mock.patch('builtin.open', open_mock):
 
+            new_filelink = client.upload(filepath='bird.jpg')
+
+            assert new_filelink.handle == HANDLE
