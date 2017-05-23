@@ -1,4 +1,6 @@
 import json
+import mimetypes
+import os.path
 import pytest
 import requests
 import responses
@@ -18,20 +20,31 @@ def client():
 
 
 @responses.activate
-def test_upload_multipart(client):
-        responses.add(responses.POST, MULTIPART_START_URL, status=200, content_type="application/json",
-                      json={"region": "us-east-1", "upload_id": "someuuid", "uri": "someuri", "location_url": "somelocation"})
+def test_upload_multipart(monkeypatch, client):
+    def mock_filename(path):
+        return [None, 'notbird.jpg']
+    def mock_filesize(path):
+        return 10 * 1024 ** 2
+    def mock_mimetype(path):
+        return [None, 'image/jpeg']
 
-        responses.add(responses.POST, MULTIPART_UPLOAD_URL, status=200, content_type="application/json", json={'url': URL, "headers": {}})
+    monkeypatch.setattr('os.path.split', mock_filename)
+    monkeypatch.setattr('os.path.getsize', mock_filesize)
+    monkeypatch.setattr('mimetypes.guess_type', mock_mimetype)
 
-        def chunk_put_callback(request):
-            body = {'url': URL}
-            return (200, {'ETag': 'someetags'}, json.dumps(body))
+    responses.add(responses.POST, MULTIPART_START_URL, status=200, content_type="application/json",
+                  json={"region": "us-east-1", "upload_id": "someuuid", "uri": "someuri", "location_url": "somelocation"})
 
-        responses.add_callback(responses.PUT, URL, callback=chunk_put_callback)
+    responses.add(responses.POST, MULTIPART_UPLOAD_URL, status=200, content_type="application/json", json={'url': URL, "headers": {}})
 
-        responses.add(responses.POST, MULTIPART_COMPLETE_URL, status=200, content_type="application/json", json={"url": URL})
-        new_filelink = client.upload(filepath='bird.jpg')
+    def chunk_put_callback(request):
+        body = {'url': URL}
+        return (200, {'ETag': 'someetags'}, json.dumps(body))
 
-        assert new_filelink.handle == HANDLE
+    responses.add_callback(responses.PUT, URL, callback=chunk_put_callback)
+
+    responses.add(responses.POST, MULTIPART_COMPLETE_URL, status=200, content_type="application/json", json={"url": URL})
+    new_filelink = client.upload(filepath='bird.jpg')
+
+    assert new_filelink.handle == HANDLE
 
