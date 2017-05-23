@@ -1,6 +1,8 @@
 import pytest
 
-from filestack import Transform
+from httmock import urlmatch, HTTMock, response
+
+from filestack import Filelink, Transform
 from filestack.config import CDN_URL
 
 APIKEY = 'SOMEAPIKEY'
@@ -308,3 +310,18 @@ def test_no_metadata(transform):
 
     no_metadata = transform.no_metadata()
     assert no_metadata.url == target_url
+
+
+def test_store(transform):
+    @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
+    def store(url, request):
+        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
+
+    with HTTMock(store):
+        transform_obj = transform.flip()
+        store = transform_obj.store(
+            filename='filename', location='S3', path='/py-test/', container='filestack-test',
+            region='us-west-2', access='public', base64decode=True
+        )
+
+    assert isinstance(store, Filelink)
