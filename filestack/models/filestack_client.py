@@ -8,6 +8,7 @@ import filestack.models
 from filestack.config import API_URL, CDN_URL, STORE_PATH
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils
+from filestack.utils import upload_utils
 
 
 class Client():
@@ -20,7 +21,6 @@ class Client():
 
     def transform_external(self, external_url):
         return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
-
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
         params = locals()
@@ -36,35 +36,41 @@ class Client():
 
         return new_transform
 
-    def upload(self, url=None, filepath=None, params=None):
-        if params:
-            STORE_SCHEMA.check(params)
+    def upload(self, url=None, filepath=None, multipart=True, params=None):
+        if filepath and url:
+            raise ValueError("Cannot upload file and external url at the same time")
 
-        files, data = None, None
-        if url:
-            data = {'url': url}
-        if filepath:
-            filename = os.path.basename(filepath)
-            mimetype = mimetypes.guess_type(filepath)[0]
-            files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
-
-        if params:
-            params['key'] = self.apikey
+        if multipart and filepath:
+            response = upload_utils.multipart_upload(self.apikey, filepath, self.storage)
         else:
-            params = {'key': self.apikey}
+            if params:
+                STORE_SCHEMA.check(params)
 
-        path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
+            files, data = None, None
+            if url:
+                data = {'url': url}
+            if filepath:
+                filename = os.path.basename(filepath)
+                mimetype = mimetypes.guess_type(filepath)[0]
+                files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
 
-        response = utils.make_call(API_URL, 'post',
-                                   path=path,
-                                   params=params,
-                                   data=data,
-                                   files=files)
+            if params:
+                params['key'] = self.apikey
+            else:
+                params = {'key': self.apikey}
+
+            path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
+
+            response = utils.make_call(API_URL, 'post',
+                                       path=path,
+                                       params=params,
+                                       data=data,
+                                       files=files)
 
         if response.ok:
-            data = json.loads(response.text)
+            response = response.json()
             handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
-                              data['url']).group(1)
+                              response['url']).group(1)
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception(response.text)
@@ -80,4 +86,3 @@ class Client():
     @property
     def apikey(self):
         return self._apikey
-
