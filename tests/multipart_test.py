@@ -1,3 +1,4 @@
+import base64
 import hashlib
 import json
 import mimetypes
@@ -18,7 +19,7 @@ URL = "https://cdn.filestackcontent.com/{}".format(HANDLE)
 
 class FakeHash(object):
     def digest(bytes):
-        return b'this is some byte code'
+        return b'this is some string code'
 
 
 def chunk_put_callback(request):
@@ -72,7 +73,7 @@ def test_upload_multipart(monkeypatch, client):
 
             assert new_filelink.handle == HANDLE
     except ImportError:
-        with mock.patch('builtin.open', open_mock):
+        with mock.patch('builtins.open', open_mock):
 
             new_filelink = client.upload(filepath='bird.jpg')
 
