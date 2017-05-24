@@ -17,6 +17,7 @@ def get_url(base, handle=None, path=None, security=None):
 
     return '/'.join(url_components)
 
+
 def get_transform_url(tasks, external_url=None, handle=None, security=None, apikey=None):
         url_components = [CDN_URL]
         if external_url:
@@ -24,10 +25,16 @@ def get_transform_url(tasks, external_url=None, handle=None, security=None, apik
         if security:
             url_components.append('security=policy:{},signature:{}'.format(security['policy'],
                                                                            security['signature']))
+        if 'debug' in tasks:
+            index = tasks.index('debug')
+            tasks.pop(index)
+            tasks.insert(0, 'debug')
+
         url_components.append('/'.join(tasks))
         url_components.append(handle or external_url)
 
         return '/'.join(url_components)
+
 
 def make_call(base, action, handle=None, path=None, params=None, data=None, files=None, security=None, transform_url=None):
     request_func = getattr(requests, action)
