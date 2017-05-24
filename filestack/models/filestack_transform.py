@@ -3,7 +3,6 @@ import re
 
 import filestack.models
 
-from filestack.config import CDN_URL
 from filestack.mixins import ImageTransformationMixin, CommonMixin
 from filestack.utils import utils
 
