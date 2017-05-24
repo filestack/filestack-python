@@ -104,12 +104,12 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
     return response
 
 
-def multipart_upload(apikey, filepath, storage):
+def multipart_upload(apikey, filepath, storage, upload_processes=4):
     filename, filesize, mimetype = get_file_info(filepath)
     response_info = multipart_start(apikey, filename, filesize, mimetype, storage)
     jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
 
-    pool = Pool(processes=4)
+    pool = Pool(processes=upload_processes)
     pooling_job = partial(upload_chunk, storage)
     parts_and_etags = pool.map(pooling_job, jobs)
     file_data = multipart_complete(apikey, filename, filesize, mimetype, response_info, storage, parts_and_etags)

@@ -36,12 +36,12 @@ class Client():
 
         return new_transform
 
-    def upload(self, url=None, filepath=None, multipart=True, params=None):
+    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=4):
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
         if multipart and filepath:
-            response = upload_utils.multipart_upload(self.apikey, filepath, self.storage)
+            response = upload_utils.multipart_upload(self.apikey, filepath, self.storage, upload_processes=upload_processes)
         else:
             if params:
                 STORE_SCHEMA.check(params)
