@@ -104,7 +104,11 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
     return response
 
 
-def multipart_upload(apikey, filepath, storage, upload_processes=4):
+def multipart_upload(apikey, filepath, storage, upload_processes=None):
+
+    if upload_processes is None:
+        upload_processes = multiprocessing.cpu_count()
+
     filename, filesize, mimetype = get_file_info(filepath)
     response_info = multipart_start(apikey, filename, filesize, mimetype, storage)
     jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
