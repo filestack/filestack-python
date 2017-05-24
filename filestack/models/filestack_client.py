@@ -36,7 +36,7 @@ class Client():
 
         return new_transform
 
-    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=4):
+    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None):
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
