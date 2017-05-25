@@ -34,11 +34,10 @@ class Transform(ImageTransformationMixin, CommonMixin):
 
     @property
     def url(self):
-        return utils.get_transform_url(self._transformation_tasks,
-                                       external_url=self.external_url,
-                                       handle=self.handle,
-                                       security=self.security,
-                                       apikey=self.apikey)
+        return utils.get_transform_url(
+            self._transformation_tasks, external_url=self.external_url,
+            handle=self.handle, security=self.security, apikey=self.apikey
+        )
 
     def store(self, filename=None, location=None, path=None, container=None, region=None, access=None, base64decode=None):
         if path:
@@ -49,8 +48,7 @@ class Transform(ImageTransformationMixin, CommonMixin):
 
         if response.ok:
             data = json.loads(response.text)
-            handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
-                              data['url']).group(1)
+            handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)', data['url']).group(1)
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception(response.text)
