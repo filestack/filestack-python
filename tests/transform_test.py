@@ -245,7 +245,7 @@ def test_zip_no_store(transform):
 
     with HTTMock(zip):
         zip_response = transform.zip()
-        assert zip_response.text == bytes_content
+        assert zip_response.text == str(bytes_content)
 
 
 def test_zip_store(transform):
