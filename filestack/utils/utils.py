@@ -10,8 +10,9 @@ def get_url(base, handle=None, path=None, security=None):
         url_components.append(path)
 
     if security:
-        url_components.append('security=policy:{policy},signature:{signature}'.format(policy=security['policy'],
-                                                                                      signature=security['signature']))
+        url_components.append('security=policy:{policy},signature:{signature}'.format(
+            policy=security['policy'], signature=security['signature'])
+        )
     if handle:
         url_components.append(handle)
 
@@ -23,8 +24,9 @@ def get_transform_url(tasks, external_url=None, handle=None, security=None, apik
         if external_url:
             url_components.append(apikey)
         if security:
-            url_components.append('security=policy:{},signature:{}'.format(security['policy'],
-                                                                           security['signature']))
+            url_components.append('security=policy:{},signature:{}'.format(
+                security['policy'], security['signature'])
+            )
         if 'debug' in tasks:
             index = tasks.index('debug')
             tasks.pop(index)
