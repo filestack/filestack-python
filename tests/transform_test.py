@@ -237,15 +237,15 @@ def test_ascii(transform):
 
 
 def test_zip_no_store(transform):
-    bytes_content = b'somebytescontent'
+    content = 'somecontent'
 
     @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
     def zip(url, request):
-        return response(200, bytes_content)
+        return response(200, content)
 
     with HTTMock(zip):
         zip_response = transform.zip()
-        assert zip_response.text == str(bytes_content)
+        assert zip_response.text == content
 
 
 def test_zip_store(transform):
