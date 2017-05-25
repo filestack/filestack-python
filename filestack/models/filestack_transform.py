@@ -3,7 +3,6 @@ import re
 
 import filestack.models
 
-from filestack.config import CDN_URL
 from filestack.mixins import ImageTransformationMixin, CommonMixin
 from filestack.utils import utils
 
@@ -55,3 +54,8 @@ class Transform(ImageTransformationMixin, CommonMixin):
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception(response.text)
+
+    def debug(self):
+        debug_instance = self.add_transform_task('debug', locals())
+        response = utils.make_call(debug_instance.url, 'get')
+        return response.json()

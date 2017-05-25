@@ -17,13 +17,14 @@ class CommonMixin(object):
                                        handle=self.handle,
                                        params=params,
                                        security=self.security,
-                                       transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
+                                       transform_url=(self.url if isinstance(self, filestack.models.Transform) else None))
 
             if response.ok:
                 for chunk in response.iter_content(1024):
                     if not chunk:
                         break
                     new_file.write(chunk)
+
             return response
 
     def get_content(self, params=None):
@@ -33,7 +34,7 @@ class CommonMixin(object):
                                    handle=self.handle,
                                    params=params,
                                    security=self.security,
-                                   transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
+                                   transform_url=(self.url if isinstance(self, filestack.models.Transform) else None))
 
         return response.content
 
