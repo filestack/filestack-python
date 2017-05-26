@@ -1,4 +1,4 @@
-from filestack.config import CDN_URL, HEADERS
+from filestack.config import CDN_URL, PROCESS_URL, HEADERS
 
 import requests
 
@@ -19,8 +19,8 @@ def get_url(base, handle=None, path=None, security=None):
     return '/'.join(url_components)
 
 
-def get_transform_url(tasks, external_url=None, handle=None, security=None, apikey=None):
-        url_components = [CDN_URL]
+def get_transform_url(tasks, external_url=None, handle=None, security=None, apikey=None, video=False):
+        url_components = [(PROCESS_URL if video else CDN_URL)]
         if external_url:
             url_components.append(apikey)
         if security:
