@@ -1,7 +1,8 @@
 import filestack.models
 import pytest
 
-from filestack import Client, Filelink
+from base64 import b64encode
+from filestack import Client, Filelink, Transform
 from filestack.exceptions import FilestackException
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
@@ -46,8 +47,26 @@ def test_bad_store_params(client):
     kwargs = {'params': {'access': True}, 'url': 'someurl'}
     pytest.raises(DataError, client.upload, **kwargs)
 
+
 def test_url_screenshot(client):
     external_url = 'https//www.someexternalurl'
     transform = client.urlscreenshot(external_url)
     assert isinstance(transform, filestack.models.Transform)
     assert transform.apikey == APIKEY
+
+
+def test_transform_external(client):
+    new_transform = client.transform_external('SOMEURL')
+    assert isinstance(new_transform, Transform)
+
+
+def test_zip(client):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    def api_zip(url, request):
+        with open('tests/data/bird.jpg', 'rb') as f:
+            return response(200, b64encode(f.read()))
+
+    with HTTMock(api_zip):
+        zip_response = client.zip('test.zip', 'tests/data/bird.jpg')
+
+        assert zip_response.status_code == 200
