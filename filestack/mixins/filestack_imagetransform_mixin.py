@@ -109,6 +109,22 @@ class ImageTransformationMixin(object):
     def no_metadata(self):
         return self.add_transform_task('no_metadata', locals())
 
+    def quality(self, value=None):
+        return self.add_transform_task('quality', locals())
+
+    def zip(self, store=False, store_params=None):
+
+        params = locals()
+        params.pop('store')
+        params.pop('store_params')
+
+        new_transform = self.add_transform_task('zip', params)
+
+        if store:
+            return new_transform.store(**store_params) if store_params else new_transform.store()
+
+        return utils.make_call(CDN_URL, 'get', transform_url=new_transform.url)
+
     def add_transform_task(self, transformation, params):
 
         if not isinstance(self, filestack.models.Transform):
