@@ -7,6 +7,7 @@ ACCEPTED_SECURITY_TYPES = {'expiry': int, 'call': list,
 
 API_URL = 'https://www.filestackapi.com/api'
 CDN_URL = 'https://cdn.filestackcontent.com'
+PROCESS_URL = 'https://process.filestackapi.com'
 
 MULTIPART_START_URL = 'https://upload.filestackapi.com/multipart/start'
 MULTIPART_UPLOAD_URL = 'https://upload.filestackapi.com/multipart/upload'
