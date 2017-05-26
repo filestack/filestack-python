@@ -2,7 +2,7 @@ import pytest
 
 from httmock import urlmatch, HTTMock, response
 
-from filestack import Filelink, Transform
+from filestack import Filelink, Transform, AudioVisual
 from filestack.config import CDN_URL
 
 APIKEY = 'SOMEAPIKEY'
@@ -289,7 +289,7 @@ def test_no_metadata(transform):
 
 
 def test_store(transform):
-    @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def store(url, request):
         return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
 
@@ -301,3 +301,13 @@ def test_store(transform):
         )
 
     assert isinstance(store, Filelink)
+
+def test_av_convert(transform):
+    url = 'https://.com/{}'.format(HANDLE)
+    @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
+    def av_convert(url, request):
+        return response(200, {'url': url})
+
+    with HTTMock(av_convert):
+        new_av = transform.av_convert(width=500,height=500)
+        assert isinstance(new_av, AudioVisual)
