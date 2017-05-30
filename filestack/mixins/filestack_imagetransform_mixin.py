@@ -125,6 +125,28 @@ class ImageTransformationMixin(object):
 
         return utils.make_call(CDN_URL, 'get', transform_url=new_transform.url)
 
+    def av_convert(self, preset=None, force=None, title=None, extname=None, filename=None,
+                   width=None, height=None, upscale=None, aspect_mode=None, two_pass=None,
+                   video_bitrate=None, fps=None, keyframe_interval=None, location=None,
+                   watermark_url=None, watermark_top=None, watermark_bottom=None,
+                   watermark_right=None, watermark_left=None, watermark_width=None, watermark_height=None,
+                   path=None, access=None, container=None, audio_bitrate=None, audio_sample_rate=None,
+                   audio_channels=None, clip_length=None, clip_offset=None):
+
+        new_transform = self.add_transform_task('video_convert', locals())
+        transform_url = utils.get_transform_url(
+            new_transform._transformation_tasks, external_url=new_transform.external_url,
+            handle=new_transform.handle, security=new_transform.security,
+            apikey=new_transform.apikey, video=True
+        )
+
+        response = utils.make_call(transform_url, 'get')
+
+        if response.ok:
+            return filestack.models.AudioVisual(transform_url, apikey=new_transform.apikey, security=new_transform.security)
+
+        raise Exception(response.text)
+
     def add_transform_task(self, transformation, params):
 
         if not isinstance(self, filestack.models.Transform):

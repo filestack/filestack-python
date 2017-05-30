@@ -1,5 +1,6 @@
 import pytest
 
+from base64 import b64encode
 from filestack import Filelink, security
 from filestack.config import CDN_URL
 from httmock import urlmatch, HTTMock, response
@@ -87,6 +88,16 @@ def test_download_bad_param_value(filelink):
     kwargs = {'params': {'dl': 'true'}}
     pytest.raises(DataError, filelink.download, 'somepath', **kwargs)
 
+
+def test_download(filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    def api_download(url, request):
+        with open('tests/data/bird.jpg', 'rb') as f:
+            return response(200, b64encode(f.read()))
+
+    with HTTMock(api_download):
+        download_response = filelink.download('tests/data/test_download.jpg')
+        assert download_response.status_code == 200
 
 def test_overwrite_content(secure_filelink):
     @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
