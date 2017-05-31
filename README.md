@@ -30,12 +30,34 @@ The Filestack SDK allows you to upload and handle filelinks using two main class
 
     $ from filestack import Client
     $ client = Client("<YOUR_API_KEY>")
-    $ new_filelink = client.upload(filepath="path/to/file")
+     
+    $ params = {'mimetype': 'image/png'}
+    $ new_filelink = client.upload(filepath="path/to/file", params=params)
+    
+Uploading local files will use Filestack's multipart upload by default. To disable, just set the argument to false.
+
+    $ new_filelink = client.upload(filepath="path/to/file", multipart=False)
 
 ### Create Filelink using Existing Handle
 
     $ from filestack import Filelink
     $ new_filelink = Filelink("<YOUR_HANDLE>")
+    
+### Basic Filelink Functions
+
+With a Filelink, you can download to a local path or get the content of a file. You can also delete or overwrite files if you have security enabled on your account. 
+
+    $ file_content = new_filelink.get_content()
+
+### Transformations
+
+You can chain transformations on both Filelinks and external URLS. Storing transformations will return a new Filelink object.
+
+    $ transform = client.transform_external('http://<SOME_URL>')
+    $ new_filelink = transform.resize(width=500, height=500).store()
+    
+    $ filelink = Filelink("<YOUR_HANDLE">)
+    # new_filelink = filelink.resize(width=500, height=500).store()
 
 ## Versioning
 
