@@ -24,6 +24,19 @@ or directly from GitHub
 
 ## Usage
 
+The Filestack SDK allows you to upload and handle filelinks using two main classes: Client and Filelink.
+
+### Uploading New File with Client
+
+    $ from filestack import Client
+    $ client = Client("<YOUR_API_KEY>")
+    $ new_filelink = client.upload(filepath="path/to/file")
+
+### Create Filelink using Existing Handle
+
+    $ from filestack import Filelink
+    $ new_filelink = Filelink("<YOUR_HANDLE>")
+
 ## Versioning
 
 Filestack Python SDK follows the [Semantic Versioning](http://semver.org/).
