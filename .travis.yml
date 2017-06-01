@@ -19,3 +19,6 @@ notifications:
       - dev@filestack.com
     on_success: never
     on_failure: always
+
+after_success:
+  coveralls
