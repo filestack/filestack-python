@@ -11,7 +11,7 @@ install:
   - pip install -r requirements.txt
 
 script:
-  - pytest --cov=filestack tests
+  - pytest tests
 
 notifications:
   email:
@@ -19,3 +19,6 @@ notifications:
       - dev@filestack.com
     on_success: never
     on_failure: always
+
+after_success:
+  - coveralls
