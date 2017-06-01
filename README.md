@@ -27,64 +27,72 @@ or directly from GitHub
 The Filestack SDK allows you to upload and handle filelinks using two main classes: Client and Filelink.
 
 ### Uploading New File with Client
+``` python
+from filestack import Client
+client = Client("<YOUR_API_KEY>")
 
-    $ from filestack import Client
-    $ client = Client("<YOUR_API_KEY>")
-     
-    $ params = {'mimetype': 'image/png'}
-    $ new_filelink = client.upload(filepath="path/to/file", params=params)
-    $ print(new_filelink.url)
-    
+params = {'mimetype': 'image/png'}
+new_filelink = client.upload(filepath="path/to/file", params=params)
+print(new_filelink.url)
+```
 Uploading local files will use Filestack's multipart upload by default. To disable, just set the argument to false.
 
-    $ new_filelink = client.upload(filepath="path/to/file", multipart=False)
-
+```python
+new_filelink = client.upload(filepath="path/to/file", multipart=False)
+```
+    
 ### Create Filelink using Existing Handle
-
-    $ from filestack import Filelink
-    $ new_filelink = Filelink("<YOUR_HANDLE>")
+```python
+from filestack import Filelink
+new_filelink = Filelink("<YOUR_HANDLE>")
+````
     
 ### Basic Filelink Functions
 
 With a Filelink, you can download to a local path or get the content of a file. You can also delete or overwrite files if you have security enabled on your account. 
 
-    $ file_content = new_filelink.get_content()
-    
-    $ response = new_filelink.download("/path/to/file")
-    
-    $ filelink.overwrite(filepath="path/to/new/file")
-    
-    $ response = filelink.delete()
+```python
+file_content = new_filelink.get_content()
+
+response = new_filelink.download("/path/to/file")
+
+filelink.overwrite(filepath="path/to/new/file")
+
+response = filelink.delete()
+```
 
 ### Transformations
 
 You can chain transformations on both Filelinks and external URLs. Storing transformations will return a new Filelink object.
 
-    $ transform = client.transform_external('http://<SOME_URL>')
-    $ new_filelink = transform.resize(width=500, height=500).flip().enhance().store()
-    
-    $ filelink = Filelink("<YOUR_HANDLE">)
-    $ new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
+```python
+transform = client.transform_external('http://<SOME_URL>')
+new_filelink = transform.resize(width=500, height=500).flip().enhance().store()
+
+filelink = Filelink("<YOUR_HANDLE">)
+new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
+```
     
 You can also retrieve the transformation url at any point.
-    
-    $ transform = client.transform_external('http://<SOME_URL>')
-    $ new_filelink = transform.resize(width=500, height=500).flip().enhance()
-    $ print(transform.url)
+ ```python   
+transform = client.transform_external('http://<SOME_URL>')
+new_filelink = transform.resize(width=500, height=500).flip().enhance()
+print(transform.url)
+```
     
 ### Security Objects
 
 Security is set on Client or Filelink classes upon instantiation.
+```python
+from filestack import security
 
-    $ from filestack import security
-    
-    $ json_policy = {"expiry": 253381964415}
-    $ security = security(json_policy, '<YOUR_APP_SECRET>')
-    $ client = Client("<YOUR_API_KEY", security=security)
-    
-    # new Filelink object inherits security and will use for all calls
-    $ new_filelink = client.upload(filepath="path/to/file")
-    
+json_policy = {"expiry": 253381964415}
+security = security(json_policy, '<YOUR_APP_SECRET>')
+client = Client("<YOUR_API_KEY", security=security)
+
+# new Filelink object inherits security and will use for all calls
+new_filelink = client.upload(filepath="path/to/file")
+```
 ## Versioning
 
 Filestack Python SDK follows the [Semantic Versioning](http://semver.org/).
