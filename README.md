@@ -64,7 +64,7 @@ You can chain transformations on both Filelinks and external URLs. Storing trans
     $ new_filelink = transform.resize(width=500, height=500).flip().enhance().store()
     
     $ filelink = Filelink("<YOUR_HANDLE">)
-    # new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
+    $ new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
     
 You can also retrieve the transformation url at any point.
     
