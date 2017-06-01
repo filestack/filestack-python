@@ -108,3 +108,10 @@ Please see [CONTRIBUTING.md](https://github.com/filepicker/filestack-python/CONT
 ## Credits
 
 Thank you to all the [contributors](https://github.com/filepicker/filestack-python/graphs/contributors).
+
+-[travis_ci]: http://travis-ci.org/filestack/filestack-python		
+-[travis_ci_badge]: https://travis-ci.org/filestack/filestack-python.svg?branch=master		
+-[code_climate]: https://codeclimate.com/github/filestack/filestack-python		
+-[code_climate_badge]: https://codeclimate.com/github/filestack/filestack-python.png		
+-[coveralls]: https://coveralls.io/github/filestack/filestack-python?branch=master		
+-[coveralls_badge]: https://coveralls.io/repos/github/filestack/filestack-python/badge.svg?branch=master
