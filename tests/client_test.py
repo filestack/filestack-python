@@ -32,7 +32,7 @@ def test_store(client):
         return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
 
     with HTTMock(api_store):
-        filelink = client.upload(url="someurl")
+        filelink = client.upload(url="someurl", params={'filename': 'something.jpg'}, multipart=False)
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
