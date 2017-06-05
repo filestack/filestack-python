@@ -105,12 +105,12 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     try:
         filename = params['filename']
-    except KeyError:
+    except (KeyError, TypeError):
         filename = None
 
     try:
         mimetype = params['mimetype']
-    except KeyError:
+    except (KeyError, TypeError):
         mimetype = None
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
