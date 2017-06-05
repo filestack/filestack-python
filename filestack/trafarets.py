@@ -60,3 +60,5 @@ STORE_SCHEMA = t.Dict({
     'access': t.String(),
     'base64decode': t.Bool()
 })
+
+STORE_SCHEMA.make_optional('*')
