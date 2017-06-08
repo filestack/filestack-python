@@ -22,17 +22,18 @@ def get_file_info(filepath, filename=None, mimetype=None):
 
 def multipart_start(apikey, filename, filesize, mimetype, storage, params=None):
     response = requests.post(
-            MULTIPART_START_URL, files={'file': (filename, '', None)},
-            data={
-                'apikey': apikey,
-                'filename': filename,
-                'mimetype': mimetype,
-                'size': filesize,
-                'store_location': storage
-                },
-            params=params,
-            headers=HEADERS
-            )
+        MULTIPART_START_URL,
+        files={'file': (filename, '', None)},
+        data={
+            'apikey': apikey,
+            'filename': filename,
+            'mimetype': mimetype,
+            'size': filesize,
+            'store_location': storage
+        },
+        params=params,
+        headers=HEADERS
+    )
     return response.json()
 
 
