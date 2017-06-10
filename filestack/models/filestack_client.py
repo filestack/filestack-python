@@ -19,7 +19,7 @@ class Client():
         self._storage = storage
 
     def transform_external(self, external_url):
-      return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
         params = locals()
@@ -63,16 +63,16 @@ class Client():
 
             files, data = None, None
             if url:
-                  data = {'url': url}
+                data = {'url': url}
             if filepath:
-                  filename = os.path.basename(filepath)
-                  mimetype = mimetypes.guess_type(filepath)[0]
-                  files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
+                filename = os.path.basename(filepath)
+                mimetype = mimetypes.guess_type(filepath)[0]
+                files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
 
             if params:
-                  params['key'] = self.apikey
+                params['key'] = self.apikey
             else:
-                  params = {'key': self.apikey}
+                params = {'key': self.apikey}
 
             path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
@@ -90,12 +90,12 @@ class Client():
 
     @property
     def security(self):
-      return self._security
+        return self._security
 
     @property
     def storage(self):
-      return self._storage
+        return self._storage
 
     @property
     def apikey(self):
-      return self._apikey
+        return self._apikey

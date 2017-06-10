@@ -5,7 +5,10 @@ import hashlib
 import requests
 
 from base64 import b64encode
-from filestack.config import MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL, DEFAULT_CHUNK_SIZE
+from filestack.config import (
+    MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL,
+    DEFAULT_CHUNK_SIZE, HEADERS
+)
 from functools import partial
 from multiprocessing import Pool
 
@@ -19,16 +22,18 @@ def get_file_info(filepath, filename=None, mimetype=None):
 
 def multipart_start(apikey, filename, filesize, mimetype, storage, params=None):
     response = requests.post(
-            MULTIPART_START_URL, files={'file': (filename, '', None)},
-            data={
-                'apikey': apikey,
-                'filename': filename,
-                'mimetype': mimetype,
-                'size': filesize,
-                'store_location': storage
-                },
-            params=params
-            )
+        MULTIPART_START_URL,
+        files={'file': (filename, '', None)},
+        data={
+            'apikey': apikey,
+            'filename': filename,
+            'mimetype': mimetype,
+            'size': filesize,
+            'store_location': storage
+        },
+        params=params,
+        headers=HEADERS
+    )
     return response.json()
 
 
@@ -68,8 +73,12 @@ def upload_chunk(storage, job):
         'upload_id': job['upload_id'],
         'store_location': storage
     }
-
-    fs_resp = requests.post(MULTIPART_UPLOAD_URL, data=data, files={'file': (job['filename'], '', None)}).json()
+    fs_resp = requests.post(
+        MULTIPART_UPLOAD_URL,
+        data=data,
+        files={'file': (job['filename'], '', None)},
+        headers=HEADERS
+    ).json()
 
     resp = requests.put(fs_resp['url'], headers=fs_resp['headers'], data=chunk)
 
@@ -93,7 +102,8 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
         files={
             'file': (filename, '', None)
         },
-        params=params
+        params=params,
+        headers=HEADERS
     )
     return response
 

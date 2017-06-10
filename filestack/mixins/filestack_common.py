@@ -7,6 +7,7 @@ from filestack.config import CDN_URL, API_URL, FILE_PATH
 from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA
 from filestack.utils import utils
 
+
 class CommonMixin(object):
 
     def download(self, destination_path, params=None):
