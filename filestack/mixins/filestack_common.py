@@ -43,7 +43,6 @@ class CommonMixin(object):
 
     def get_metadata(self, params=None):
         metadata_url = "{}/{}".format(self.url, METADATA_PATH)
-        print("metadata_url=" + metadata_url)
         response = utils.make_call(metadata_url, 'get',
                                    params=params,
                                    security=self.security)
