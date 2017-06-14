@@ -43,10 +43,7 @@ def make_call(base, action, handle=None, path=None, params=None, data=None, file
     if transform_url:
         return request_func(transform_url, params=params, headers=HEADERS, data=data, files=files)
 
-    if security:
-        url = get_url(base, path=path, handle=handle, security=security)
-    else:
-        url = get_url(base, path=path, handle=handle)
+    url = get_url(base, path=path, handle=handle, security=security)
 
     return request_func(url, params=params, headers=HEADERS, data=data, files=files)
 

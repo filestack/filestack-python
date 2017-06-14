@@ -58,6 +58,18 @@ def test_get_content(filelink):
     assert content == b'SOMEBYTESCONTENT'
 
 
+def test_get_metadata(filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', path='/metadata', method='get', scheme='https')
+    def api_metadata(url, request):
+        return response(200, '{"filename": "somefile.jpg"}')
+
+    with HTTMock(api_metadata):
+        response = filelink.get_metadata()
+        metadata = response.json()
+
+    assert metadata['filename'] == 'calvinandhobbes.jpg'
+
+
 def test_get_content_params(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
