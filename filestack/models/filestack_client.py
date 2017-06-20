@@ -52,15 +52,17 @@ class Client():
 
     def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None):
         if params:
-                STORE_SCHEMA.check(params)
+            STORE_SCHEMA.check(params)
 
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
         if multipart and filepath:
-            response = upload_utils.multipart_upload(self.apikey, filepath, self.storage, upload_processes=upload_processes, params=params)
+            response = upload_utils.multipart_upload(
+                self.apikey, filepath, self.storage,
+                upload_processes=upload_processes, params=params, security=self.security
+            )
         else:
-
             files, data = None, None
             if url:
                 data = {'url': url}
@@ -76,7 +78,15 @@ class Client():
 
             path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-            response = utils.make_call(API_URL, 'post', path=path, params=params, data=data, files=files)
+            if self.security:
+                path = "{path}?policy={policy}&signature={signature}".format(
+                    path=path, policy=self.security['policy'].decode('utf-8'),
+                    signature=self.security['signature']
+                )
+
+            response = utils.make_call(
+                API_URL, 'post', path=path, params=params, data=data, files=files
+            )
 
         if response.ok:
             response = response.json()
