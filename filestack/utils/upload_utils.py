@@ -20,17 +20,23 @@ def get_file_info(filepath, filename=None, mimetype=None):
     return filename, filesize, mimetype
 
 
-def multipart_start(apikey, filename, filesize, mimetype, storage, params=None):
+def multipart_start(apikey, filename, filesize, mimetype, storage, security=None, params=None):
+    data = {
+        'apikey': apikey,
+        'filename': filename,
+        'mimetype': mimetype,
+        'size': filesize,
+        'store_location': storage
+    }
+    if security:
+        data.update({
+            'policy': security['policy'],
+            'signature': security['signature']
+        })
     response = requests.post(
         MULTIPART_START_URL,
+        data=data,
         files={'file': (filename, '', None)},
-        data={
-            'apikey': apikey,
-            'filename': filename,
-            'mimetype': mimetype,
-            'size': filesize,
-            'store_location': storage
-        },
         params=params,
         headers=HEADERS
     )
@@ -108,7 +114,7 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
     return response
 
 
-def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None):
+def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None, security=None):
 
     if upload_processes is None:
         upload_processes = multiprocessing.cpu_count()
@@ -125,7 +131,7 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
-    response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params)
+    response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
     jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
 
     pool = Pool(processes=upload_processes)

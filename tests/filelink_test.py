@@ -14,9 +14,7 @@ HANDLE = 'SOMEHANDLE'
 def filelink():
     return Filelink(HANDLE, apikey=APIKEY)
 
-
 SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
-
 
 @pytest.fixture
 def secure_filelink():
@@ -135,3 +133,15 @@ def test_overwrite_bad_params(secure_filelink):
 def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+
+def test_tags(secure_filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
+    def tag_request(url, request):
+        return response(200, {'tags': {'auto': {'tag': 100}}})
+
+    with HTTMock(tag_request):
+        tag_response = secure_filelink.tags()
+        assert tag_response['tags']['auto']['tag'] == 100
+
+def test_unsecure_tags(filelink):
+    pytest.raises(Exception, filelink.tags)
