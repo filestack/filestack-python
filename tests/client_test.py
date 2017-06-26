@@ -14,7 +14,7 @@ HANDLE = 'SOMEHANDLE'
 
 @pytest.fixture
 def client():
-    return Client(APIKEY)
+    return Client(APIKEY, security={'policy': b64encode(b'somepolicy'), 'signature': 'somesignature'})
 
 
 def test_api_set(client):
@@ -37,6 +37,16 @@ def test_store(client):
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
 
+def test_store_filepath(client):
+    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/store', method='post', scheme='https')
+    def api_store(url, request):
+        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
+
+    with HTTMock(api_store):
+        filelink = client.upload(filepath="tests/data/bird.jpg", multipart=False)
+
+    assert isinstance(filelink, Filelink)
+    assert filelink.handle == HANDLE
 
 def test_wrong_store_params(client):
     kwargs = {'params': {'call': 'someparameter'}, 'url': 'someurl'}

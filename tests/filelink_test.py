@@ -79,6 +79,17 @@ def test_get_content_params(filelink):
     assert content == b'SOMEBYTESCONTENT'
 
 
+def test_delete(filelink):
+    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='delete', scheme='https')
+    def test_delete(url, request):
+        return response(200)
+
+    with HTTMock(test_delete):
+        delete_response = filelink.delete()
+
+    assert delete_response.status_code
+
+
 def test_get_content_bad_params(filelink):
     kwargs = {'params': {'call': ['read']}}
     pytest.raises(DataError, filelink.get_content, **kwargs)
@@ -116,6 +127,17 @@ def test_overwrite_content(secure_filelink):
 
     with HTTMock(api_delete):
         filelink_response = secure_filelink.overwrite(url="http://www.someurl.com")
+
+    assert filelink_response.status_code == 200
+
+
+def test_overwrite_content_filepath(secure_filelink):
+    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
+    def api_delete(url, request):
+        return response(200, {'handle': HANDLE})
+
+    with HTTMock(api_delete):
+        filelink_response = secure_filelink.overwrite(filepath='tests/data/bird.jpg')
 
     assert filelink_response.status_code == 200
 
