@@ -5,7 +5,10 @@ import hashlib
 import requests
 
 from base64 import b64encode
-from filestack.config import MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL, DEFAULT_CHUNK_SIZE
+from filestack.config import (
+    MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL,
+    DEFAULT_CHUNK_SIZE, HEADERS
+)
 from functools import partial
 from multiprocessing import Pool
 
@@ -17,18 +20,26 @@ def get_file_info(filepath, filename=None, mimetype=None):
     return filename, filesize, mimetype
 
 
-def multipart_start(apikey, filename, filesize, mimetype, storage, params=None):
+def multipart_start(apikey, filename, filesize, mimetype, storage, security=None, params=None):
+    data = {
+        'apikey': apikey,
+        'filename': filename,
+        'mimetype': mimetype,
+        'size': filesize,
+        'store_location': storage
+    }
+    if security:
+        data.update({
+            'policy': security['policy'],
+            'signature': security['signature']
+        })
     response = requests.post(
-            MULTIPART_START_URL, files={'file': (filename, '', None)},
-            data={
-                'apikey': apikey,
-                'filename': filename,
-                'mimetype': mimetype,
-                'size': filesize,
-                'store_location': storage
-                },
-            params=params
-            )
+        MULTIPART_START_URL,
+        data=data,
+        files={'file': (filename, '', None)},
+        params=params,
+        headers=HEADERS
+    )
     return response.json()
 
 
@@ -68,8 +79,12 @@ def upload_chunk(storage, job):
         'upload_id': job['upload_id'],
         'store_location': storage
     }
-
-    fs_resp = requests.post(MULTIPART_UPLOAD_URL, data=data, files={'file': (job['filename'], '', None)}).json()
+    fs_resp = requests.post(
+        MULTIPART_UPLOAD_URL,
+        data=data,
+        files={'file': (job['filename'], '', None)},
+        headers=HEADERS
+    ).json()
 
     resp = requests.put(fs_resp['url'], headers=fs_resp['headers'], data=chunk)
 
@@ -93,12 +108,13 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
         files={
             'file': (filename, '', None)
         },
-        params=params
+        params=params,
+        headers=HEADERS
     )
     return response
 
 
-def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None):
+def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None, security=None):
 
     if upload_processes is None:
         upload_processes = multiprocessing.cpu_count()
@@ -115,7 +131,7 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
-    response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params)
+    response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
     jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
 
     pool = Pool(processes=upload_processes)

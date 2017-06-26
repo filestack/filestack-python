@@ -14,9 +14,7 @@ HANDLE = 'SOMEHANDLE'
 def filelink():
     return Filelink(HANDLE, apikey=APIKEY)
 
-
 SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
-
 
 @pytest.fixture
 def secure_filelink():
@@ -58,6 +56,18 @@ def test_get_content(filelink):
     assert content == b'SOMEBYTESCONTENT'
 
 
+def test_get_metadata(filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
+    def api_metadata(url, request):
+        return response(200, '{"filename": "somefile.jpg"}')
+
+    with HTTMock(api_metadata):
+        metadata_response = filelink.get_metadata()
+        metadata = metadata_response.json()
+
+    assert metadata['filename'] == 'somefile.jpg'
+
+
 def test_get_content_params(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
@@ -67,6 +77,17 @@ def test_get_content_params(filelink):
         content = filelink.get_content(params={'dl': True})
 
     assert content == b'SOMEBYTESCONTENT'
+
+
+def test_delete(filelink):
+    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='delete', scheme='https')
+    def test_delete(url, request):
+        return response(200)
+
+    with HTTMock(test_delete):
+        delete_response = filelink.delete()
+
+    assert delete_response.status_code
 
 
 def test_get_content_bad_params(filelink):
@@ -110,6 +131,17 @@ def test_overwrite_content(secure_filelink):
     assert filelink_response.status_code == 200
 
 
+def test_overwrite_content_filepath(secure_filelink):
+    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
+    def api_delete(url, request):
+        return response(200, {'handle': HANDLE})
+
+    with HTTMock(api_delete):
+        filelink_response = secure_filelink.overwrite(filepath='tests/data/bird.jpg')
+
+    assert filelink_response.status_code == 200
+
+
 def test_overwrite_argument_fail(filelink):
     # passing in neither the url or filepath parameter
     pytest.raises(ValueError, filelink.overwrite)
@@ -123,3 +155,15 @@ def test_overwrite_bad_params(secure_filelink):
 def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+
+def test_tags(secure_filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
+    def tag_request(url, request):
+        return response(200, {'tags': {'auto': {'tag': 100}}})
+
+    with HTTMock(tag_request):
+        tag_response = secure_filelink.tags()
+        assert tag_response['tags']['auto']['tag'] == 100
+
+def test_unsecure_tags(filelink):
+    pytest.raises(Exception, filelink.tags)

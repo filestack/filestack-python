@@ -12,3 +12,9 @@
 ### 2.0.4
 - FS-1116 Make upload parameters all optional
 - FS-1117 Ensure params are being sent during multipart upload
+
+### 2.1.0 (June 26th, 2017)
+- FS-1134 Add autotagging and SFW detection 
+- FS-1117 Mulipart upload now sends user parameters 
+- FS-1116 Upload parameters are now optional 
+- Fixes to security and mulipart uploads

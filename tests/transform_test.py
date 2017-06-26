@@ -309,5 +309,15 @@ def test_av_convert(transform):
         return response(200, {'url': url})
 
     with HTTMock(av_convert):
-        new_av = transform.av_convert(width=500,height=500)
+        new_av = transform.av_convert(width=500, height=500)
         assert isinstance(new_av, AudioVisual)
+
+def test_debug(transform):
+    url = 'https://.com/{}'.format(HANDLE)
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    def debug(url, request):
+        return response(200, {'data': 'somedata'})
+
+    with HTTMock(debug):
+        debug_response = transform.resize(width=500, height=500).debug()
+        assert debug_response['data'] == 'somedata'

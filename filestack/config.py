@@ -22,3 +22,4 @@ DEFAULT_CHUNK_SIZE = 5 * 1024 ** 2
 
 STORE_PATH = 'store'
 FILE_PATH = 'file'
+METADATA_PATH = 'metadata'

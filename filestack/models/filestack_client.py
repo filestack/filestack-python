@@ -19,7 +19,7 @@ class Client():
         self._storage = storage
 
     def transform_external(self, external_url):
-      return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
         params = locals()
@@ -52,31 +52,41 @@ class Client():
 
     def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None):
         if params:
-                STORE_SCHEMA.check(params)
+            STORE_SCHEMA.check(params)
 
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
         if multipart and filepath:
-            response = upload_utils.multipart_upload(self.apikey, filepath, self.storage, upload_processes=upload_processes, params=params)
+            response = upload_utils.multipart_upload(
+                self.apikey, filepath, self.storage,
+                upload_processes=upload_processes, params=params, security=self.security
+            )
         else:
-
             files, data = None, None
             if url:
-                  data = {'url': url}
+                data = {'url': url}
             if filepath:
-                  filename = os.path.basename(filepath)
-                  mimetype = mimetypes.guess_type(filepath)[0]
-                  files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
+                filename = os.path.basename(filepath)
+                mimetype = mimetypes.guess_type(filepath)[0]
+                files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
 
             if params:
-                  params['key'] = self.apikey
+                params['key'] = self.apikey
             else:
-                  params = {'key': self.apikey}
+                params = {'key': self.apikey}
 
             path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-            response = utils.make_call(API_URL, 'post', path=path, params=params, data=data, files=files)
+            if self.security:
+                path = "{path}?policy={policy}&signature={signature}".format(
+                    path=path, policy=self.security['policy'].decode('utf-8'),
+                    signature=self.security['signature']
+                )
+
+            response = utils.make_call(
+                API_URL, 'post', path=path, params=params, data=data, files=files
+            )
 
         if response.ok:
             response = response.json()
@@ -90,12 +100,12 @@ class Client():
 
     @property
     def security(self):
-      return self._security
+        return self._security
 
     @property
     def storage(self):
-      return self._storage
+        return self._storage
 
     @property
     def apikey(self):
-      return self._apikey
+        return self._apikey

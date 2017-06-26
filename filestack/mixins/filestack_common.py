@@ -3,9 +3,10 @@ import os
 
 import filestack.models
 
-from filestack.config import CDN_URL, API_URL, FILE_PATH
+from filestack.config import CDN_URL, API_URL, FILE_PATH, METADATA_PATH
 from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA
 from filestack.utils import utils
+
 
 class CommonMixin(object):
 
@@ -27,6 +28,7 @@ class CommonMixin(object):
 
             return response
 
+
     def get_content(self, params=None):
         if params:
             CONTENT_DOWNLOAD_SCHEMA.check(params)
@@ -37,6 +39,15 @@ class CommonMixin(object):
                                    transform_url=(self.url if isinstance(self, filestack.models.Transform) else None))
 
         return response.content
+
+
+    def get_metadata(self, params=None):
+        metadata_url = "{}/{}".format(self.url, METADATA_PATH)
+        response = utils.make_call(metadata_url, 'get',
+                                   params=params,
+                                   security=self.security)
+        return response
+
 
     def delete(self, params=None):
         if params:
@@ -49,6 +60,7 @@ class CommonMixin(object):
                                params=params,
                                security=self.security,
                                transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
+
 
     def overwrite(self, url=None, filepath=None, params=None):
         if params:
