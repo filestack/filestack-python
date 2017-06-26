@@ -30,5 +30,5 @@ def test_upload_multipart(client):
     responses.add_callback(responses.PUT, URL, callback=chunk_put_callback)
     responses.add(responses.POST, MULTIPART_COMPLETE_URL, status=200, content_type="application/json", json={"url": URL})
 
-    new_filelink = client.upload(filepath='tests/data/bird.jpg')
+    new_filelink = client.upload(filepath='tests/data/doom.mp4')
     assert new_filelink.handle == HANDLE
