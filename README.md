@@ -75,8 +75,8 @@ new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
     
 You can also retrieve the transformation url at any point.
  ```python   
-transform = client.transform_external('http://<SOME_URL>')
-new_filelink = transform.resize(width=500, height=500).flip().enhance()
+transform_candidate = client.transform_external('http://<SOME_URL>')
+transform = transform_candidate.resize(width=500, height=500).flip().enhance()
 print(transform.url)
 ```
     
