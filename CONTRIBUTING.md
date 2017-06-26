@@ -1,4 +1,4 @@
-# Contributing to Filestack Ruby SDK
+# Contributing to Filestack Python SDK
 
 First of all, thank you so much for being interested in contributing to Filestack Python SDK. This document will guide you through this process. You can contribute in different ways:
 
