@@ -55,6 +55,14 @@ def test_get_content(filelink):
 
     assert content == b'SOMEBYTESCONTENT'
 
+def test_bad_call(filelink):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    def api_bad(url, request):
+        return response(400, b'SOMEBYTESCONTENT')
+
+    with HTTMock(api_bad):
+        pytest.raises(Exception, filelink.get_content)
+
 
 def test_get_metadata(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
