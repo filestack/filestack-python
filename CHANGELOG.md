@@ -18,3 +18,7 @@
 - FS-1117 Mulipart upload now sends user parameters 
 - FS-1116 Upload parameters are now optional 
 - Fixes to security and mulipart uploads
+
+### 2.1.1 (July 7th, 2017)
+- FS-1365 Fix security formatting for non-transform URLs
+- Add generic error handling to make_call utility function
