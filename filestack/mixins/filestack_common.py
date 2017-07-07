@@ -42,11 +42,13 @@ class CommonMixin(object):
 
 
     def get_metadata(self, params=None):
-        metadata_url = "{}/{}".format(self.url, METADATA_PATH)
+        metadata_url = "{CDN_URL}/{handle}/metadata".format(
+            CDN_URL=CDN_URL, handle=self.handle
+        )
         response = utils.make_call(metadata_url, 'get',
                                    params=params,
                                    security=self.security)
-        return response
+        return response.json()
 
 
     def delete(self, params=None):
