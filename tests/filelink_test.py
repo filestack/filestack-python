@@ -63,7 +63,7 @@ def test_get_metadata(filelink):
 
     with HTTMock(api_metadata):
         metadata_response = filelink.get_metadata()
-        metadata = metadata_response.json()
+        metadata = metadata_response
 
     assert metadata['filename'] == 'somefile.jpg'
 
