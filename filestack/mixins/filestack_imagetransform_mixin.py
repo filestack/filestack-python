@@ -143,7 +143,11 @@ class ImageTransformationMixin(object):
         response = utils.make_call(transform_url, 'get')
 
         if response.ok:
-            return filestack.models.AudioVisual(transform_url, apikey=new_transform.apikey, security=new_transform.security)
+            uuid = response.json()['uuid']
+            timestamp = response.json()['timestamp']
+            return filestack.models.AudioVisual(
+                transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
+            )
 
         raise Exception(response.text)
 
