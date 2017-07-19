@@ -142,14 +142,16 @@ class ImageTransformationMixin(object):
 
         response = utils.make_call(transform_url, 'get')
 
-        if response.ok:
-            uuid = response.json()['uuid']
-            timestamp = response.json()['timestamp']
-            return filestack.models.AudioVisual(
-                transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
-            )
+        if not response.ok:
+            raise Exception(response.text)
 
-        raise Exception(response.text)
+        uuid = response.json()['uuid']
+        timestamp = response.json()['timestamp']
+        
+        return filestack.models.AudioVisual(
+            transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
+        )
+
 
     def add_transform_task(self, transformation, params):
 
