@@ -7,10 +7,12 @@ from filestack.utils import utils
 
 class AudioVisual:
 
-    def __init__(self, url, apikey=None, security=None):
+    def __init__(self, url, uuid, timestamp, apikey=None, security=None):
         self._url = url
         self._apikey = apikey
         self._security = security
+        self._uuid = uuid
+        self._timestamp = timestamp
 
     def to_filelink(self):
         if self.status != 'completed':
@@ -44,3 +46,11 @@ class AudioVisual:
     @property
     def security(self):
         return self._security
+
+    @property
+    def uuid(self):
+        return self._uuid
+
+    @property
+    def timestamp(self):
+        return self._timestamp
