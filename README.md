@@ -79,7 +79,24 @@ transform_candidate = client.transform_external('http://<SOME_URL>')
 transform = transform_candidate.resize(width=500, height=500).flip().enhance()
 print(transform.url)
 ```
-    
+
+### Audio/Video Convert
+
+Audio and video conversion works just like any transformation, except it returns an instance of class AudioVisual, which allows you to check the status of your video conversion, as well as get its UUID and timestamp. 
+
+```python
+av_object = filelink.av_convert(width=100, height=100)
+while (av_object.status != 'completed'):
+    print(av_object.status)
+    print(av_object.uuid)
+    print(av_object.timestamp)
+```
+The status property makes a call to the API to check its current status, and you can call to_filelink() once video is complete (this function checks its status first and will fail if not completed yet).
+
+```python
+filelink = av_object.to_filelink()
+```
+
 ### Security Objects
 
 Security is set on Client or Filelink classes upon instantiation.

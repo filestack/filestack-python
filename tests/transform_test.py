@@ -303,17 +303,19 @@ def test_store(transform):
     assert isinstance(store, Filelink)
 
 def test_av_convert(transform):
-    url = 'https://.com/{}'.format(HANDLE)
+    url = 'https://cdn.filestack.com/{}'.format(HANDLE)
     @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
     def av_convert(url, request):
-        return response(200, {'url': url})
+        return response(200, {'url': url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'})
 
     with HTTMock(av_convert):
         new_av = transform.av_convert(width=500, height=500)
         assert isinstance(new_av, AudioVisual)
+        assert new_av.uuid == 'someuuid'
+        assert new_av.timestamp == 'sometimestamp' 
 
 def test_debug(transform):
-    url = 'https://.com/{}'.format(HANDLE)
+    url = 'https://process.filestackapi.com/{}'.format(HANDLE)
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def debug(url, request):
         return response(200, {'data': 'somedata'})

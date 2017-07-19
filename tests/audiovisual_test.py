@@ -13,8 +13,7 @@ PROCESS_URL = 'https://process.filestackapi.com/{}'.format(HANDLE)
 
 @pytest.fixture
 def av():
-    return AudioVisual(PROCESS_URL, apikey=APIKEY)
-
+    return AudioVisual(PROCESS_URL, 'someuuid', 'sometimetstamp', apikey=APIKEY)
 
 def test_status(av):
 
@@ -24,7 +23,6 @@ def test_status(av):
 
     with HTTMock(api_zip):
         assert av.status == 'completed'
-
 
 def test_convert(av):
 
