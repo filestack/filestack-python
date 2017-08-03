@@ -155,8 +155,6 @@ class UploadManager(object):
                     self.parts[part_num]['chunks'].append(c)
 
             self._submit_upload_job(part_num, chunk)
-            self.parts[part_num]['currently_processed'] += 1
-            self._currently_processed += 1
 
     def _manage_upload_process(self):
         self._feed_uploaders()
@@ -237,6 +235,8 @@ class UploadManager(object):
             'upload_id': self.start_response['upload_id'],
             'delay': delay
         })
+        self.parts[part_num]['currently_processed'] += 1
+        self._currently_processed += 1
 
     @staticmethod
     def _get_byte_ranges(filesize, part_size, start=0, bytes_to_read=None):
@@ -270,6 +270,10 @@ def consume_upload_job(upload_q, response_q):
     log.info('Uploader ready')
     while True:
         job = upload_q.get(block=True)
+
+        if job == 'die':
+            break  # we need a way to stop it in tests (other than terminate())
+
         log.info(
             'Uploader got chunk %s for part %s',
             job['chunk'], job['part']
@@ -308,7 +312,6 @@ def consume_upload_job(upload_q, response_q):
                 raise ResponseNotOk('Incorrect backend response %s', backend_resp)
 
             backend_data = backend_resp.json()
-
             try:
                 s3_resp = requests.put(
                     backend_data['url'],
@@ -352,6 +355,10 @@ def commit_part(commit_q, response_q):
     log.info('Committer ready')
     while True:
         job = commit_q.get(block=True)
+
+        if job == 'die':
+            break  # we need a way to stop it in tests (other than terminate())
+
         log.info('Committer got job for part %s', job['part'])
         log.debug('Job details: %s', job)
 
