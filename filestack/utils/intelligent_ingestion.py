@@ -327,6 +327,7 @@ def consume_upload_job(upload_q, response_q):
 
         except ResponseNotOk:
             delay = delay * 1.3 or 1
+            success = False
         except S3UploadException:
             delay = 0
             success = False
