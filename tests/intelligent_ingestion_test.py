@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
-from Queue import Empty as QueueEmptyException
+from queue import Empty as QueueEmptyException
+
 from multiprocessing import Process, Queue
 
 import pytest
