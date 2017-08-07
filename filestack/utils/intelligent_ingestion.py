@@ -26,6 +26,7 @@ DEFAULT_PART_SIZE = 8 * MB
 DEFAULT_CHUNK_SIZE = 8 * MB
 NUM_OF_UPLOADERS = 4
 NUM_OF_COMMITTERS = 2
+MAX_DELAY = 4
 
 
 class ResponseNotOk(Exception):
@@ -173,7 +174,10 @@ class UploadManager(object):
 
                     if response['delay']:
                         # this means uploader got a response, but it wasn't ok (status code >= 400)
-                        # resubmit with requested delay
+                        # resubmit with requested delay if max delay not exceeded
+                        if response['delay'] > MAX_DELAY:
+                            log.error('Max delay exceeded for chunk %s', old_chunk)
+                            return
                         self._submit_upload_job(response['part'], old_chunk, delay=response['delay'])
                         continue
 
@@ -281,9 +285,8 @@ def consume_upload_job(upload_q, response_q):
         log.debug('Job details: %s', job)
 
         delay = job.get('delay', 0)
-        if delay:
-            time.sleep(delay)
-            log.info('Uploader waiting for %s seconds', delay)
+        time.sleep(delay)
+        log.info('Uploader waiting for %s seconds', delay)
 
         with open(job['filepath'], 'rb') as f:
             f.seek(job['seek'] + job['offset'])
@@ -424,6 +427,9 @@ def upload(apikey, filepath, storage, params=None, security=None):
         proc.terminate()
 
     try:
-        return response_q.get(block=True, timeout=1)
+        final_response = response_q.get(block=True, timeout=1)
+        if not isinstance(final_response, requests.Response):
+            raise Exception()
+        return final_response
     except:
         raise Exception('Upload aborted')

@@ -58,7 +58,7 @@ class Client():
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
-        if intelligent:
+        if intelligent and filepath:
             response = intelligent_ingestion.upload(
                 self.apikey, filepath, self.storage, params=params, security=self.security
             )
