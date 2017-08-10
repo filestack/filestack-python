@@ -8,6 +8,7 @@ from filestack.config import API_URL, CDN_URL, STORE_PATH
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils
 from filestack.utils import upload_utils
+from filestack.utils import intelligent_ingestion
 
 
 class Client():
@@ -50,14 +51,18 @@ class Client():
 
             return response.text
 
-    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None):
+    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None, intelligent=False):
         if params:
             STORE_SCHEMA.check(params)
 
         if filepath and url:
             raise ValueError("Cannot upload file and external url at the same time")
 
-        if multipart and filepath:
+        if intelligent and filepath:
+            response = intelligent_ingestion.upload(
+                self.apikey, filepath, self.storage, params=params, security=self.security
+            )
+        elif multipart and filepath:
             response = upload_utils.multipart_upload(
                 self.apikey, filepath, self.storage,
                 upload_processes=upload_processes, params=params, security=self.security

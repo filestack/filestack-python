@@ -1,3 +1,5 @@
 .DS_Store
 *.pyc
 .cache/
+temp_files/
+.vscode/

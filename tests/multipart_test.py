@@ -1,9 +1,12 @@
 import json
 import pytest
+from collections import defaultdict
 import responses
+from httmock import HTTMock, response, urlmatch
 
 from filestack import Client
 from filestack.config import MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL
+from filestack.utils.upload_utils import upload_chunk
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
@@ -32,3 +35,26 @@ def test_upload_multipart(client):
 
     new_filelink = client.upload(filepath='tests/data/doom.mp4')
     assert new_filelink.handle == HANDLE
+
+
+def test_upload_chunk():
+    @urlmatch(netloc=r'upload\.filestackapi\.com', path='/multipart/upload', method='post', scheme='https')
+    def fs_backend_mock(url, request):
+        return {
+            'status_code': 200,
+            'content': json.dumps({
+                'url': 'https://amazon.com/upload', 'headers': {'one': 'two'}
+            })
+        }
+
+    @urlmatch(netloc=r'amazon\.com', path='/upload', method='put', scheme='https')
+    def amazon_mock(url, request):
+        return response(200, b'', {'ETag': 'etagX'}, reason=None, elapsed=0, request=request)
+
+    job = defaultdict(str)
+    job['seek'] = 0
+    job['size'] = 0
+    job['part'] = 123
+    job['filepath'] = 'tests/data/doom.mp4'
+    with HTTMock(fs_backend_mock), HTTMock(amazon_mock):
+        assert upload_chunk('s3', job) == '123:etagX'
