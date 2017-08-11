@@ -2,7 +2,6 @@ from filestack.config import CDN_URL
 from filestack.mixins import CommonMixin
 from filestack.mixins import ImageTransformationMixin
 from filestack.utils.utils import get_url, make_call, get_transform_url
-from filestack.version import __version__
 
 
 class Filelink(ImageTransformationMixin, CommonMixin):

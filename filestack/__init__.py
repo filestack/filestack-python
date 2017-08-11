@@ -1,3 +1,4 @@
+__version__ = '2.2.1'
 from .models.filestack_client import Client
 from .models.filestack_filelink import Filelink
 from .models.filestack_security import security

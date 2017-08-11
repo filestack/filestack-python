@@ -5,7 +5,7 @@ import hashlib
 import logging
 import time
 
-from multiprocessing import Queue, Process, Value
+from multiprocessing import Queue, Process
 from base64 import b64encode
 from collections import deque, OrderedDict
 
@@ -14,7 +14,7 @@ import requests
 from filestack.config import HEADERS
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.INFO)
+log.setLevel(logging.ERROR)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter("%(asctime)s - %(processName)s[%(process)d] - %(levelname)s - %(message)s"))
