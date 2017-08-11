@@ -40,7 +40,13 @@ Uploading local files will use Filestack's multipart upload by default. To disab
 ```python
 new_filelink = client.upload(filepath="path/to/file", multipart=False)
 ```
-    
+#### Uploading files using Filestack Intelligent Ingestion
+To upload files using Filestack Intelligent Ingestion, simply add `intelligent=True` argument
+```python
+new_filelink = client.upload(filepath="path/to/file", intelligent=True)
+```
+FII always uses multipart uploads. In case of network issues, it will dynamically split file parts into smaller chunks (sacrificing upload speed in favour of upload reliability).
+
 ### Create Filelink using Existing Handle
 ```python
 from filestack import Filelink
