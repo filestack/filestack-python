@@ -19,7 +19,7 @@ class Transform(ImageTransformationMixin, CommonMixin):
 
     def __init__(self, apikey=None, handle=None, external_url=None, security=None):
         """
-        '''python
+        ```python
         from filestack import Client
 
         client = Client("<API_KEY>")
