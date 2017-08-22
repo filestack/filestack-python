@@ -12,7 +12,10 @@ from filestack.utils import intelligent_ingestion
 
 
 class Client():
-
+    """
+    The hub for all Filestack operations. Creates Filelinks, converts external to transform objects, takes a URL screenshot and 
+    returns zipped files. 
+    """
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
         self._security = security
@@ -20,9 +23,35 @@ class Client():
         self._storage = storage
 
     def transform_external(self, external_url):
+        """
+        Turns an external URL into a Filestack Transform object
+
+        *returns* [Filestack.Transform]
+
+        ```python
+        from filestack import Client, Filelink
+
+        client = Client("API_KEY")    
+        transform = client.transform_external('http://www.example.com')
+        ```
+        """
         return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
+        """
+        Takes a 'screenshot' of the given URL 
+
+        *returns* [Filestack.Transform]
+
+        ```python
+        from filestack import Client
+
+        client = Client("API_KEY")
+        # returns a Transform object
+        screenshot = client.url_screenshot('https://www.example.com', width=100, height=100, agent="desktop")
+        filelink = screenshot.store()
+        ````
+        """
         params = locals()
         params.pop('self')
         params.pop('external_url')
@@ -37,7 +66,19 @@ class Client():
         return new_transform
 
     def zip(self, destination_path, files):
+        """
+        Takes array of files and downloads a compressed ZIP archive
+        to provided path
 
+        *returns* [requests.response]
+
+        ```python
+        from filestack import Client
+
+        client = Client("<API_KEY>")
+        client.zip('/path/to/file/destination', ['files'])
+        ```
+        """
         zip_url = "{}/{}/zip/{}".format(CDN_URL, self.apikey, files)
         with open(destination_path, 'wb') as new_file:
             response = utils.make_call(zip_url, 'get')
@@ -52,6 +93,28 @@ class Client():
             return response.text
 
     def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None, intelligent=False):
+        """
+        Uploads a file either through a local filepath or external_url. Uses multipart by default and Intelligent Ingestion by default (if enabled). You can specify the
+        number of multipart processes and pass in parameters.
+
+        returns [Filestack.Filelink]
+        ```python
+        from filestack import Client
+
+        client = Client("<API_KEY>")
+        filelink = client.upload(filepath='/path/to/file')
+
+        # to use different storage:
+        client = FilestackClient.new('API_KEY', storage='dropbox')
+        filelink = client.upload(filepath='/path/to/file', params={'container': 'my-container'})
+
+        # to use an external URL:
+        filelink = client.upload(external_url='https://www.example.com')
+
+        # to disable intelligent ingestion:
+        filelink = client.upload(filepath='/path/to/file', intelligent=False)
+        ```
+        """
         if params:
             STORE_SCHEMA.check(params)
 
@@ -105,12 +168,42 @@ class Client():
 
     @property
     def security(self):
+        """
+        Returns the security object associated with the instance (if any)
+
+        *returns* [Dict]
+
+        ```python
+        client.security
+        # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
+        ```
+        """
         return self._security
 
     @property
     def storage(self):
+        """
+        Returns the storage associated with the client (defaults to 'S3')
+
+        *returns* [Dict]
+
+        ```python
+        client.storage
+        # S3
+        ```
+        """
         return self._storage
 
     @property
     def apikey(self):
+        """
+        Returns the API key associated with the instance
+
+        *returns* [String]
+
+        ```python
+        client.apikey
+        # YOUR_API_KEY
+        ```
+        """
         return self._apikey

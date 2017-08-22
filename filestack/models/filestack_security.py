@@ -8,6 +8,9 @@ import json
 
 
 def validate(policy):
+    """
+    Validates a policy and its parameters and raises an error if invalid
+    """
     for param, value in policy.items():
 
         if param not in ACCEPTED_SECURITY_TYPES.keys():
@@ -21,6 +24,19 @@ def validate(policy):
 
 
 def security(policy, app_secret):
+    """
+    Creates a valid signature and policy based on provided app secret and 
+    parameters
+    ```python
+    from filestack import Client, security
+
+    # a policy requires at least an expiry
+    policy = {'expiry': 56589012, 'call': ['read', 'store', 'pick']}
+    sec = security(policy, 'APP_SECRET')
+
+    client =  Client('API_KEY', security=sec)
+    ```
+    """
     validate(policy)
     policy_enc = base64.urlsafe_b64encode(json.dumps(policy).encode('utf-8'))
 
