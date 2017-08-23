@@ -27,7 +27,7 @@ def test_handle(filelink):
 
 def test_apikey_default():
     filelink_default = Filelink(HANDLE)
-    assert filelink_default.apikey == None
+    assert filelink_default.apikey is None
 
 
 def test_api_get(filelink):

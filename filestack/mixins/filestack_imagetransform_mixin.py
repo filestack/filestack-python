@@ -5,6 +5,10 @@ import filestack.models
 
 
 class ImageTransformationMixin(object):
+    """
+    All transformations and related/dependent tasks live here. They can 
+    be directly called by Transform or Filelink objects.
+    """
     def resize(self, width=None, height=None, fit=None, align=None):
         return self.add_transform_task('resize', locals())
 
@@ -113,7 +117,12 @@ class ImageTransformationMixin(object):
         return self.add_transform_task('quality', locals())
 
     def zip(self, store=False, store_params=None):
+        """
+        Returns a zip file of the current transformation. This is different from
+        the zip function that lives on the Filestack Client
 
+        *returns* [Filestack.Transform]
+        """
         params = locals()
         params.pop('store')
         params.pop('store_params')
@@ -132,6 +141,21 @@ class ImageTransformationMixin(object):
                    watermark_right=None, watermark_left=None, watermark_width=None, watermark_height=None,
                    path=None, access=None, container=None, audio_bitrate=None, audio_sample_rate=None,
                    audio_channels=None, clip_length=None, clip_offset=None):
+
+        """
+        ```python
+        from filestack import Client
+
+        client = Client("<API_KEY>")
+        filelink = client.upload(filepath='path/to/file/doom.mp4')
+        av_convert= filelink.av_convert(width=100, height=100)
+        while av_convert.status != 'completed':
+            print(av_convert.status)
+
+        filelink = av_convert.to_filelink()
+        print(filelink.url)
+        ```
+        """
 
         new_transform = self.add_transform_task('video_convert', locals())
         transform_url = utils.get_transform_url(
@@ -154,7 +178,11 @@ class ImageTransformationMixin(object):
 
 
     def add_transform_task(self, transformation, params):
+        """
+        Adds a transform task to the current instance and returns it
 
+        *returns* Filestack.Transform
+        """
         if not isinstance(self, filestack.models.Transform):
             instance = filestack.models.Transform(apikey=self.apikey, security=self.security, handle=self.handle)
         else:

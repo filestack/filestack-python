@@ -43,7 +43,7 @@ def multipart_start(apikey, filename, filesize, mimetype, storage, security=None
 
     if not response.ok:
         raise Exception(response.text)
-    
+
     return response.json()
 
 
