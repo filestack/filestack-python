@@ -1,5 +1,9 @@
 # Filestack-Python Changelog
 
+### 2.3.0 (August 22th, 2017)
+- FS-1556 Add SDK reference
+- FS-1399 added intelligent ingestion 
+
 ### 2.2.1 (July 19th, 2017)
 - FS-1364 Add all response data to AudioVisual class
 
