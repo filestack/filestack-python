@@ -9,8 +9,8 @@ This is the official Python SDK for Filestack - API and content management syste
 ## Resources
 
 * [Filestack](https://www.filestack.com)
-* [Documentation](https://www.filestack.com/docs)
-* [API Reference](https://filestack.github.io/)
+* [Documentation](https://www.filestack.com/docs/sdks?python)
+* [API Reference](https://filestack.github.io/filestack-python)
 
 ## Installing
 
