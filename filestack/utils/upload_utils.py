@@ -142,5 +142,6 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
     pooling_job = partial(upload_chunk, storage)
     parts_and_etags = pool.map(pooling_job, jobs)
     file_data = multipart_complete(apikey, filename, filesize, mimetype, response_info, storage, parts_and_etags, params=params)
+    pool.close()
 
     return file_data
