@@ -7,17 +7,21 @@ This is the official Python SDK for Filestack - API and content management syste
 
 ## Resources
 
-g* [API Reference](https://filestack.github.io/filestack-python)
+* [API Reference](https://filestack.github.io/filestack-python)
 
 ## Installing
 
 Install ``filestack`` with pip
 
-    $ pip install filestack-python
+```shell
+pip install filestack-python
+```
 
 or directly from GitHub
 
-    $ pip install git+https://github.com/filestack/filestack-python.git
+```shell
+pip install git+https://github.com/filestack/filestack-python.git
+```
 
 ## Usage
 
