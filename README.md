@@ -125,14 +125,6 @@ new_filelink = client.upload(filepath="path/to/file")
 
 Filestack Python SDK follows the [Semantic Versioning](http://semver.org/).
 
-## Issues
-
-If you have problems, please create a [Github Issue](https://github.com/filepicker/filestack-python/issues).
-
-## Credits
-
-Thank you to all the [contributors](https://github.com/filepicker/filestack-python/graphs/contributors).
-
 [travis_ci]: http://travis-ci.org/filestack/filestack-python		
 [travis_ci_badge]: https://travis-ci.org/filestack/filestack-python.svg?branch=master
 [coveralls]: https://coveralls.io/github/filestack/filestack-python?branch=master
