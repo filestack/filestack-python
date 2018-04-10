@@ -1,8 +1,9 @@
-[![Travis CI][travis_ci_badge]][travis_ci]
-[![Coveralls][coveralls_badge]][coveralls]
+
 
 <p align="center"><img src="logo.svg" align="center" width="100"/></p>
 <h1 align="center">Filestack Python</h1>
+[![Travis CI][travis_ci_badge]][travis_ci]
+[![Coveralls][coveralls_badge]][coveralls]
 <p align="center">
   <a href="https://pypi.python.org/pypi/filestack-python/2.3.1">
     <img src="https://img.shields.io/pypi/v/filestack-python.svg">
