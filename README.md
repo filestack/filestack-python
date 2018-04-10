@@ -5,6 +5,17 @@
 <h1 align="center">Filestack Python</h1>
 This is the official Python SDK for Filestack - API and content management system that makes it easy to add powerful file uploading and transformation capabilities to any web or mobile application.
 
+[![PyPI](https://img.shields.io/pypi/v/nine.svg)](https://pypi.python.org/pypi/filestack-python/2.3.1)
+
+<p align="center">
+  <a href="https://pypi.python.org/pypi/filestack-python/2.3.1">
+    <img src="https://img.shields.io/pypi/v/filestack-python.svg">
+  </a>
+  <a href="https://pypi.python.org/pypi/filestack-python/2.3.1">
+    <img src="https://img.shields.io/pypi/v/filestack-python.svg">
+  </a>
+</p>
+
 ## Resources
 
 * [API Reference](https://filestack.github.io/filestack-python)
@@ -125,7 +136,7 @@ new_filelink = client.upload(filepath="path/to/file")
 
 Filestack Python SDK follows the [Semantic Versioning](http://semver.org/).
 
-[travis_ci]: http://travis-ci.org/filestack/filestack-python		
+[travis_ci]: http://travis-ci.org/filestack/filestack-python
 [travis_ci_badge]: https://travis-ci.org/filestack/filestack-python.svg?branch=master
 [coveralls]: https://coveralls.io/github/filestack/filestack-python?branch=master
 [coveralls_badge]: https://coveralls.io/repos/github/filestack/filestack-python/badge.svg?branch=master
