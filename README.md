@@ -1,26 +1,32 @@
-[![Travis CI][travis_ci_badge]][travis_ci]
-[![Coveralls][coveralls_badge]][coveralls]
-[![Code Climate][code_climate_badge]][code_climate]
-
-# Filestack Python SDK
-<a href="https://www.filestack.com"><img src="https://filestack.com/themes/filestack/assets/images/press-articles/color.svg" align="left" hspace="10" vspace="6"></a>
+<p align="center"><img src="logo.svg" align="center" width="100"/></p>
+<h1 align="center">Filestack Python</h1>
+<p align="center">
+  <a href="http://travis-ci.org/filestack/filestack-python">
+    <img src="https://img.shields.io/travis/filestack/filestack-python.svg">
+  </a>
+  <a href="https://pypi.python.org/pypi/filestack-python/2.3.1">
+    <img src="https://img.shields.io/pypi/v/filestack-python.svg">
+  </a>
+</p>
 This is the official Python SDK for Filestack - API and content management system that makes it easy to add powerful file uploading and transformation capabilities to any web or mobile application.
 
 ## Resources
 
-* [Filestack](https://www.filestack.com)
-* [Documentation](https://www.filestack.com/docs/sdks?python)
 * [API Reference](https://filestack.github.io/filestack-python)
 
 ## Installing
 
 Install ``filestack`` with pip
 
-    $ pip install filestack-python
+```shell
+pip install filestack-python
+```
 
 or directly from GitHub
 
-    $ pip install git+https://github.com/filestack/filestack-python.git
+```shell
+pip install git+https://github.com/filestack/filestack-python.git
+```
 
 ## Usage
 
@@ -51,11 +57,11 @@ FII always uses multipart uploads. In case of network issues, it will dynamicall
 ```python
 from filestack import Filelink
 new_filelink = Filelink("<YOUR_HANDLE>")
-````
-    
+```
+
 ### Basic Filelink Functions
 
-With a Filelink, you can download to a local path or get the content of a file. You can also delete or overwrite files if you have security enabled on your account. 
+With a Filelink, you can download to a local path or get the content of a file. You can also delete or overwrite files if you have security enabled on your account.
 
 ```python
 file_content = new_filelink.get_content()
@@ -78,9 +84,10 @@ new_filelink = transform.resize(width=500, height=500).flip().enhance().store()
 filelink = Filelink("<YOUR_HANDLE">)
 new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
 ```
-    
+
 You can also retrieve the transformation url at any point.
- ```python   
+
+ ```python
 transform_candidate = client.transform_external('http://<SOME_URL>')
 transform = transform_candidate.resize(width=500, height=500).flip().enhance()
 print(transform.url)
@@ -97,6 +104,7 @@ while (av_object.status != 'completed'):
     print(av_object.uuid)
     print(av_object.timestamp)
 ```
+
 The status property makes a call to the API to check its current status, and you can call to_filelink() once video is complete (this function checks its status first and will fail if not completed yet).
 
 ```python
@@ -106,6 +114,7 @@ filelink = av_object.to_filelink()
 ### Security Objects
 
 Security is set on Client or Filelink classes upon instantiation.
+
 ```python
 from filestack import security
 
@@ -116,25 +125,7 @@ client = Client("<YOUR_API_KEY", security=security)
 # new Filelink object inherits security and will use for all calls
 new_filelink = client.upload(filepath="path/to/file")
 ```
+
 ## Versioning
 
 Filestack Python SDK follows the [Semantic Versioning](http://semver.org/).
-
-## Issues
-
-If you have problems, please create a [Github Issue](https://github.com/filepicker/filestack-python/issues).
-
-## Contributing
-
-Please see [CONTRIBUTING.md](https://github.com/filepicker/filestack-python/CONTRIBUTING.md) for details.
-
-## Credits
-
-Thank you to all the [contributors](https://github.com/filepicker/filestack-python/graphs/contributors).
-
-[travis_ci]: http://travis-ci.org/filestack/filestack-python		
-[travis_ci_badge]: https://travis-ci.org/filestack/filestack-python.svg?branch=master		
-[code_climate]: https://codeclimate.com/github/filestack/filestack-python		
-[code_climate_badge]: https://codeclimate.com/github/filestack/filestack-python.png		
-[coveralls]: https://coveralls.io/github/filestack/filestack-python?branch=master		
-[coveralls_badge]: https://coveralls.io/repos/github/filestack/filestack-python/badge.svg?branch=master
