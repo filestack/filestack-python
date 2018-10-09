@@ -19,6 +19,7 @@ HEADERS = {
 }
 
 DEFAULT_CHUNK_SIZE = 5 * 1024 ** 2
+DEFAULT_UPLOAD_MIMETYPE = 'application/octet-stream'
 
 STORE_PATH = 'store'
 FILE_PATH = 'file'
