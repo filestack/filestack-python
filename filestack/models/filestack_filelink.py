@@ -18,10 +18,10 @@ class Filelink(ImageTransformationMixin, CommonMixin):
 
     def tags(self):
         """
-        Get Google Vision tags for the Filelink. 
+        Get Google Vision tags for the Filelink.
 
         *returns* [Dict]
-        
+
         ```python
         from filestack import Client
 
@@ -34,7 +34,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
 
     def sfw(self):
         """
-        Get SFW label for the given file. 
+        Get SFW label for the given file.
 
         *returns* [Boolean]
 

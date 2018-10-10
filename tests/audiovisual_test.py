@@ -1,4 +1,3 @@
-import filestack.models
 import pytest
 
 from filestack import AudioVisual, Filelink
@@ -15,6 +14,7 @@ PROCESS_URL = 'https://process.filestackapi.com/{}'.format(HANDLE)
 def av():
     return AudioVisual(PROCESS_URL, 'someuuid', 'sometimetstamp', apikey=APIKEY)
 
+
 def test_status(av):
 
     @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
@@ -23,6 +23,7 @@ def test_status(av):
 
     with HTTMock(api_zip):
         assert av.status == 'completed'
+
 
 def test_convert(av):
 

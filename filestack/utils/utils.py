@@ -2,6 +2,7 @@ from filestack.config import CDN_URL, PROCESS_URL, HEADERS
 
 import requests
 
+
 def get_security_path(url, security):
     return '{url_path}?signature={signature}&policy={policy}'.format(
         url_path=url, policy=security['policy'].decode('utf-8'), signature=security['signature']
@@ -17,7 +18,7 @@ def get_url(base, handle=None, path=None, security=None):
     if handle:
         url_components.append(handle)
 
-    url_path =  '/'.join(url_components)
+    url_path = '/'.join(url_components)
 
     if security:
         return get_security_path(url_path, security)
@@ -36,11 +37,11 @@ def get_transform_url(tasks, external_url=None, handle=None, security=None, apik
         tasks.insert(0, 'debug')
 
     url_components.append('/'.join(tasks))
-    
+
     if security:
         url_components.append('security=policy:{},signature:{}'.format(
             security['policy'].decode('utf-8'), security['signature']))
-    
+
     url_components.append(handle or external_url)
 
     url_path = '/'.join(url_components)
@@ -58,8 +59,8 @@ def make_call(base, action, handle=None, path=None, params=None, data=None, file
 
     if not response.ok:
         raise Exception(response.text)
-        
-    return response 
+
+    return response
 
 
 def return_transform_task(transformation, params):

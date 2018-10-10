@@ -5,7 +5,7 @@ from queue import Empty as QueueEmptyException
 from multiprocessing import Process, Queue
 
 import pytest
-from httmock import urlmatch, HTTMock, all_requests
+from httmock import urlmatch, HTTMock
 
 from filestack.utils.intelligent_ingestion import (
     UploadManager,
@@ -25,6 +25,7 @@ def upload_manager():
         params=None, security=None,
         upload_q=Queue(), commit_q=Queue(), response_q=Queue()
     )
+
 
 @urlmatch(netloc=r'upload\.filestackapi\.com', path='/multipart/start', method='post', scheme='https')
 def multipart_start_mock(url, request):
@@ -370,5 +371,5 @@ def test_manage_upload_process():
 def test_whole_upload():
     with HTTMock(multipart_start_mock), HTTMock(multipart_complete_mock), HTTMock(multipart_commit_mock), \
          HTTMock(fs_backend_mock), HTTMock(s3_mock):
-         response = upload('Apikeyz', 'tests/data/doom.mp4', 's3')
+        response = upload('Apikeyz', 'tests/data/doom.mp4', 's3')
     assert response.json()['msg'] == 'ok'

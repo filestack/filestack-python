@@ -13,8 +13,8 @@ from filestack.utils import intelligent_ingestion
 
 class Client():
     """
-    The hub for all Filestack operations. Creates Filelinks, converts external to transform objects, takes a URL screenshot and 
-    returns zipped files. 
+    The hub for all Filestack operations. Creates Filelinks, converts external to transform objects,
+    takes a URL screenshot and returns zipped files.
     """
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
@@ -31,7 +31,7 @@ class Client():
         ```python
         from filestack import Client, Filelink
 
-        client = Client("API_KEY")    
+        client = Client("API_KEY")
         transform = client.transform_external('http://www.example.com')
         ```
         """
@@ -39,7 +39,7 @@ class Client():
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
         """
-        Takes a 'screenshot' of the given URL 
+        Takes a 'screenshot' of the given URL
 
         *returns* [Filestack.Transform]
 
@@ -94,8 +94,9 @@ class Client():
 
     def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None, intelligent=False):
         """
-        Uploads a file either through a local filepath or external_url. Uses multipart by default and Intelligent Ingestion by default (if enabled). You can specify the
-        number of multipart processes and pass in parameters.
+        Uploads a file either through a local filepath or external_url.
+        Uses multipart by default and Intelligent Ingestion by default (if enabled).
+        You can specify the number of multipart processes and pass in parameters.
 
         returns [Filestack.Filelink]
         ```python

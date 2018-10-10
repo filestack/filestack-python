@@ -7,7 +7,7 @@ import requests
 from base64 import b64encode
 from filestack.config import (
     MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL,
-    DEFAULT_CHUNK_SIZE, HEADERS
+    DEFAULT_CHUNK_SIZE, DEFAULT_UPLOAD_MIMETYPE, HEADERS
 )
 from functools import partial
 from multiprocessing import Pool
@@ -16,7 +16,7 @@ from multiprocessing import Pool
 def get_file_info(filepath, filename=None, mimetype=None):
     filename = filename or os.path.split(filepath)[1]
     filesize = os.path.getsize(filepath)
-    mimetype = mimetype or mimetypes.guess_type(filepath)[0]
+    mimetype = mimetype or mimetypes.guess_type(filepath)[0] or DEFAULT_UPLOAD_MIMETYPE
     return filename, filesize, mimetype
 
 

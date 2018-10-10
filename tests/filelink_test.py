@@ -8,13 +8,13 @@ from trafaret import DataError
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
+SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
 
 
 @pytest.fixture
 def filelink():
     return Filelink(HANDLE, apikey=APIKEY)
 
-SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
 
 @pytest.fixture
 def secure_filelink():
@@ -54,6 +54,7 @@ def test_get_content(filelink):
         content = filelink.get_content()
 
     assert content == b'SOMEBYTESCONTENT'
+
 
 def test_bad_call(filelink):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
@@ -128,6 +129,7 @@ def test_download(filelink):
         download_response = filelink.download('tests/data/test_download.jpg')
         assert download_response.status_code == 200
 
+
 def test_overwrite_content(secure_filelink):
     @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
     def api_delete(url, request):
@@ -164,6 +166,7 @@ def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
 
+
 def test_tags(secure_filelink):
     @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
     def tag_request(url, request):
@@ -172,6 +175,7 @@ def test_tags(secure_filelink):
     with HTTMock(tag_request):
         tag_response = secure_filelink.tags()
         assert tag_response['tags']['auto']['tag'] == 100
+
 
 def test_unsecure_tags(filelink):
     pytest.raises(Exception, filelink.tags)
