@@ -9,8 +9,9 @@ from filestack.config import (
     MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL,
     DEFAULT_CHUNK_SIZE, DEFAULT_UPLOAD_MIMETYPE, HEADERS
 )
+from filestack.utils.utils import store_params
 from functools import partial
-from multiprocessing import Pool
+from multiprocessing.pool import ThreadPool
 
 
 def get_file_info(filepath, filename=None, mimetype=None):
@@ -26,18 +27,23 @@ def multipart_start(apikey, filename, filesize, mimetype, storage, security=None
         'filename': filename,
         'mimetype': mimetype,
         'size': filesize,
-        'store_location': storage
+        'store_location': storage,
+        'store_region': 'what'
     }
+
+    if params:
+        data.update(store_params(params))
+
     if security:
         data.update({
             'policy': security['policy'],
             'signature': security['signature']
         })
+
     response = requests.post(
         MULTIPART_START_URL,
         data=data,
         files={'file': (filename, '', None)},
-        params=params,
         headers=HEADERS
     )
 
@@ -96,23 +102,27 @@ def upload_chunk(storage, job):
 
 
 def multipart_complete(apikey, filename, filesize, mimetype, start_response, storage, parts_and_etags, params=None):
+    data = {
+        'apikey': apikey,
+        'uri': start_response['uri'],
+        'region': start_response['region'],
+        'upload_id': start_response['upload_id'],
+        'filename': filename,
+        'size': filesize,
+        'mimetype': mimetype,
+        'parts': ';'.join(parts_and_etags),
+        'store_location': storage
+    }
+
+    if params:
+        data.update(store_params(params))
+
     response = requests.post(
         MULTIPART_COMPLETE_URL,
-        data={
-            'apikey': apikey,
-            'uri': start_response['uri'],
-            'region': start_response['region'],
-            'upload_id': start_response['upload_id'],
-            'filename': filename,
-            'size': filesize,
-            'mimetype': mimetype,
-            'parts': ';'.join(parts_and_etags),
-            'store_location': storage
-        },
+        data=data,
         files={
             'file': (filename, '', None)
         },
-        params=params,
         headers=HEADERS
     )
     return response
@@ -138,7 +148,7 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
     response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
     jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
 
-    pool = Pool(processes=upload_processes)
+    pool = ThreadPool(upload_processes)
     pooling_job = partial(upload_chunk, storage)
     parts_and_etags = pool.map(pooling_job, jobs)
     file_data = multipart_complete(apikey, filename, filesize, mimetype, response_info, storage, parts_and_etags, params=params)
