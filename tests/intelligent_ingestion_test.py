@@ -1,6 +1,9 @@
 import json
 from collections import defaultdict
-from queue import Empty as QueueEmptyException
+try:
+    from queue import Empty as QueueEmptyException
+except ImportError:
+    from Queue import Empty as QueueEmptyException
 
 from multiprocessing import Process, Queue
 
