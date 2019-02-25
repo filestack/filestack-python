@@ -27,8 +27,7 @@ def multipart_start(apikey, filename, filesize, mimetype, storage, security=None
         'filename': filename,
         'mimetype': mimetype,
         'size': filesize,
-        'store_location': storage,
-        'store_region': 'what'
+        'store_location': storage
     }
 
     if params:
