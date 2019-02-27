@@ -6,8 +6,7 @@ import requests
 
 from base64 import b64encode
 from filestack.config import (
-    MULTIPART_START_URL, MULTIPART_UPLOAD_URL, MULTIPART_COMPLETE_URL,
-    DEFAULT_CHUNK_SIZE, DEFAULT_UPLOAD_MIMETYPE, HEADERS
+    MULTIPART_START_URL, DEFAULT_CHUNK_SIZE, DEFAULT_UPLOAD_MIMETYPE, HEADERS
 )
 from filestack.utils.utils import store_params
 from functools import partial
@@ -65,7 +64,8 @@ def create_upload_jobs(apikey, filename, filepath, filesize, start_response):
             'part': part,
             'uri': start_response['uri'],
             'region': start_response['region'],
-            'upload_id': start_response['upload_id']
+            'upload_id': start_response['upload_id'],
+            'location_url': start_response['location_url']
         })
         part += 1
         seek_point += DEFAULT_CHUNK_SIZE
@@ -89,7 +89,7 @@ def upload_chunk(storage, job):
         'store_location': storage
     }
     fs_resp = requests.post(
-        MULTIPART_UPLOAD_URL,
+        'https://{}/multipart/upload'.format(job['location_url']),
         data=data,
         files={'file': (job['filename'], '', None)},
         headers=HEADERS
@@ -117,7 +117,7 @@ def multipart_complete(apikey, filename, filesize, mimetype, start_response, sto
         data.update(store_params(params))
 
     response = requests.post(
-        MULTIPART_COMPLETE_URL,
+        'https://{}/multipart/complete'.format(start_response['location_url']),
         data=data,
         files={
             'file': (filename, '', None)
@@ -144,13 +144,13 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
-    response_info = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
-    jobs = create_upload_jobs(apikey, filename, filepath, filesize, response_info)
+    start_response = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
+    jobs = create_upload_jobs(apikey, filename, filepath, filesize, start_response)
 
-    pool = ThreadPool(upload_processes)
     pooling_job = partial(upload_chunk, storage)
+    pool = ThreadPool(upload_processes)
     parts_and_etags = pool.map(pooling_job, jobs)
-    file_data = multipart_complete(apikey, filename, filesize, mimetype, response_info, storage, parts_and_etags, params=params)
     pool.close()
+    file_data = multipart_complete(apikey, filename, filesize, mimetype, start_response, storage, parts_and_etags, params=params)
 
     return file_data
