@@ -33,7 +33,7 @@ def test_upload_multipart():
     responses.add_callback(responses.PUT, URL, callback=chunk_put_callback)
     responses.add(
         responses.POST, 'https://fs-uploads.com/multipart/complete', status=200,
-        content_type='application/json', json={'url': URL}
+        content_type='application/json', json={'url': URL, 'handle': HANDLE}
     )
 
     new_filelink = client.upload(filepath='tests/data/doom.mp4')
@@ -54,11 +54,9 @@ def test_upload_chunk():
     def amazon_mock(url, request):
         return response(200, b'', {'ETag': 'etagX'}, reason=None, elapsed=0, request=request)
 
-    job = defaultdict(str)
-    job['seek'] = 0
-    job['size'] = 0
-    job['part'] = 123
-    job['filepath'] = 'tests/data/doom.mp4'
-    job['location_url'] = 'fsuploads.com'
+    job = {'seek': 0, 'part': 123}
+    filepath = 'tests/data/doom.mp4'
+    start_response = defaultdict(str)
+    start_response['location_url'] = 'fsuploads.com'
     with HTTMock(fs_backend_mock), HTTMock(amazon_mock):
-        assert upload_chunk('s3', job) == '123:etagX'
+        assert upload_chunk('apikey', 'filename', filepath, 's3', start_response, job) == '123:etagX'

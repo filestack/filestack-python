@@ -59,7 +59,6 @@ def create_upload_jobs(filesize):
 
 
 def upload_chunk(apikey, filename, filepath, storage, start_response, job):
-    print("UPLOADING", job['part'])
     with open(filepath, 'rb') as f:
         f.seek(job['seek'])
         chunk = f.read(DEFAULT_CHUNK_SIZE)
