@@ -79,7 +79,7 @@ class Client():
         client.zip('/path/to/file/destination', ['files'])
         ```
         """
-        zip_url = "{}/{}/zip/{}".format(CDN_URL, self.apikey, files)
+        zip_url = "{}/{}/zip/[{}]".format(CDN_URL, self.apikey, ','.join(files))
         with open(destination_path, 'wb') as new_file:
             response = utils.make_call(zip_url, 'get')
             if response.ok:
@@ -131,6 +131,8 @@ class Client():
                 self.apikey, filepath, self.storage,
                 upload_processes=upload_processes, params=params, security=self.security
             )
+            handle = response['handle']
+            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             files, data = None, None
             if url:

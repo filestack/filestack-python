@@ -3,7 +3,7 @@ import os
 
 import filestack.models
 
-from filestack.config import CDN_URL, API_URL, FILE_PATH, METADATA_PATH
+from filestack.config import CDN_URL, API_URL, FILE_PATH
 from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA
 from filestack.utils import utils
 
@@ -44,7 +44,6 @@ class CommonMixin(object):
 
             return response
 
-
     def get_content(self, params=None):
         """
         Returns the raw byte content of a given Filelink
@@ -68,12 +67,11 @@ class CommonMixin(object):
 
         return response.content
 
-
     def get_metadata(self, params=None):
         """
-        Metadata provides certain information about a Filehandle, and you can specify which pieces 
-        of information you will receive back by passing in optional parameters. 
-        
+        Metadata provides certain information about a Filehandle, and you can specify which pieces
+        of information you will receive back by passing in optional parameters.
+
         ```python
         from filestack import Client
 
@@ -92,10 +90,9 @@ class CommonMixin(object):
                                    security=self.security)
         return response.json()
 
-
     def delete(self, params=None):
         """
-        You may delete any file you have uploaded, either through a Filelink returned from the client or one you have initialized yourself. 
+        You may delete any file you have uploaded, either through a Filelink returned from the client or one you have initialized yourself.
         This returns a response of success or failure. This action requires security.abs
 
         *returns* [requests.response]
@@ -122,7 +119,6 @@ class CommonMixin(object):
                                params=params,
                                security=self.security,
                                transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
-
 
     def overwrite(self, url=None, filepath=None, params=None):
         """

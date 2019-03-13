@@ -20,14 +20,7 @@ def get_file_info(filepath, filename=None, mimetype=None):
     return filename, filesize, mimetype
 
 
-def multipart_start(apikey, filename, filesize, mimetype, storage, security=None, params=None):
-    data = {
-        'apikey': apikey,
-        'filename': filename,
-        'mimetype': mimetype,
-        'size': filesize,
-        'store_location': storage
-    }
+def multipart_request(url, data, params=None, security=None):
 
     if params:
         data.update(store_params(params))
@@ -39,59 +32,51 @@ def multipart_start(apikey, filename, filesize, mimetype, storage, security=None
         })
 
     response = requests.post(
-        MULTIPART_START_URL,
+        url,
         data=data,
-        files={'file': (filename, '', None)},
+        files={'file': (data['filename'], '', None)},
         headers=HEADERS
     )
 
     if not response.ok:
-        raise Exception(response.text)
+        raise Exception('Invalid API response')
 
     return response.json()
 
 
-def create_upload_jobs(apikey, filename, filepath, filesize, start_response):
+def create_upload_jobs(filesize):
     seek_point = 0
     part = 1
     jobs = []
     while seek_point < filesize:
         jobs.append({
             'seek': seek_point,
-            'filepath': filepath,
-            'filename': filename,
-            'apikey': apikey,
             'part': part,
-            'uri': start_response['uri'],
-            'region': start_response['region'],
-            'upload_id': start_response['upload_id'],
-            'location_url': start_response['location_url']
         })
         part += 1
         seek_point += DEFAULT_CHUNK_SIZE
     return jobs
 
 
-def upload_chunk(storage, job):
-
-    with open(job['filepath'], 'rb') as f:
+def upload_chunk(apikey, filename, filepath, storage, start_response, job):
+    with open(filepath, 'rb') as f:
         f.seek(job['seek'])
         chunk = f.read(DEFAULT_CHUNK_SIZE)
 
     data = {
-        'apikey': job['apikey'],
+        'apikey': apikey,
         'part': job['part'],
         'size': len(chunk),
         'md5': b64encode(hashlib.md5(chunk).digest()).strip(),
-        'uri': job['uri'],
-        'region': job['region'],
-        'upload_id': job['upload_id'],
+        'uri': start_response['uri'],
+        'region': start_response['region'],
+        'upload_id': start_response['upload_id'],
         'store_location': storage
     }
     fs_resp = requests.post(
-        'https://{}/multipart/upload'.format(job['location_url']),
+        'https://{}/multipart/upload'.format(start_response['location_url']),
         data=data,
-        files={'file': (job['filename'], '', None)},
+        files={'file': (filename, '', None)},
         headers=HEADERS
     ).json()
 
@@ -100,57 +85,42 @@ def upload_chunk(storage, job):
     return '{}:{}'.format(job['part'], resp.headers['ETag'])
 
 
-def multipart_complete(apikey, filename, filesize, mimetype, start_response, storage, parts_and_etags, params=None):
-    data = {
-        'apikey': apikey,
-        'uri': start_response['uri'],
-        'region': start_response['region'],
-        'upload_id': start_response['upload_id'],
-        'filename': filename,
-        'size': filesize,
-        'mimetype': mimetype,
-        'parts': ';'.join(parts_and_etags),
-        'store_location': storage
-    }
-
-    if params:
-        data.update(store_params(params))
-
-    response = requests.post(
-        'https://{}/multipart/complete'.format(start_response['location_url']),
-        data=data,
-        files={
-            'file': (filename, '', None)
-        },
-        headers=HEADERS
-    )
-    return response
-
-
 def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None, security=None):
+    params = params or {}
 
     if upload_processes is None:
         upload_processes = multiprocessing.cpu_count()
 
-    try:
-        filename = params['filename']
-    except (KeyError, TypeError):
-        filename = None
-
-    try:
-        mimetype = params['mimetype']
-    except (KeyError, TypeError):
-        mimetype = None
+    filename = params.get('filename')
+    mimetype = params.get('mimetype')
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
-    start_response = multipart_start(apikey, filename, filesize, mimetype, storage, params=params, security=security)
-    jobs = create_upload_jobs(apikey, filename, filepath, filesize, start_response)
+    request_data = {
+        'apikey': apikey,
+        'filename': filename,
+        'mimetype': mimetype,
+        'size': filesize,
+        'store_location': storage
+    }
 
-    pooling_job = partial(upload_chunk, storage)
+    start_response = multipart_request(MULTIPART_START_URL, request_data, params, security)
+    jobs = create_upload_jobs(filesize)
+
+    pooling_job = partial(upload_chunk, apikey, filename, filepath, storage, start_response)
     pool = ThreadPool(upload_processes)
-    parts_and_etags = pool.map(pooling_job, jobs)
+    uploaded_parts = pool.map(pooling_job, jobs)
     pool.close()
-    file_data = multipart_complete(apikey, filename, filesize, mimetype, start_response, storage, parts_and_etags, params=params)
 
-    return file_data
+    location_url = start_response.pop('location_url')
+    request_data.update(start_response)
+    request_data['parts'] = ';'.join(uploaded_parts)
+
+    complete_response = multipart_request(
+        'https://{}/multipart/complete'.format(location_url),
+        request_data,
+        params,
+        security
+    )
+
+    return complete_response
