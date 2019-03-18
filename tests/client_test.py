@@ -3,7 +3,6 @@ import pytest
 
 from base64 import b64encode
 from filestack import Client, Filelink, Transform
-from filestack.exceptions import FilestackException
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
 
@@ -37,6 +36,7 @@ def test_store(client):
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
 
+
 def test_store_filepath(client):
     @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/store', method='post', scheme='https')
     def api_store(url, request):
@@ -47,6 +47,7 @@ def test_store_filepath(client):
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
+
 
 def test_wrong_store_params(client):
     kwargs = {'params': {'call': 'someparameter'}, 'url': 'someurl'}

@@ -12,6 +12,7 @@ from collections import deque, OrderedDict
 import requests
 
 from filestack.config import HEADERS
+from filestack.utils.utils import store_params
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.ERROR)
@@ -70,11 +71,16 @@ class UploadManager(object):
             'store_location': self.storage,
             'multipart': True
         }
+
+        if self.params:
+            data.update(store_params(self.params))
+
         if self.security:
             data.update({
                 'policy': self.security['policy'],
                 'signature': self.security['signature']
             })
+
         response = requests.post(
             UPLOAD_HOST + '/multipart/start',
             data=data,
@@ -86,25 +92,31 @@ class UploadManager(object):
 
     def _multipart_complete(self):
         response_code = 0
+        data = {
+            'apikey': self.apikey,
+            'uri': self.start_response['uri'],
+            'region': self.start_response['region'],
+            'upload_id': self.start_response['upload_id'],
+            'filename': self.filename,
+            'size': self.filesize,
+            'mimetype': self.mimetype,
+            'multipart': True,
+            'store_location': self.storage
+        }
+
+        if self.params:
+            data.update(store_params(self.params))
+
         while response_code != 200:
             log.info('Waiting for complete')
             response = requests.post(
                 UPLOAD_HOST + '/multipart/complete',
-                data={
-                    'apikey': self.apikey,
-                    'uri': self.start_response['uri'],
-                    'region': self.start_response['region'],
-                    'upload_id': self.start_response['upload_id'],
-                    'filename': self.filename,
-                    'size': self.filesize,
-                    'mimetype': self.mimetype,
-                    'multipart': True,
-                    'store_location': self.storage
-                },
+                data=data,
                 files={'file': (self.filename, '', None)},
                 params=self.params,
                 headers=HEADERS
             )
+
             if not response.ok:
                 log.error('Unexpected backend response: %s', response.content)
                 raise Exception(response.content)
@@ -431,5 +443,5 @@ def upload(apikey, filepath, storage, params=None, security=None):
         if not isinstance(final_response, requests.Response):
             raise Exception()
         return final_response
-    except:
+    except Exception:
         raise Exception('Upload aborted')

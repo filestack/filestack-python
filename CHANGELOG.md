@@ -1,5 +1,9 @@
 # Filestack-Python Changelog
 
+### 2.4.0 (March 18th, 2019)
+- Added default mimetype for multipart uploads
+- Refactored multipart uploads
+
 ### 2.3.0 (August 22th, 2017)
 - FS-1556 Add SDK reference
 - FS-1399 added intelligent ingestion 

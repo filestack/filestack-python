@@ -25,7 +25,7 @@ def validate(policy):
 
 def security(policy, app_secret):
     """
-    Creates a valid signature and policy based on provided app secret and 
+    Creates a valid signature and policy based on provided app secret and
     parameters
     ```python
     from filestack import Client, security

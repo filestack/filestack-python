@@ -137,7 +137,7 @@ class Transform(ImageTransformationMixin, CommonMixin):
 
     def debug(self):
         """
-        Returns a JSON object with inforamtion regarding the current transformation 
+        Returns a JSON object with inforamtion regarding the current transformation
 
         *returns* [Dict]
         """
