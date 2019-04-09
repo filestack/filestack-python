@@ -259,6 +259,24 @@ def test_zip_store(transform):
         assert zip_transform.handle == HANDLE
 
 
+def test_fallback(transform):
+    target_url = '{}/{}/fallback=cache:12,handle:fallbackHandle/{}'.format(CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.fallback(handle='fallbackHandle', cache=12)
+    assert result.url == target_url
+
+
+def test_pdf_info(transform):
+    target_url = '{}/{}/pdfinfo=colorinfo:true/{}'.format(CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.pdf_info(colorinfo=True)
+    assert result.url == target_url
+
+
+def test_pdf_convert(transform):
+    target_url = '{}/{}/pdfconvert=pageorientation:landscape/{}'.format(CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.pdf_convert(pageorientation='landscape')
+    assert result.url == target_url
+
+
 def quality(transform):
     target_url = '{}/{}/quality=value:75/{}'.format(CDN_URL, APIKEY, EXTERNAL_URL)
     quality = transform.quality(75)

@@ -19,4 +19,4 @@ filelink.download('</your/file/path/your_filename.filetype>')
 # get filelink's metadata
 response = filelink.get_metadata()
 if response.ok:
-  metadata = response.json()
+    metadata = response.json()
