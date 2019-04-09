@@ -23,7 +23,8 @@ STORE_SCHEMA = t.Dict({
     'path': t.String(),
     'container': t.String(),
     'access': t.String(),
-    'base64decode': t.Bool()
+    'base64decode': t.Bool(),
+    'workflows': t.List(t.String())
 })
 
 STORE_SCHEMA.make_optional('*')

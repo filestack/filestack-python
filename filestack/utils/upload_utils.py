@@ -93,6 +93,11 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     filename = params.get('filename')
     mimetype = params.get('mimetype')
+    workflows = params.get('workflows')
+
+    if workflows:
+        workflows = ', '.join('"{}"'.format(item) for item in workflows)
+        workflows = '[{}]'.format(workflows)
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
@@ -101,7 +106,8 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
         'filename': filename,
         'mimetype': mimetype,
         'size': filesize,
-        'store_location': storage
+        'store_location': storage,
+        'workflows': workflows
     }
 
     start_response = multipart_request(MULTIPART_START_URL, request_data, params, security)
