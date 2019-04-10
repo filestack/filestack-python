@@ -1,6 +1,7 @@
 import mimetypes
 import os
 import re
+import requests
 
 import filestack.models
 
@@ -116,47 +117,85 @@ class Client():
         filelink = client.upload(filepath='/path/to/file', intelligent=False)
         ```
         """
-        if params:
+
+        if params:  # Check the structure of parameters
             STORE_SCHEMA.check(params)
 
-        if filepath and url:
+        if filepath and url:  # Raise an error for using both filepath and external url
             raise ValueError("Cannot upload file and external url at the same time")
 
-        if intelligent and filepath:
-            response = intelligent_ingestion.upload(
-                self.apikey, filepath, self.storage, params=params, security=self.security
-            )
-        elif multipart and filepath:
-            response = upload_utils.multipart_upload(
-                self.apikey, filepath, self.storage,
-                upload_processes=upload_processes, params=params, security=self.security
-            )
-            handle = response['handle']
-            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
-        else:
-            files, data = None, None
-            if url:
-                data = {'url': url}
-            if filepath:
+        if filepath:  # Uploading from local drive
+            if intelligent:
+                response = intelligent_ingestion.upload(
+                    self.apikey, filepath, self.storage, params=params, security=self.security
+                )
+
+            elif multipart:
+                response = upload_utils.multipart_upload(
+                    self.apikey, filepath, self.storage,
+                    upload_processes=upload_processes, params=params, security=self.security
+                )
+                handle = response['handle']
+                return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
+
+            else:  # Uploading with multipart=False
                 filename = os.path.basename(filepath)
                 mimetype = mimetypes.guess_type(filepath)[0]
                 files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
 
-            if params:
-                params['key'] = self.apikey
-            else:
-                params = {'key': self.apikey}
+                if params:
+                    params['key'] = self.apikey
+                else:
+                    params = {'key': self.apikey}
 
-            path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
+                path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
 
-            if self.security:
-                path = "{path}?policy={policy}&signature={signature}".format(
-                    path=path, policy=self.security['policy'].decode('utf-8'),
-                    signature=self.security['signature']
+                if self.security:
+                    path = "{path}?policy={policy}&signature={signature}".format(
+                        path=path, policy=self.security['policy'].decode('utf-8'),
+                        signature=self.security['signature']
+                    )
+
+                response = utils.make_call(
+                    API_URL, 'post', path=path, params=params, files=files
                 )
 
-            response = utils.make_call(
-                API_URL, 'post', path=path, params=params, data=data, files=files
+        else:  # Uploading from an external URL
+            tasks = []
+
+            tasks.append(
+                '{path}=location:{storage}'.format(
+                    path=STORE_PATH,
+                    storage=self.storage
+                )
+            )
+
+            if params:
+                workflows = params.get('workflows')
+
+                if workflows:
+                    workflows = ', '.join('"{}"'.format(item) for item in workflows)
+                    tasks[0] += ',workflows:[{workflows}]'.format(
+                        workflows=workflows
+                    )
+
+            if self.security:
+                tasks.append(
+                    'security=p:{policy},s:{signature}'.format(
+                        policy=self.security['policy'].decode('utf-8'),
+                        signature=self.security['signature']
+                    )
+                )
+
+            tasks = '/'.join('{}'.format(item) for item in tasks)
+
+            response = requests.post(
+                '{cdn}/{apikey}/{tasks}/{url}'.format(
+                    cdn=CDN_URL,
+                    apikey=self.apikey,
+                    tasks=tasks,
+                    url=url
+                )
             )
 
         if response.ok:
@@ -167,7 +206,7 @@ class Client():
             ).group(1)
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
-            raise Exception(response.text)
+            raise Exception('Invalid API response')
 
     @property
     def security(self):

@@ -26,7 +26,7 @@ def test_wrong_storage():
 
 
 def test_store(client):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/store', method='post', scheme='https')
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
     def api_store(url, request):
         return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
 
