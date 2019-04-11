@@ -5,3 +5,4 @@ temp_files/
 .vscode/
 test.zip
 tests/data/test_download.jpg
+.coverage
