@@ -1,7 +1,15 @@
+"""
+    This script contains examples of using Filestack Workflows
+    in Python SDK. Workflows are compatible with uploading using
+    pathfile (by default with multipart=True) and external URL.
+    * It is essential to upload either from pathfile or url.
+"""
+
 from filestack import Client
 
 Filestack_API_Key = '<YOUR_FILESTACK_API_KEY>'
 file_path = '<PATH_TO_FILE>'
+file_url = '<FILE_URL>'
 
 client = Client(Filestack_API_Key)
 
@@ -18,5 +26,6 @@ store_params = {
 
 new_filelink = client.upload(
     filepath=file_path,
+    # url=file_url,
     params=store_params
 )
