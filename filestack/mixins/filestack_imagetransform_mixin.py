@@ -6,7 +6,7 @@ import filestack.models
 
 class ImageTransformationMixin(object):
     """
-    All transformations and related/dependent tasks live here. They can 
+    All transformations and related/dependent tasks live here. They can
     be directly called by Transform or Filelink objects.
     """
     def resize(self, width=None, height=None, fit=None, align=None):
@@ -171,11 +171,10 @@ class ImageTransformationMixin(object):
 
         uuid = response.json()['uuid']
         timestamp = response.json()['timestamp']
-        
+
         return filestack.models.AudioVisual(
             transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
         )
-
 
     def add_transform_task(self, transformation, params):
         """
