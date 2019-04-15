@@ -81,3 +81,17 @@ def test_zip(client):
         zip_response = client.zip('test.zip', 'tests/data/bird.jpg')
 
         assert zip_response.status_code == 200
+
+
+def test_url_workflows(client):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
+    def api_store(url, request):
+        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
+
+    with HTTMock(api_store):
+        filelink = client.upload(url="someurl", params={
+            'workflows': ['workflows_id']
+        }, multipart=False)
+
+    assert isinstance(filelink, Filelink)
+    assert filelink.handle == HANDLE
