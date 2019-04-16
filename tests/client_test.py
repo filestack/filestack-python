@@ -83,15 +83,71 @@ def test_zip(client):
         assert zip_response.status_code == 200
 
 
-def test_url_workflows(client):
+@pytest.mark.parametrize('store_params, expected_url_part', [
+    [
+        {
+            'filename': 'image.jpg'
+        },
+        'filename:image.jpg'
+    ],
+
+    [
+        {
+            'location': 'S3'
+        },
+        'location:S3'
+    ],
+
+    [
+        {
+            'path': 'some_path'
+        },
+        'path:some_path'
+    ],
+
+    [
+        {
+            'container': 'container_id'
+        },
+        'container:container_id'
+    ],
+
+    [
+        {
+            'region': 'us-east-1'
+        },
+        'region:us-east-1'
+    ],
+
+    [
+        {
+            'access': 'public'
+        },
+        'access:public'
+    ],
+
+    [
+        {
+            'base64decode': True
+        },
+        'base64decode:True'
+    ],
+
+    [
+        {
+            'workflows': ['workflows_id_1']
+        },
+        'workflows:[%22workflows_id_1%22]'
+    ]
+])
+def test_url_store_task(store_params, expected_url_part, client):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
     def api_store(url, request):
+        assert expected_url_part in request.url
         return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
 
     with HTTMock(api_store):
-        filelink = client.upload(url="someurl", params={
-            'workflows': ['workflows_id']
-        }, multipart=False)
+        filelink = client.upload(url="someurl", params=store_params, multipart=False)
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE

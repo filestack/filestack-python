@@ -162,22 +162,11 @@ class Client():
 
         else:  # Uploading from an external URL
             tasks = []
-
-            tasks.append(
-                '{path}=location:{storage}'.format(
-                    path=STORE_PATH,
-                    storage=self.storage
-                )
-            )
+            request_url_list = []
 
             if params:
-                workflows = params.get('workflows')
-
-                if workflows:
-                    workflows = ', '.join('"{}"'.format(item) for item in workflows)
-                    tasks[0] += ',workflows:[{workflows}]'.format(
-                        workflows=workflows
-                    )
+                store_task = utils.store_params_maker(params)
+                tasks.append(store_task)
 
             if self.security:
                 tasks.append(
@@ -187,16 +176,16 @@ class Client():
                     )
                 )
 
-            tasks = '/'.join('{}'.format(item) for item in tasks)
+            tasks = '/'.join(tasks)
 
-            response = requests.post(
-                '{cdn}/{apikey}/{tasks}/{url}'.format(
-                    cdn=CDN_URL,
-                    apikey=self.apikey,
-                    tasks=tasks,
-                    url=url
-                )
-            )
+            if tasks:
+                request_url_list.extend((CDN_URL, self.apikey, tasks, url))
+            else:
+                request_url_list.extend((CDN_URL, self.apikey, url))
+
+            request_url = '/'.join(request_url_list)
+
+            response = requests.post(request_url)
 
         if response.ok:
             response = response.json()

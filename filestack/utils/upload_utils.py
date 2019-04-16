@@ -96,7 +96,7 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
     workflows = params.get('workflows')
 
     if workflows:
-        workflows = ', '.join('"{}"'.format(item) for item in workflows)
+        workflows = ','.join('"{}"'.format(item) for item in workflows)
         workflows = '[{}]'.format(workflows)
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
