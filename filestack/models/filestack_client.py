@@ -5,7 +5,7 @@ import requests
 
 import filestack.models
 
-from filestack.config import API_URL, CDN_URL, STORE_PATH
+from filestack.config import API_URL, CDN_URL, STORE_PATH, HEADERS
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils
 from filestack.utils import upload_utils
@@ -185,7 +185,7 @@ class Client():
 
             request_url = '/'.join(request_url_list)
 
-            response = requests.post(request_url)
+            response = requests.post(request_url, headers=HEADERS)
 
         if response.ok:
             response = response.json()
