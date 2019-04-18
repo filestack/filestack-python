@@ -164,7 +164,7 @@ class Client():
             tasks = []
             request_url_list = []
 
-            if params:
+            if utils.store_params_checker(params):
                 store_task = utils.store_params_maker(params)
                 tasks.append(store_task)
 

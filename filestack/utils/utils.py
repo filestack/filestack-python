@@ -99,9 +99,18 @@ def store_params_maker(params):
         if key in ('filename', 'location', 'path', 'container', 'region', 'access', 'base64decode'):
             store_task.append('{key}:{value}'.format(key=key, value=value))
 
-    if params.get('workflows'):
-        workflows = ','.join('"{}"'.format(item) for item in params.get('workflows'))
-        store_task.append('workflows:[{workflows}]'.format(workflows=workflows))
+        if key is 'workflows':
+            workflows = ','.join('"{}"'.format(item) for item in value)
+            store_task.append('workflows:[{workflows}]'.format(workflows=workflows))
 
-    if store_task is not []:
-        return 'store=' + ','.join(store_task)
+    return 'store=' + ','.join(store_task)
+
+
+def store_params_checker(params):
+    store_params_list = ['filename', 'location', 'path', 'container',
+                         'region', 'access', 'base64decode', 'workflows']
+
+    if any(key in params for key in store_params_list):
+        return True
+    else:
+        return False
