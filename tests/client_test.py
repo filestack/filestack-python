@@ -1,6 +1,7 @@
 import filestack.models
 import pytest
 
+from mock import patch
 from base64 import b64encode
 from filestack import Client, Filelink, Transform
 from httmock import urlmatch, HTTMock, response
@@ -151,3 +152,28 @@ def test_url_store_task(store_params, expected_url_part, client):
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
+
+
+@pytest.mark.parametrize('request_data, expected_request_data', [
+    [
+        {
+            'workflows': ['workflows_id']
+        },
+        {
+            'workflows': '["workflows_id"]'
+        }
+    ]
+])
+@patch('requests.put')
+@patch('requests.post')
+def test_upload_multipart_workflows(post_mock, put_mock, request_data, expected_request_data, client):
+
+    new_filelink = client.upload(
+        filepath='tests/data/bird.jpg',
+        params=request_data,
+        multipart=True
+    )
+
+    assert all(key in post_mock.call_args[1]['data'] and post_mock.call_args[1]['data'][key] == value
+               for key, value in expected_request_data.items())
+    assert isinstance(new_filelink, Filelink)
