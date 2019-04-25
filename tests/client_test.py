@@ -6,10 +6,22 @@ from base64 import b64encode
 from filestack import Client, Filelink, Transform
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
+from collections import defaultdict
 
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
+
+
+class MockResponse():
+    ok = True
+    headers = {'ETag': 'some_tag'}
+
+    def __init__(self, json=None):
+        self.json_data = defaultdict(str) if json is None else json
+
+    def json(self):
+        return self.json_data
 
 
 @pytest.fixture
@@ -154,19 +166,20 @@ def test_url_store_task(store_params, expected_url_part, client):
     assert filelink.handle == HANDLE
 
 
-@pytest.mark.parametrize('request_data, expected_request_data', [
-    [
-        {
-            'workflows': ['workflows_id']
-        },
-        {
-            'workflows': '["workflows_id"]'
-        }
-    ]
-])
 @patch('requests.put')
 @patch('requests.post')
-def test_upload_multipart_workflows(post_mock, put_mock, request_data, expected_request_data, client):
+def test_upload_multipart_workflows(post_mock, put_mock, client):
+
+    request_data = {'workflows': ['workflows_id']}
+    expected_request_data = {'workflows': '["workflows_id"]'}
+
+    put_mock.return_value = MockResponse()
+
+    post_mock.side_effect = [
+        MockResponse(),
+        MockResponse(),
+        MockResponse(json={'handle': 'new_handle'})
+    ]
 
     new_filelink = client.upload(
         filepath='tests/data/bird.jpg',
@@ -174,6 +187,5 @@ def test_upload_multipart_workflows(post_mock, put_mock, request_data, expected_
         multipart=True
     )
 
-    assert all(key in post_mock.call_args[1]['data'] and post_mock.call_args[1]['data'][key] == value
-               for key, value in expected_request_data.items())
-    assert isinstance(new_filelink, Filelink)
+    assert 'workflows' in post_mock.call_args[1]['data'].keys() and post_mock.call_args[1]['data']['workflows'] == expected_request_data['workflows']
+    assert new_filelink.handle == 'new_handle'
