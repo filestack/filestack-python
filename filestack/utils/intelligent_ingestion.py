@@ -26,6 +26,7 @@ log.addHandler(handler)
 MB = 1024 ** 2
 DEFAULT_PART_SIZE = 8 * MB
 CHUNK_SIZE = 8 * MB
+MIN_CHUNK_SIZE = 32 * 1024
 MAX_DELAY = 4
 NUM_THREADS = 4
 
@@ -39,15 +40,20 @@ def filestack_request(request_url, request_data, filename):
         files={'file': (filename, '', None)},
         headers=config.HEADERS
     )
-
     if not response.ok:
         raise Exception('Invalid Filestack API response')
 
     return response
 
 
+def decrease_chunk_size():
+    global CHUNK_SIZE
+    CHUNK_SIZE //= 2
+    if CHUNK_SIZE < MIN_CHUNK_SIZE:
+        raise Exception('Minimal chunk size failed')
+
+
 def upload_part(apikey, filename, filepath, filesize, storage, start_response, part):
-    log.debug('[%s] Working on part: %s', threading.get_ident(), part)
     with open(filepath, 'rb') as f:
         f.seek(part['seek_point'])
         part_bytes = io.BytesIO(f.read(DEFAULT_PART_SIZE))
@@ -83,14 +89,14 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
             api_resp = api_resp.json()
             s3_resp = requests.put(api_resp['url'], headers=api_resp['headers'], data=chunk_data)
             if not s3_resp.ok:
-                raise
+                raise Exception('Incorrect S3 response')
             offset += len(chunk_data)
             chunk_data = part_bytes.read(CHUNK_SIZE)
         except Exception as e:
             log.error('Upload failed: %s', str(e))
             with lock:
                 if CHUNK_SIZE >= len(chunk_data):
-                    CHUNK_SIZE //= 2
+                    decrease_chunk_size()
 
             part_bytes.seek(offset)
             chunk_data = part_bytes.read(CHUNK_SIZE)
@@ -142,8 +148,9 @@ def upload(apikey, filepath, storage, params=None, security=None):
         upload_part, apikey, filename, filepath, filesize, storage, start_response
     )
 
-    with ThreadPool(4) as pool:
-        pool.map(fii_upload, parts)
+    pool = ThreadPool(NUM_THREADS)
+    pool.map(fii_upload, parts)
+    pool.close()
 
     request_data.update({
         'uri': start_response['uri'],
