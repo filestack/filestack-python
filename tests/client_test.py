@@ -1,14 +1,27 @@
 import filestack.models
 import pytest
 
+from mock import patch
 from base64 import b64encode
 from filestack import Client, Filelink, Transform
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
+from collections import defaultdict
 
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
+
+
+class MockResponse():
+    ok = True
+    headers = {'ETag': 'some_tag'}
+
+    def __init__(self, json=None):
+        self.json_data = defaultdict(str) if json is None else json
+
+    def json(self):
+        return self.json_data
 
 
 @pytest.fixture
@@ -26,7 +39,7 @@ def test_wrong_storage():
 
 
 def test_store(client):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/store', method='post', scheme='https')
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
     def api_store(url, request):
         return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
 
@@ -81,3 +94,98 @@ def test_zip(client):
         zip_response = client.zip('test.zip', 'tests/data/bird.jpg')
 
         assert zip_response.status_code == 200
+
+
+@pytest.mark.parametrize('store_params, expected_url_part', [
+    [
+        {
+            'filename': 'image.jpg'
+        },
+        'filename:image.jpg'
+    ],
+
+    [
+        {
+            'location': 'S3'
+        },
+        'location:S3'
+    ],
+
+    [
+        {
+            'path': 'some_path'
+        },
+        'path:some_path'
+    ],
+
+    [
+        {
+            'container': 'container_id'
+        },
+        'container:container_id'
+    ],
+
+    [
+        {
+            'region': 'us-east-1'
+        },
+        'region:us-east-1'
+    ],
+
+    [
+        {
+            'access': 'public'
+        },
+        'access:public'
+    ],
+
+    [
+        {
+            'base64decode': True
+        },
+        'base64decode:True'
+    ],
+
+    [
+        {
+            'workflows': ['workflows_id_1']
+        },
+        'workflows:[%22workflows_id_1%22]'
+    ]
+])
+def test_url_store_task(store_params, expected_url_part, client):
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
+    def api_store(url, request):
+        assert expected_url_part in request.url
+        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
+
+    with HTTMock(api_store):
+        filelink = client.upload(url="someurl", params=store_params, multipart=False)
+
+    assert isinstance(filelink, Filelink)
+    assert filelink.handle == HANDLE
+
+
+@patch('requests.put')
+@patch('requests.post')
+def test_upload_multipart_workflows(post_mock, put_mock, client):
+
+    request_data = {'workflows': ['workflows_id']}
+    expected_request_data = {'workflows': '["workflows_id"]'}
+
+    put_mock.return_value = MockResponse()
+
+    post_mock.side_effect = [
+        MockResponse(),
+        MockResponse(),
+        MockResponse(json={'handle': 'new_handle'})
+    ]
+
+    new_filelink = client.upload(
+        filepath='tests/data/bird.jpg',
+        params=request_data,
+        multipart=True
+    )
+
+    assert 'workflows' in post_mock.call_args[1]['data'].keys() and post_mock.call_args[1]['data']['workflows'] == expected_request_data['workflows']
+    assert new_filelink.handle == 'new_handle'

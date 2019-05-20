@@ -116,6 +116,11 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
     request_data.update(start_response)
     request_data['parts'] = ';'.join(uploaded_parts)
 
+    if params.get('workflows'):
+        workflows = ','.join('"{}"'.format(item) for item in params.get('workflows'))
+        workflows = '[{}]'.format(workflows)
+        request_data['workflows'] = workflows
+
     complete_response = multipart_request(
         'https://{}/multipart/complete'.format(location_url),
         request_data,
