@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 2.5.0 (May 20th, 2019)
+- Added support for [Filestack Workflows](https://www.filestack.com/products/workflows/)
+
 ### 2.4.0 (March 18th, 2019)
 - Added default mimetype for multipart uploads
 - Refactored multipart uploads
