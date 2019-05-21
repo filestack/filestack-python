@@ -227,6 +227,9 @@ class Client:
         if not body or not isinstance(body, dict):
             error = 'Missing content or content is not a dict'
 
+        if error:
+            return {'error': error, 'valid': valid}
+
         headers_prepared = dict((k.lower(), v) for k, v in headers.items())
         if 'fs-signature' not in headers_prepared:
             error = 'Missing `Signature` value in provided headers'
