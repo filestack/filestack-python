@@ -219,18 +219,22 @@ class Client:
         If 'error' is not None - it means that you provided wrong parameters
         If 'valid' is False - it means that signature is invalid and probably Filestack is not source of webhook
         """
+        error, valid = None, True
         if not secret or not isinstance(secret, str):
-            return {'error': 'Missing secret or secret is not a string', 'valid': True}
+            error = 'Missing secret or secret is not a string'
         if not headers or not isinstance(headers, dict):
-            return {'error': 'Missing headers or headers are not a dict', 'valid': True}
+            error = 'Missing headers or headers are not a dict'
         if not body or not isinstance(body, dict):
-            return {'error': 'Missing content or content is not a dict', 'valid': True}
+            error = 'Missing content or content is not a dict'
 
         headers_prepared = dict((k.lower(), v) for k, v in headers.items())
         if 'fs-signature' not in headers_prepared:
-            return {'error': 'Missing `Signature` value in provided headers', 'valid': True}
+            error = 'Missing `Signature` value in provided headers'
         if 'fs-timestamp' not in headers_prepared:
-            return {'error': 'Missing `Timestamp` value in provided headers', 'valid': True}
+            error = 'Missing `Timestamp` value in provided headers'
+
+        if error:
+            return {'error': error, 'valid': valid}
 
         sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(dict(FlatterDict(body)), sort_keys=True))
         signature = hmac.new(secret.encode('latin-1'), sign.encode('latin-1'), hashlib.sha256).hexdigest()
