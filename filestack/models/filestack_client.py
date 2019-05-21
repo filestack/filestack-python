@@ -238,11 +238,11 @@ class Client:
     def validate_webhook_params(secret, body, headers):
         error = None
         if not secret or not isinstance(secret, str):
-            error = error or 'Missing secret or secret is not a string'
+            error = 'Missing secret or secret is not a string'
         if not headers or not isinstance(headers, dict):
-            error = error or 'Missing headers or headers are not a dict'
+            error = 'Missing headers or headers are not a dict'
         if not body or not isinstance(body, dict):
-            error = error or 'Missing content or content is not a dict'
+            error = 'Missing content or content is not a dict'
         return error
 
     @staticmethod
@@ -252,7 +252,7 @@ class Client:
         if 'fs-signature' not in headers_prepared:
             error = 'Missing `Signature` value in provided headers'
         if 'fs-timestamp' not in headers_prepared:
-            error = error or 'Missing `Timestamp` value in provided headers'
+            error = 'Missing `Timestamp` value in provided headers'
         return error, headers_prepared
 
     @property

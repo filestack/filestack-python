@@ -145,19 +145,19 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
 
 
 def test_webhooks_signature():
-    resp = Client.validate_webhook_signature(100, '')
+    resp = Client.validate_webhook_signature(100, {'test': 'content'}, {'test': 'headers'})
     assert resp == {'error': 'Missing secret or secret is not a string', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', '')
+    resp = Client.validate_webhook_signature('a', {'test': 'content'})
     assert resp == {'error': 'Missing headers or headers are not a dict', 'valid': True}
 
     resp = Client.validate_webhook_signature('a', '', {'header': 'header'})
     assert resp == {'error': 'Missing content or content is not a dict', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'header': 'header'})
+    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'fs-timestamp': 'header'})
     assert resp == {'error': 'Missing `Signature` value in provided headers', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'fs-signature': 'header'})
+    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'header': 'header'})
     assert resp == {'error': 'Missing `Timestamp` value in provided headers', 'valid': True}
 
     content = {
