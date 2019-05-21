@@ -219,30 +219,41 @@ class Client:
         If 'error' is not None - it means that you provided wrong parameters
         If 'valid' is False - it means that signature is invalid and probably Filestack is not source of webhook
         """
-        error, valid = None, True
-        if not secret or not isinstance(secret, str):
-            error = 'Missing secret or secret is not a string'
-        if not headers or not isinstance(headers, dict):
-            error = 'Missing headers or headers are not a dict'
-        if not body or not isinstance(body, dict):
-            error = 'Missing content or content is not a dict'
+        error = Client.validate_webhook_params(secret, body, headers)
 
         if error:
-            return {'error': error, 'valid': valid}
+            return {'error': error, 'valid': True}
 
-        headers_prepared = dict((k.lower(), v) for k, v in headers.items())
-        if 'fs-signature' not in headers_prepared:
-            error = 'Missing `Signature` value in provided headers'
-        if 'fs-timestamp' not in headers_prepared:
-            error = 'Missing `Timestamp` value in provided headers'
+        error, headers_prepared = Client.prepare_and_validate_webhook_headers(headers)
 
         if error:
-            return {'error': error, 'valid': valid}
+            return {'error': error, 'valid': True}
 
         sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(dict(FlatterDict(body)), sort_keys=True))
         signature = hmac.new(secret.encode('latin-1'), sign.encode('latin-1'), hashlib.sha256).hexdigest()
 
         return {'error': None, 'valid': signature == headers_prepared['fs-signature']}
+
+    @staticmethod
+    def validate_webhook_params(secret, body, headers):
+        error = None
+        if not secret or not isinstance(secret, str):
+            error = error or 'Missing secret or secret is not a string'
+        if not headers or not isinstance(headers, dict):
+            error = error or 'Missing headers or headers are not a dict'
+        if not body or not isinstance(body, dict):
+            error = error or 'Missing content or content is not a dict'
+        return error
+
+    @staticmethod
+    def prepare_and_validate_webhook_headers(headers):
+        error = None
+        headers_prepared = dict((k.lower(), v) for k, v in headers.items())
+        if 'fs-signature' not in headers_prepared:
+            error = 'Missing `Signature` value in provided headers'
+        if 'fs-timestamp' not in headers_prepared:
+            error = error or 'Missing `Timestamp` value in provided headers'
+        return error, headers_prepared
 
     @property
     def security(self):
