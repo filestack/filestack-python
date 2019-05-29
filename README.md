@@ -133,19 +133,8 @@ Verification method give you ability to check if filestack generated webhook whi
 ```python
 from filestack import Client
 
-webhook_data = {
-	"id": 50000,
-	"action": "fp.upload",
-	"text": {
-		"container": "some-bucket",
-		"url": "https://cdn.filestackcontent.com/Handle",
-		"filename": "filename.png",
-		"client": "Computer",
-		"key": "key_filename.png",
-		"type": "image/png",
-		"size": 1000000
-	}
-}
+# webhook_data is raw content received on webhook endpoint
+webhook_data = '{"action": "fp.upload", "text": {"container": "some-bucket", "url": "https://cdn.filestackcontent.com/Handle", "filename": "filename.png", "client": "Computer", "key": "key_filename.png", "type": "image/png", "size": 1000000}, "id": 50006}'
 
 resp = Client.validate_webhook_signature(
 	'<YOUR_WEBHOOK_SECRET>', webhook_data,
