@@ -238,7 +238,7 @@ class Client:
 
     @staticmethod
     def cleanup_webhook_dict(data):
-        cleaned_dict = dict(FlatterDict(body))
+        cleaned_dict = dict(FlatterDict(data))
         for k in list(cleaned_dict.keys()):
             if isinstance(cleaned_dict[k], FlatterDict):
                 del cleaned_dict[k]
