@@ -6,8 +6,6 @@ import hashlib
 import requests
 import mimetypes
 
-from flatdict import FlatterDict
-
 import filestack.models
 
 from filestack.config import API_URL, CDN_URL, STORE_PATH, HEADERS
@@ -204,14 +202,15 @@ class Client:
     def validate_webhook_signature(secret, body, headers=None):
         """
         Checks if webhook, which you received was originally from Filestack,
-        based on you secret for webhook endpoint which was generated in Filestack developer portal
+        based on you secret for webhook endpoint which was generated in Filestack developer portal.
+        Body suppose to be raw content of received webhook
 
         returns [Dict]
         ```python
         from filestack import Client
 
         result = client.validate_webhook_signature(
-            'secret', {'webhook_content': 'received_from_filestack'},
+            'secret', b'{"webhook_content": "received_from_filestack"}',
             {'FS-Timestamp': '1558367878', 'FS-Signature': 'Filestack Signature'}
         )
         ```
@@ -229,20 +228,13 @@ class Client:
         if error:
             return {'error': error, 'valid': True}
 
-        cleaned_dict = Client.cleanup_webhook_dict(body)
+        if isinstance(body, bytes):
+            body = body.decode('latin-1')
 
-        sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(cleaned_dict, sort_keys=True))
+        sign = "%s.%s" % (headers_prepared['fs-timestamp'], body)
         signature = hmac.new(secret.encode('latin-1'), sign.encode('latin-1'), hashlib.sha256).hexdigest()
 
         return {'error': None, 'valid': signature == headers_prepared['fs-signature']}
-
-    @staticmethod
-    def cleanup_webhook_dict(data):
-        cleaned_dict = dict(FlatterDict(data))
-        for k in list(cleaned_dict.keys()):
-            if isinstance(cleaned_dict[k], FlatterDict):
-                del cleaned_dict[k]
-        return cleaned_dict
 
     @staticmethod
     def validate_webhook_params(secret, body, headers):
@@ -251,8 +243,8 @@ class Client:
             error = 'Missing secret or secret is not a string'
         if not headers or not isinstance(headers, dict):
             error = 'Missing headers or headers are not a dict'
-        if not body or not isinstance(body, dict):
-            error = 'Missing content or content is not a dict'
+        if not body or not isinstance(body, (str, bytes)):
+            error = 'Missing content or content is not string/bytes type'
         return error
 
     @staticmethod
