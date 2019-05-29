@@ -17,7 +17,7 @@ setup(
     version=read_version(),
     license='Apache 2.0',
     description='Filestack REST API Library',
-    long_description=read('README.md'),
+    long_description='Visit: https://github.com/filestack/filestack-python',
     url='https://github.com/filestack/filestack-python',
     author='filestack.com',
     author_email='support@filestack.com',
