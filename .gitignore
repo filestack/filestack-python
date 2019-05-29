@@ -6,3 +6,5 @@ temp_files/
 test.zip
 tests/data/test_download.jpg
 .coverage
+.idea
+.venv

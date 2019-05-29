@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 2.6.0 (May 29th, 2019)
+- Added webhook signature verification
+
 ### 2.5.0 (May 20th, 2019)
 - Added support for [Filestack Workflows](https://www.filestack.com/products/workflows/)
 

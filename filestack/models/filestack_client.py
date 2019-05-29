@@ -1,18 +1,21 @@
-import mimetypes
 import os
 import re
+import hmac
+import json
+import hashlib
 import requests
+import mimetypes
+
+from flatdict import FlatterDict
 
 import filestack.models
 
 from filestack.config import API_URL, CDN_URL, STORE_PATH, HEADERS
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
-from filestack.utils import utils
-from filestack.utils import upload_utils
-from filestack.utils import intelligent_ingestion
+from filestack.utils import utils, upload_utils, intelligent_ingestion
 
 
-class Client():
+class Client:
     """
     The hub for all Filestack operations. Creates Filelinks, converts external to transform objects,
     takes a URL screenshot and returns zipped files.
@@ -196,6 +199,71 @@ class Client():
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception('Invalid API response')
+
+    @staticmethod
+    def validate_webhook_signature(secret, body, headers=None):
+        """
+        Checks if webhook, which you received was originally from Filestack,
+        based on you secret for webhook endpoint which was generated in Filestack developer portal
+
+        returns [Dict]
+        ```python
+        from filestack import Client
+
+        result = client.validate_webhook_signature(
+            'secret', {'webhook_content': 'received_from_filestack'},
+            {'FS-Timestamp': '1558367878', 'FS-Signature': 'Filestack Signature'}
+        )
+        ```
+        Response will contain keys 'error' and 'valid'.
+        If 'error' is not None - it means that you provided wrong parameters
+        If 'valid' is False - it means that signature is invalid and probably Filestack is not source of webhook
+        """
+        error = Client.validate_webhook_params(secret, body, headers)
+
+        if error:
+            return {'error': error, 'valid': True}
+
+        error, headers_prepared = Client.prepare_and_validate_webhook_headers(headers)
+
+        if error:
+            return {'error': error, 'valid': True}
+
+        cleaned_dict = Client.cleanup_webhook_dict(body)
+
+        sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(cleaned_dict, sort_keys=True))
+        signature = hmac.new(secret.encode('latin-1'), sign.encode('latin-1'), hashlib.sha256).hexdigest()
+
+        return {'error': None, 'valid': signature == headers_prepared['fs-signature']}
+
+    @staticmethod
+    def cleanup_webhook_dict(data):
+        cleaned_dict = dict(FlatterDict(data))
+        for k in list(cleaned_dict.keys()):
+            if isinstance(cleaned_dict[k], FlatterDict):
+                del cleaned_dict[k]
+        return cleaned_dict
+
+    @staticmethod
+    def validate_webhook_params(secret, body, headers):
+        error = None
+        if not secret or not isinstance(secret, str):
+            error = 'Missing secret or secret is not a string'
+        if not headers or not isinstance(headers, dict):
+            error = 'Missing headers or headers are not a dict'
+        if not body or not isinstance(body, dict):
+            error = 'Missing content or content is not a dict'
+        return error
+
+    @staticmethod
+    def prepare_and_validate_webhook_headers(headers):
+        error = None
+        headers_prepared = dict((k.lower(), v) for k, v in headers.items())
+        if 'fs-signature' not in headers_prepared:
+            error = 'Missing `Signature` value in provided headers'
+        if 'fs-timestamp' not in headers_prepared:
+            error = 'Missing `Timestamp` value in provided headers'
+        return error, headers_prepared
 
     @property
     def security(self):
