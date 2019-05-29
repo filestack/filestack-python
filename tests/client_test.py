@@ -171,7 +171,9 @@ def test_webhooks_signature():
             'size': 100000,
             'status': 'Stored',
             'type': 'image/jpeg',
-            'url': 'https://cdn.filestackcontent.com/Handle1Handle1Handle1'
+            'url': 'https://cdn.filestackcontent.com/Handle1Handle1Handle1',
+            'test': [],
+            'test1': {}
         },
         'timestamp': 1558123673
     }

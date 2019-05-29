@@ -229,10 +229,20 @@ class Client:
         if error:
             return {'error': error, 'valid': True}
 
-        sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(dict(FlatterDict(body)), sort_keys=True))
+        cleaned_dict = Client.cleanup_webhook_dict(body)
+
+        sign = "%s.%s" % (headers_prepared['fs-timestamp'], json.dumps(cleaned_dict, sort_keys=True))
         signature = hmac.new(secret.encode('latin-1'), sign.encode('latin-1'), hashlib.sha256).hexdigest()
 
         return {'error': None, 'valid': signature == headers_prepared['fs-signature']}
+
+    @staticmethod
+    def cleanup_webhook_dict(data):
+        cleaned_dict = dict(FlatterDict(body))
+        for k in list(cleaned_dict.keys()):
+            if isinstance(cleaned_dict[k], FlatterDict):
+                del cleaned_dict[k]
+        return cleaned_dict
 
     @staticmethod
     def validate_webhook_params(secret, body, headers):
