@@ -1,5 +1,9 @@
 # Filestack-Python Changelog
 
+### 2.7.0 (May 30th, 2019)
+- Refactored and renamed webhook verification method
+- Added new transformation tasks: callbak, pdf_info and pdf_convert
+
 ### 2.6.0 (May 29th, 2019)
 - Added webhook signature verification
 
