@@ -199,7 +199,7 @@ class Client:
             raise Exception('Invalid API response')
 
     @staticmethod
-    def validate_webhook_signature(secret, body, headers=None):
+    def verify_webhook_signature(secret, body, headers=None):
         """
         Checks if webhook, which you received was originally from Filestack,
         based on you secret for webhook endpoint which was generated in Filestack developer portal.
