@@ -6,7 +6,7 @@ import filestack.models
 
 class ImageTransformationMixin(object):
     """
-    All transformations and related/dependent tasks live here. They can 
+    All transformations and related/dependent tasks live here. They can
     be directly called by Transform or Filelink objects.
     """
     def resize(self, width=None, height=None, fit=None, align=None):
@@ -134,6 +134,15 @@ class ImageTransformationMixin(object):
 
         return utils.make_call(CDN_URL, 'get', transform_url=new_transform.url)
 
+    def fallback(self, handle=None, cache=None):
+        return self.add_transform_task('fallback', locals())
+
+    def pdf_info(self, colorinfo=None):
+        return self.add_transform_task('pdfinfo', locals())
+
+    def pdf_convert(self, pageorientation=None, pageformat=None, pages=None):
+        return self.add_transform_task('pdfconvert', locals())
+
     def av_convert(self, preset=None, force=None, title=None, extname=None, filename=None,
                    width=None, height=None, upscale=None, aspect_mode=None, two_pass=None,
                    video_bitrate=None, fps=None, keyframe_interval=None, location=None,
@@ -171,11 +180,10 @@ class ImageTransformationMixin(object):
 
         uuid = response.json()['uuid']
         timestamp = response.json()['timestamp']
-        
+
         return filestack.models.AudioVisual(
             transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
         )
-
 
     def add_transform_task(self, transformation, params):
         """

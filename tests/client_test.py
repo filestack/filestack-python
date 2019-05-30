@@ -145,46 +145,31 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
 
 
 def test_webhooks_signature():
-    resp = Client.validate_webhook_signature(100, {'test': 'content'}, {'test': 'headers'})
+    resp = Client.verify_webhook_signature(100, b'{"test": "content"}', {'test': 'headers'})
     assert resp == {'error': 'Missing secret or secret is not a string', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', {'test': 'content'})
+    resp = Client.verify_webhook_signature('a', b'{"test": "content"}')
     assert resp == {'error': 'Missing headers or headers are not a dict', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', '', {'header': 'header'})
-    assert resp == {'error': 'Missing content or content is not a dict', 'valid': True}
+    resp = Client.verify_webhook_signature('a', {"test": "content"}, {'header': 'header'})
+    assert resp == {'error': 'Missing content or content is not string/bytes type', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'fs-timestamp': 'header'})
+    resp = Client.verify_webhook_signature('a', '{"test": "content"}', {'fs-timestamp': 'header'})
     assert resp == {'error': 'Missing `Signature` value in provided headers', 'valid': True}
 
-    resp = Client.validate_webhook_signature('a', {'test': 'body'}, {'header': 'header'})
+    resp = Client.verify_webhook_signature('a', '{"test": "content"}', {'header': 'header'})
     assert resp == {'error': 'Missing `Timestamp` value in provided headers', 'valid': True}
 
-    content = {
-        'action': 'fp.upload',
-        'id': 1000,
-        'text': {
-            'client': 'Computer',
-            'container': 'your-bucket',
-            'filename': 'filename.jpg',
-            'key': 'kGaeljnga9wkysK6Z_filename.jpg',
-            'size': 100000,
-            'status': 'Stored',
-            'type': 'image/jpeg',
-            'url': 'https://cdn.filestackcontent.com/Handle1Handle1Handle1',
-            'test': [],
-            'test1': {}
-        },
-        'timestamp': 1558123673
-    }
+    content = '{"timestamp": 1558123673, "id": 1000, "text": {"filename": "filename.jpg", "type": "image/jpeg", "container": "your-bucket", "client": "Computer", "status": "Stored", "url": "https://cdn.filestackcontent.com/Handle1Handle1Handle1", "key": "kGaeljnga9wkysK6Z_filename.jpg", "test": [], "test1": {}, "size": 100000}, "action": "fp.upload"}'
     secret = 'SecretSecretSecretAA'
+
     headers = {
-        'FS-Signature': '4450cd49aad51b689cade0b7d462ae4fdd7e4e5bd972cc3e7fd6373c442871c7',
+        'FS-Signature': '4b058e4065206cfc13d57a8480cbd5915f9d2ed4e3fa4179e7fe82c6e58dc6d5',
         'FS-Timestamp': '1558384364'
     }
-    resp = Client.validate_webhook_signature(secret, content, headers)
+    resp = Client.verify_webhook_signature(secret, content, headers)
     assert resp == {'error': None, 'valid': True}
 
     headers['FS-Signature'] = '4450cd49aad51b689cbde0b7d462ae5fdd7e4e5bd972cc3e7fd6373c442871c7'
-    resp = Client.validate_webhook_signature(secret, content, headers)
+    resp = Client.verify_webhook_signature(secret, content, headers)
     assert resp == {'error': None, 'valid': False}
