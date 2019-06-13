@@ -17,7 +17,7 @@ from filestack import config
 from filestack.utils.utils import store_params
 
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.INFO)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setFormatter(logging.Formatter("%(asctime)s - %(processName)s[%(process)d] - %(levelname)s - %(message)s"))
@@ -41,7 +41,7 @@ def filestack_request(request_url, request_data, filename):
         headers=config.HEADERS
     )
     if not response.ok:
-        raise Exception('Invalid Filestack API response')
+        raise Exception(response.text)
 
     return response
 

@@ -3,6 +3,7 @@ from collections import defaultdict
 
 import pytest
 
+from filestack import __version__
 from filestack.utils.intelligent_ingestion import upload_part, filestack_request, upload
 
 
@@ -54,7 +55,7 @@ def test_upload_part_success(post_mock, put_mock):
                 'part': 1, 'size': 5415034, 'md5': b'IuNjhgPo2wbzGFo6f7WhUA==', 'offset': 0, 'multipart': True
             },
             files={'file': ('file.txt', '', None)},
-            headers={'User-Agent': 'filestack-python 2.4.0', 'Filestack-Source': 'Python-2.4.0'}
+            headers={'User-Agent': 'filestack-python {}'.format(__version__), 'Filestack-Source': 'Python-{}'.format(__version__)}
         ),
         call(
             'https://fs-upload.com/multipart/commit',
@@ -63,7 +64,7 @@ def test_upload_part_success(post_mock, put_mock):
                 'upload_id': 'fs-upload.com', 'store_location': 's3', 'part': 1, 'size': 1234
             },
             files={'file': ('file.txt', '', None)},
-            headers={'User-Agent': 'filestack-python 2.4.0', 'Filestack-Source': 'Python-2.4.0'}
+            headers={'User-Agent': 'filestack-python {}'.format(__version__), 'Filestack-Source': 'Python-{}'.format(__version__)}
         )
     ]
     put_mock.assert_called_once_with(
