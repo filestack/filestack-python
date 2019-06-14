@@ -123,9 +123,8 @@ def test_url_store_task(store_params, expected_url_part, client):
 @patch('requests.post')
 def test_upload_multipart_workflows(post_mock, put_mock, client):
 
-    request_data = {'workflows': ['workflows_id']}
-    expected_request_data = {'workflows': '["workflows_id"]'}
-
+    workflow_ids = ['workflow-id-1', 'workflow-id-2']
+    store_params = {'workflows': workflow_ids}
     put_mock.return_value = MockResponse()
 
     post_mock.side_effect = [
@@ -136,11 +135,12 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
 
     new_filelink = client.upload(
         filepath='tests/data/bird.jpg',
-        params=request_data,
+        params=store_params,
         multipart=True
     )
 
-    assert 'workflows' in post_mock.call_args[1]['data'].keys() and post_mock.call_args[1]['data']['workflows'] == expected_request_data['workflows']
+    post_args, post_kwargs = post_mock.call_args
+    assert post_kwargs['json']['store']['workflows'] == workflow_ids
     assert new_filelink.handle == 'new_handle'
 
 

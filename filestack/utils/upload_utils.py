@@ -8,7 +8,6 @@ from base64 import b64encode
 from filestack.config import (
     MULTIPART_START_URL, DEFAULT_CHUNK_SIZE, DEFAULT_UPLOAD_MIMETYPE, HEADERS
 )
-from filestack.utils.utils import store_params
 from functools import partial
 from multiprocessing.pool import ThreadPool
 
@@ -20,26 +19,22 @@ def get_file_info(filepath, filename=None, mimetype=None):
     return filename, filesize, mimetype
 
 
-def multipart_request(url, data, params=None, security=None):
+def multipart_request(url, payload, params=None, security=None):
 
-    if params:
-        data.update(store_params(params))
+    for key in ('path', 'location', 'region', 'container', 'access'):
+        if key in params:
+            payload['store'][key] = params[key]
 
     if security:
-        data.update({
-            'policy': security['policy'],
+        payload.update({
+            'policy': security['policy'].decode('utf-8'),
             'signature': security['signature']
         })
 
-    response = requests.post(
-        url,
-        data=data,
-        files={'file': (data['filename'], '', None)},
-        headers=HEADERS
-    )
+    response = requests.post(url, json=payload, headers=HEADERS)
 
     if not response.ok:
-        raise Exception('Invalid API response')
+        raise Exception(response.text)
 
     return response.json()
 
@@ -49,10 +44,7 @@ def create_upload_jobs(filesize):
     part = 1
     jobs = []
     while seek_point < filesize:
-        jobs.append({
-            'seek': seek_point,
-            'part': part,
-        })
+        jobs.append({'seek': seek_point, 'part': part})
         part += 1
         seek_point += DEFAULT_CHUNK_SIZE
     return jobs
@@ -63,26 +55,27 @@ def upload_chunk(apikey, filename, filepath, storage, start_response, job):
         f.seek(job['seek'])
         chunk = f.read(DEFAULT_CHUNK_SIZE)
 
-    data = {
+    payload = {
         'apikey': apikey,
         'part': job['part'],
         'size': len(chunk),
-        'md5': b64encode(hashlib.md5(chunk).digest()).strip(),
+        'md5': b64encode(hashlib.md5(chunk).digest()).strip().decode('utf-8'),
         'uri': start_response['uri'],
         'region': start_response['region'],
         'upload_id': start_response['upload_id'],
-        'store_location': storage
+        'store': {
+            'location': storage,
+        }
     }
     fs_resp = requests.post(
         'https://{}/multipart/upload'.format(start_response['location_url']),
-        data=data,
-        files={'file': (filename, '', None)},
+        json=payload,
         headers=HEADERS
     ).json()
 
     resp = requests.put(fs_resp['url'], headers=fs_resp['headers'], data=chunk)
 
-    return '{}:{}'.format(job['part'], resp.headers['ETag'])
+    return {'part_number': job['part'], 'etag': resp.headers['ETag']}
 
 
 def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None, security=None):
@@ -96,15 +89,17 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
 
     filename, filesize, mimetype = get_file_info(filepath, filename=filename, mimetype=mimetype)
 
-    request_data = {
+    payload = {
         'apikey': apikey,
         'filename': filename,
         'mimetype': mimetype,
         'size': filesize,
-        'store_location': storage
+        'store': {
+            'location': storage
+        }
     }
 
-    start_response = multipart_request(MULTIPART_START_URL, request_data, params, security)
+    start_response = multipart_request(MULTIPART_START_URL, payload, params, security)
     jobs = create_upload_jobs(filesize)
 
     pooling_job = partial(upload_chunk, apikey, filename, filepath, storage, start_response)
@@ -113,19 +108,13 @@ def multipart_upload(apikey, filepath, storage, upload_processes=None, params=No
     pool.close()
 
     location_url = start_response.pop('location_url')
-    request_data.update(start_response)
-    request_data['parts'] = ';'.join(uploaded_parts)
+    payload.update(start_response)
+    payload['parts'] = uploaded_parts
 
     if params.get('workflows'):
-        workflows = ','.join('"{}"'.format(item) for item in params.get('workflows'))
-        workflows = '[{}]'.format(workflows)
-        request_data['workflows'] = workflows
+        payload['store']['workflows'] = params['workflows']
 
-    complete_response = multipart_request(
-        'https://{}/multipart/complete'.format(location_url),
-        request_data,
-        params,
-        security
-    )
+    complete_url = 'https://{}/multipart/complete'.format(location_url)
+    complete_response = multipart_request(complete_url, payload, params, security)
 
     return complete_response

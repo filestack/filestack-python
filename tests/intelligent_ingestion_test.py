@@ -8,28 +8,31 @@ from filestack.utils.intelligent_ingestion import upload_part, filestack_request
 
 
 class DummyHttpResponse:
-    def __init__(self, ok=True, json_dict=None, headers=None, status_code=200):
+    def __init__(self, ok=True, json_dict=None, headers=None, status_code=200, text=''):
         self.ok = ok
         self.json_dict = json_dict or {}
         self.headers = headers or {}
         self.status_code = status_code
         self.content = b''
+        self.text = text
 
     def json(self):
         return self.json_dict
 
 
-@pytest.mark.parametrize('ok_value', [True, False])
 @patch('filestack.utils.intelligent_ingestion.requests.post')
-def test_filestack_request(post_mock, ok_value):
-    post_mock.return_value = DummyHttpResponse(ok=ok_value, json_dict={'a': 1})
+def test_filestack_request_success(post_mock):
+    post_mock.return_value = DummyHttpResponse(json_dict={'a': 1})
 
-    if ok_value:
-        response = filestack_request('http://req.url', {}, 'file.txt')
-        assert response.json() == {'a': 1}
-    else:
-        with pytest.raises(Exception, match='Invalid Filestack API response'):
-            filestack_request('http://req.url', {}, 'file.txt')
+    response = filestack_request('http://req.url', {}, 'file.txt')
+    assert response.json() == {'a': 1}
+
+
+@patch('filestack.utils.intelligent_ingestion.requests.post')
+def test_filestack_request_error(post_mock):
+    post_mock.return_value = DummyHttpResponse(ok=False, text='Invalid Filestack API response')
+    with pytest.raises(Exception, match='Invalid Filestack API response'):
+        filestack_request('http://req.url', {}, 'file.txt')
 
 
 @patch('filestack.utils.intelligent_ingestion.requests.put')
