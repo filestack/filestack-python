@@ -8,28 +8,30 @@ from filestack.utils.intelligent_ingestion import upload_part, filestack_request
 
 
 class DummyHttpResponse:
-    def __init__(self, ok=True, json_dict=None, headers=None, status_code=200):
+    def __init__(self, ok=True, json_dict=None, headers=None, status_code=200, text=''):
         self.ok = ok
         self.json_dict = json_dict or {}
         self.headers = headers or {}
         self.status_code = status_code
         self.content = b''
+        self.text = text
 
     def json(self):
         return self.json_dict
 
 
-@pytest.mark.parametrize('ok_value', [True, False])
 @patch('filestack.utils.intelligent_ingestion.requests.post')
-def test_filestack_request(post_mock, ok_value):
-    post_mock.return_value = DummyHttpResponse(ok=ok_value, json_dict={'a': 1})
+def test_filestack_request_success(post_mock):
+    post_mock.return_value = DummyHttpResponse(json_dict={'a': 1})
+    response = filestack_request('http://req.url', {})
+    assert response.json() == {'a': 1}
 
-    if ok_value:
-        response = filestack_request('http://req.url', {}, 'file.txt')
-        assert response.json() == {'a': 1}
-    else:
-        with pytest.raises(Exception, match='Invalid Filestack API response'):
-            filestack_request('http://req.url', {}, 'file.txt')
+
+@patch('filestack.utils.intelligent_ingestion.requests.post')
+def test_filestack_request_error(post_mock):
+    post_mock.return_value = DummyHttpResponse(ok=False, text='Invalid Filestack API response')
+    with pytest.raises(Exception, match='Invalid Filestack API response'):
+        filestack_request('http://req.url', {})
 
 
 @patch('filestack.utils.intelligent_ingestion.requests.put')
@@ -49,21 +51,19 @@ def test_upload_part_success(post_mock, put_mock):
     assert post_mock.call_args_list == [
         call(
             'https://fs-upload.com/multipart/upload',
-            data={
+            json={
                 'apikey': 'Aaaaapikey', 'uri': 'fs-upload.com', 'region': 'fs-upload.com',
-                'upload_id': 'fs-upload.com', 'store_location': 's3',
-                'part': 1, 'size': 5415034, 'md5': b'IuNjhgPo2wbzGFo6f7WhUA==', 'offset': 0, 'multipart': True
+                'upload_id': 'fs-upload.com', 'store': {'location': 's3'},
+                'part': 1, 'size': 5415034, 'md5': 'IuNjhgPo2wbzGFo6f7WhUA==', 'offset': 0, 'fii': True
             },
-            files={'file': ('file.txt', '', None)},
             headers={'User-Agent': 'filestack-python {}'.format(__version__), 'Filestack-Source': 'Python-{}'.format(__version__)}
         ),
         call(
             'https://fs-upload.com/multipart/commit',
-            data={
+            json={
                 'apikey': 'Aaaaapikey', 'uri': 'fs-upload.com', 'region': 'fs-upload.com',
-                'upload_id': 'fs-upload.com', 'store_location': 's3', 'part': 1, 'size': 1234
+                'upload_id': 'fs-upload.com', 'store': {'location': 's3'}, 'part': 1, 'size': 1234
             },
-            files={'file': ('file.txt', '', None)},
             headers={'User-Agent': 'filestack-python {}'.format(__version__), 'Filestack-Source': 'Python-{}'.format(__version__)}
         )
     ]
@@ -96,13 +96,13 @@ def test_upload_part_with_resize(post_mock, put_mock):
     assert post_mock.call_count == 4  # 3x upload, 1 commit
     # 1st attempt
     req_args, req_kwargs = post_mock.call_args_list[0]
-    assert req_kwargs['data']['size'] == 5415034
+    assert req_kwargs['json']['size'] == 5415034
     # 2nd attempt
     req_args, req_kwargs = post_mock.call_args_list[1]
-    assert req_kwargs['data']['size'] == 4194304
+    assert req_kwargs['json']['size'] == 4194304
     # 3rd attempt
     req_args, req_kwargs = post_mock.call_args_list[2]
-    assert req_kwargs['data']['size'] == 1220730
+    assert req_kwargs['json']['size'] == 1220730
 
 
 @patch('filestack.utils.intelligent_ingestion.requests.put')
@@ -135,14 +135,14 @@ def test_wait_for_complete(fs_request, upload_part, post_mock, sleep_mock):
         'uri': 'upload-uri', 'region': 'upload-region', 'upload_id': 'upload-id',
         'location_url': 'upload-loc-url'
     })
-    security = {'policy': 'fspolicy', 'signature': 'fssignature'}
+    security = {'policy': b'fspolicy', 'signature': 'fssignature'}
     upload_params = {'filename': 'new-filename.mp4', 'path': 'some/new/path'}
     upload('AAApikeyz', 'tests/data/doom.mp4', 's3', upload_params, security)
     assert post_mock.call_count == 4
     req_args, req_kwargs = fs_request.call_args
-    url, request_data, _ = req_args
+    url, request_data = req_args
     assert url == 'https://upload.filestackapi.com/multipart/start'
-    assert request_data['store_path'] == 'some/new/path'
+    assert request_data['store']['path'] == 'some/new/path'
     assert request_data['filename'] == 'new-filename.mp4'
     assert request_data['policy'] == 'fspolicy'
     assert request_data['signature'] == 'fssignature'

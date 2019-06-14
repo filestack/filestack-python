@@ -14,7 +14,6 @@ from base64 import b64encode
 import requests
 
 from filestack import config
-from filestack.utils.utils import store_params
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
@@ -33,13 +32,9 @@ NUM_THREADS = 4
 lock = threading.Lock()
 
 
-def filestack_request(request_url, request_data, filename):
-    response = requests.post(
-        request_url,
-        data=request_data,
-        files={'file': (filename, '', None)},
-        headers=config.HEADERS
-    )
+def filestack_request(request_url, payload):
+    response = requests.post(request_url, json=payload, headers=config.HEADERS)
+
     if not response.ok:
         raise Exception(response.text)
 
@@ -58,12 +53,12 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
         f.seek(part['seek_point'])
         part_bytes = io.BytesIO(f.read(DEFAULT_PART_SIZE))
 
-    request_data_base = {
+    payload_base = {
         'apikey': apikey,
         'uri': start_response['uri'],
         'region': start_response['region'],
         'upload_id': start_response['upload_id'],
-        'store_location': storage,
+        'store': {'location': storage},
         'part': part['num']
     }
 
@@ -72,21 +67,17 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
     offset = 0
 
     while chunk_data:
-        request_data = request_data_base.copy()
-        request_data.update({
+        payload = payload_base.copy()
+        payload.update({
             'size': len(chunk_data),
-            'md5': b64encode(hashlib.md5(chunk_data).digest()).strip(),
+            'md5': b64encode(hashlib.md5(chunk_data).digest()).strip().decode('utf-8'),
             'offset': offset,
-            'multipart': True
+            'fii': True
         })
-        try:
-            api_resp = filestack_request(
-                'https://{}/multipart/upload'.format(start_response['location_url']),
-                request_data,
-                filename
-            )
 
-            api_resp = api_resp.json()
+        try:
+            url = 'https://{}/multipart/upload'.format(start_response['location_url'])
+            api_resp = filestack_request(url, payload).json()
             s3_resp = requests.put(api_resp['url'], headers=api_resp['headers'], data=chunk_data)
             if not s3_resp.ok:
                 raise Exception('Incorrect S3 response')
@@ -101,16 +92,11 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
             part_bytes.seek(offset)
             chunk_data = part_bytes.read(CHUNK_SIZE)
 
-    request_data = request_data_base.copy()
-    request_data.update({
-        'size': filesize
-    })
+    payload = payload_base.copy()
+    payload.update({'size': filesize})
 
-    filestack_request(
-        'https://{}/multipart/commit'.format(start_response['location_url']),
-        request_data,
-        filename
-    )
+    url = 'https://{}/multipart/commit'.format(start_response['location_url'])
+    filestack_request(url, payload)
 
 
 def upload(apikey, filepath, storage, params=None, security=None):
@@ -120,23 +106,28 @@ def upload(apikey, filepath, storage, params=None, security=None):
     mimetype = params.get('mimetype') or mimetypes.guess_type(filepath)[0] or config.DEFAULT_UPLOAD_MIMETYPE
     filesize = os.path.getsize(filepath)
 
-    request_data = {
+    payload = {
         'apikey': apikey,
         'filename': filename,
         'mimetype': mimetype,
         'size': filesize,
-        'store_location': storage,
-        'multipart': True
+        'fii': True,
+        'store': {
+            'location': storage
+        }
     }
 
-    request_data.update(store_params(params))
+    for key in ('path', 'location', 'region', 'container', 'access'):
+        if key in params:
+            payload['store'][key] = params[key]
+
     if security:
-        request_data.update({
-            'policy': security['policy'],
+        payload.update({
+            'policy': security['policy'].decode('utf-8'),
             'signature': security['signature']
         })
 
-    start_response = filestack_request(config.MULTIPART_START_URL, request_data, filename).json()
+    start_response = filestack_request(config.MULTIPART_START_URL, payload).json()
     parts = [
         {
             'seek_point': seek_point,
@@ -152,20 +143,19 @@ def upload(apikey, filepath, storage, params=None, security=None):
     pool.map(fii_upload, parts)
     pool.close()
 
-    request_data.update({
+    payload.update({
         'uri': start_response['uri'],
         'region': start_response['region'],
         'upload_id': start_response['upload_id'],
     })
 
+    if params.get('workflows'):
+        payload['store']['workflows'] = params['workflows']
+
+    complete_url = 'https://{}/multipart/complete'.format(start_response['location_url'])
     for wait_time in (0, 1, 2, 3, 5):
         time.sleep(wait_time)
-        complete_response = requests.post(
-            'https://{}/multipart/complete'.format(start_response['location_url']),
-            data=request_data,
-            files={'file': (filename, '', None)},
-            headers=config.HEADERS
-        )
+        complete_response = requests.post(complete_url, json=payload, headers=config.HEADERS)
         log.debug('Complete response: %s. Content: %s', complete_response, complete_response.content)
         if complete_response.status_code == 200:
             break
