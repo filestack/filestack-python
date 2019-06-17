@@ -1,7 +1,6 @@
-from filestack.config import CDN_URL
+from filestack import config
 from filestack.mixins import CommonMixin
 from filestack.mixins import ImageTransformationMixin
-from filestack.utils.utils import get_url, make_call, get_transform_url
 
 
 class Filelink(ImageTransformationMixin, CommonMixin):
@@ -16,81 +15,22 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     def __init__(self, handle, apikey=None, security=None):
         self._apikey = apikey
         self._handle = handle
-        self._security = security
+        self.security = security
 
     def __repr__(self):
         return '<Filelink {}>'.format(self.handle)
 
-    def tags(self):
-        """
-        Get Google Vision tags for the Filelink.
-
-        *returns* [Dict]
-
-        ```python
-        from filestack import Client
-
-        client = Client("<API_KEY>")
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        tags = filelink.tags()
-        ```
-        """
-        return self._return_tag_task('tags')
-
-    def sfw(self):
-        """
-        Get SFW label for the given file.
-
-        *returns* [Boolean]
-
-        ```python
-        from filestack import Client
-
-        client = Client("<API_KEY>")
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        # returns true if SFW and false if not
-        sfw = filelink.sfw()
-        ```
-        """
-        return self._return_tag_task('sfw')
-
-    def _return_tag_task(self, task):
-        """
-        Runs both SFW and Tags tasks
-        """
-        if self.security is None:
-            raise Exception('Tags require security')
-        tasks = [task]
-        transform_url = get_transform_url(
-            tasks, handle=self.handle, security=self.security,
-            apikey=self.apikey
-        )
-        response = make_call(
-            CDN_URL, 'get', handle=self.handle, security=self.security,
-            transform_url=transform_url
-        )
-        return response.json()
-
     @property
     def handle(self):
-        """
-        Returns the handle associated with the instance (if any)
-
-        *returns* [String]
-
-        ```python
-        filelink.handle
-        # YOUR_HANDLE
-        ```
-        """
         return self._handle
+
+    # TODO - add tags & stw for filelink
+    # TODO - add delete() method
 
     @property
     def url(self):
         """
-        Returns the URL for the instance, which can be used
-        to retrieve, delete, and overwrite the file. If security is enabled, signature and policy parameters will
-        be included,
+        Returns filelink's URL
 
         *returns* [String]
 
@@ -100,36 +40,16 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         # https://cdn.filestackcontent.com/FILE_HANDLE
         ```
         """
-        return get_url(CDN_URL, handle=self.handle, security=self.security)
+        return self._build_url()
 
-    @property
-    def security(self):
-        """
-        Returns the security object associated with the instance (if any)
+    def signed_url(self, security=None):
+        sec = security or self.security  # TODO test overwriting default security
+        if sec is None:
+            raise Exception('Ssecurity object is required to sign url')
+        return self._build_url(security=sec)
 
-        *returns* [Dict]
-
-        ```python
-        filelink.security
-        # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
-        ```
-        """
-        return self._security
-
-    @property
-    def apikey(self):
-        """
-        Returns the API key associated with the instance
-
-        *returns* [String]
-
-        ```python
-        filelink.apikey
-        # YOUR_API_KEY
-        ```
-        """
-        return self._apikey
-
-    @apikey.setter
-    def apikey(self, apikey):
-        self._apikey = apikey
+    def _build_url(self, security=None):
+        url_elements = [config.CDN_URL, self.handle]
+        if security is not None:
+            url_elements.insert(-1, security.as_url_string())
+        return '/'.join(url_elements)

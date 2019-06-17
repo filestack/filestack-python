@@ -4,6 +4,7 @@ from collections import defaultdict
 import pytest
 
 from filestack import __version__
+from filestack import Security
 from filestack.utils.intelligent_ingestion import upload_part, filestack_request, upload
 
 
@@ -135,7 +136,7 @@ def test_wait_for_complete(fs_request, upload_part, post_mock, sleep_mock):
         'uri': 'upload-uri', 'region': 'upload-region', 'upload_id': 'upload-id',
         'location_url': 'upload-loc-url'
     })
-    security = {'policy': b'fspolicy', 'signature': 'fssignature'}
+    security = Security({'expires': 999}, 'secret')
     upload_params = {'filename': 'new-filename.mp4', 'path': 'some/new/path'}
     upload('AAApikeyz', 'tests/data/doom.mp4', 's3', upload_params, security)
     assert post_mock.call_count == 4
@@ -144,5 +145,5 @@ def test_wait_for_complete(fs_request, upload_part, post_mock, sleep_mock):
     assert url == 'https://upload.filestackapi.com/multipart/start'
     assert request_data['store']['path'] == 'some/new/path'
     assert request_data['filename'] == 'new-filename.mp4'
-    assert request_data['policy'] == 'fspolicy'
-    assert request_data['signature'] == 'fssignature'
+    assert request_data['policy'] == 'eyJleHBpcmVzIjogOTk5fQ=='
+    assert request_data['signature'] == 'c0b1b4d794f867287eedb34e477805aa7f5e1c9d1ec24fc55a085608b79e65fa'

@@ -1,14 +1,9 @@
-import os
-import re
 import hmac
-import json
 import hashlib
-import requests
-import mimetypes
 
 import filestack.models
+from filestack import config
 from filestack.uploads.external_url import upload_external_url
-from filestack.config import API_URL, CDN_URL, STORE_PATH, HEADERS
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils, upload_utils, intelligent_ingestion
 
@@ -81,7 +76,7 @@ class Client:
         client.zip('/path/to/file/destination', ['files'])
         ```
         """
-        zip_url = "{}/{}/zip/[{}]".format(CDN_URL, self.apikey, ','.join(files))
+        zip_url = "{}/{}/zip/[{}]".format(config.CDN_URL, self.apikey, ','.join(files))
         with open(destination_path, 'wb') as new_file:
             response = utils.make_call(zip_url, 'get')
             if response.ok:

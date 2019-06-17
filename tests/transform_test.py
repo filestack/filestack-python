@@ -18,7 +18,6 @@ def transform():
 def test_sanity(transform):
     assert transform.apikey == APIKEY
     assert transform.external_url == EXTERNAL_URL
-    assert hasattr(transform, 'delete')
 
 
 def test_resize(transform):

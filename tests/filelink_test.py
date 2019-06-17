@@ -1,14 +1,14 @@
 import pytest
 
 from base64 import b64encode
-from filestack import Filelink, security
+from filestack import Filelink, Security
 from filestack.config import CDN_URL
 from httmock import urlmatch, HTTMock, response
 from trafaret import DataError
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
-SECURITY = security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
+SECURITY = Security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
 
 
 @pytest.fixture
@@ -23,21 +23,6 @@ def secure_filelink():
 
 def test_handle(filelink):
     assert filelink.handle == HANDLE
-
-
-def test_apikey_default():
-    filelink_default = Filelink(HANDLE)
-    assert filelink_default.apikey is None
-
-
-def test_api_get(filelink):
-    assert APIKEY == filelink.apikey
-
-
-def test_api_set(filelink):
-    NEW_APIKEY = 'ANOTHER_APIKEY'
-    filelink.apikey = NEW_APIKEY
-    assert NEW_APIKEY == filelink.apikey
 
 
 def test_url(filelink):
@@ -86,17 +71,6 @@ def test_get_content_params(filelink):
         content = filelink.get_content(params={'dl': True})
 
     assert content == b'SOMEBYTESCONTENT'
-
-
-def test_delete(filelink):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='delete', scheme='https')
-    def test_delete(url, request):
-        return response(200)
-
-    with HTTMock(test_delete):
-        delete_response = filelink.delete()
-
-    assert delete_response.status_code
 
 
 def test_get_content_bad_params(filelink):
@@ -165,17 +139,3 @@ def test_overwrite_bad_params(secure_filelink):
 def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
-
-
-def test_tags(secure_filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
-    def tag_request(url, request):
-        return response(200, {'tags': {'auto': {'tag': 100}}})
-
-    with HTTMock(tag_request):
-        tag_response = secure_filelink.tags()
-        assert tag_response['tags']['auto']['tag'] == 100
-
-
-def test_unsecure_tags(filelink):
-    pytest.raises(Exception, filelink.tags)

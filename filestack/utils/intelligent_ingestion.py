@@ -123,8 +123,8 @@ def upload(apikey, filepath, storage, params=None, security=None):
 
     if security:
         payload.update({
-            'policy': security['policy'].decode('utf-8'),
-            'signature': security['signature']
+            'policy': security.policy_b64,
+            'signature': security.signature
         })
 
     start_response = filestack_request(config.MULTIPART_START_URL, payload).json()

@@ -90,36 +90,6 @@ class CommonMixin(object):
                                    security=self.security)
         return response.json()
 
-    def delete(self, params=None):
-        """
-        You may delete any file you have uploaded, either through a Filelink returned from the client or one you have initialized yourself.
-        This returns a response of success or failure. This action requires security.abs
-
-        *returns* [requests.response]
-
-        ```python
-        from filestack import Client, security
-
-        # a policy requires at least an expiry
-        policy = {'expiry': 56589012}
-        sec = security(policy, 'APP_SECRET')
-
-        client =  Client('API_KEY', security=sec)
-        filelink = client.upload(filepath='/path/to/file/foo.txt')
-        response = filelink.delete()
-        ```
-        """
-        if params:
-            params['key'] = self.apikey
-        else:
-            params = {'key': self.apikey}
-        return utils.make_call(API_URL, 'delete',
-                               path=FILE_PATH,
-                               handle=self.handle,
-                               params=params,
-                               security=self.security,
-                               transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
-
     def overwrite(self, url=None, filepath=None, params=None):
         """
         You may overwrite any Filelink by supplying a new file. The Filehandle will remain the same.

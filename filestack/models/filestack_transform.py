@@ -2,6 +2,7 @@ import json
 import re
 
 import filestack.models
+from filestack import config
 
 from filestack.mixins import ImageTransformationMixin, CommonMixin
 from filestack.utils import utils
@@ -16,6 +17,8 @@ class Transform(ImageTransformationMixin, CommonMixin):
     Transform objects can be chained to build up multi-task transform URLs, each one saved in
     self._transformation_tasks
     """
+
+    # TODO - should this class have a delete() method?
 
     def __init__(self, apikey=None, handle=None, external_url=None, security=None):
         """
@@ -95,9 +98,7 @@ class Transform(ImageTransformationMixin, CommonMixin):
     @property
     def url(self):
         """
-        Returns the URL for the current transformation, which can be used
-        to retrieve the file. If security is enabled, signature and policy parameters will
-        be included
+        Returns the URL for the current transformation
 
         *returns* [String]
 
@@ -107,10 +108,27 @@ class Transform(ImageTransformationMixin, CommonMixin):
         # https://cdn.filestackcontent.com/TRANSFORMS/FILE_HANDLE
         ```
         """
-        return utils.get_transform_url(
-            self._transformation_tasks, external_url=self.external_url,
-            handle=self.handle, security=self.security, apikey=self.apikey
-        )
+        return self._build_url()
+
+    def signed_url(self, security=None):
+        sec = security or self.security  # TODO test overwriting default security
+        if sec is None:
+            raise Exception('Ssecurity object is required to sign url')
+        return self._build_url(security=sec)
+
+    def _build_url(self, security=None):
+        url_elements = [config.CDN_URL, self.handle or self._external_url]
+
+        if self._transformation_tasks:
+            tasks_str = '/'.join(self._transformation_tasks)
+            url_elements.insert(1, tasks_str)
+
+        if self._external_url:
+            url_elements.insert(1, self.apikey)
+
+        if security is not None:
+            url_elements.insert(-1, security.as_url_string())
+        return '/'.join(url_elements)
 
     def store(self, filename=None, location=None, path=None, container=None, region=None, access=None, base64decode=None):
         """

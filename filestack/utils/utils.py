@@ -5,7 +5,7 @@ import requests
 
 def get_security_path(url, security):
     return '{url_path}?signature={signature}&policy={policy}'.format(
-        url_path=url, policy=security['policy'].decode('utf-8'), signature=security['signature']
+        url_path=url, policy=security.policy_b64, signature=security.signature
     )
 
 
@@ -36,7 +36,8 @@ def get_transform_url(tasks, external_url=None, handle=None, security=None, apik
         tasks.pop(index)
         tasks.insert(0, 'debug')
 
-    url_components.append('/'.join(tasks))
+    if tasks:
+        url_components.append('/'.join(tasks))
 
     if security:
         url_components.append('security=policy:{},signature:{}'.format(

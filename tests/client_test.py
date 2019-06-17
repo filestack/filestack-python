@@ -27,7 +27,7 @@ class MockResponse:
 
 @pytest.fixture
 def client():
-    return Client(APIKEY, security={'policy': b64encode(b'somepolicy'), 'signature': 'somesignature'})
+    return Client(APIKEY)
 
 
 def test_api_set(client):
@@ -60,7 +60,7 @@ def test_store_filepath(upload_mock, client):
     assert filelink.handle == HANDLE
     upload_mock.assert_called_once_with(
         'APIKEY', 'tests/data/bird.jpg', 'S3', params=None,
-        security={'policy': b'c29tZXBvbGljeQ==', 'signature': 'somesignature'}, upload_processes=None
+        security=None, upload_processes=None
     )
 
 
@@ -95,7 +95,6 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
     workflow_ids = ['workflow-id-1', 'workflow-id-2']
     store_params = {'workflows': workflow_ids}
     put_mock.return_value = MockResponse()
-
     post_mock.side_effect = [
         MockResponse(),
         MockResponse(),

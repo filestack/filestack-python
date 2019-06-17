@@ -27,8 +27,8 @@ def multipart_request(url, payload, params=None, security=None):
 
     if security:
         payload.update({
-            'policy': security['policy'].decode('utf-8'),
-            'signature': security['signature']
+            'policy': security.policy_b64,
+            'signature': security.signature
         })
 
     response = requests.post(url, json=payload, headers=HEADERS)
