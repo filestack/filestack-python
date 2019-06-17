@@ -10,8 +10,8 @@ from filestack.utils import utils, upload_utils, intelligent_ingestion
 
 class Client:
     """
-    The hub for all Filestack operations. Creates Filelinks, converts external to transform objects,
-    takes a URL screenshot and returns zipped files.
+    The hub for all Filestack operations. Creates Filelinks, converts external urls
+    to Transform objects, takes a URL screenshot and returns zipped files.
     """
     def __init__(self, apikey, security=None, storage='S3'):
         self._apikey = apikey
@@ -121,24 +121,16 @@ class Client:
         if store_params:  # Check the structure of parameters
             STORE_SCHEMA.check(store_params)
 
+        upload_method = upload_utils.multipart_upload
         if intelligent:
-            response = intelligent_ingestion.upload(
-                self.apikey, filepath, self.storage, params=store_params, security=self.security
-            )
+            upload_method = intelligent_ingestion.upload
 
-        else:
-            response = upload_utils.multipart_upload(
-                self.apikey, filepath, self.storage,
-                upload_processes=upload_processes, params=store_params, security=self.security
-            )
-            handle = response['handle']
-            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
+        response_json = upload_method(
+            self.apikey, filepath, self.storage, params=store_params, security=self.security
+        )
 
-        if response.ok:
-            handle = response.json()['handle']
-            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
-        else:
-            raise Exception('Invalid API response')
+        handle = response_json['handle']
+        return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
 
     @staticmethod
     def verify_webhook_signature(secret, body, headers=None):

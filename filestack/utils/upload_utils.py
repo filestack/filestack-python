@@ -78,11 +78,10 @@ def upload_chunk(apikey, filename, filepath, storage, start_response, job):
     return {'part_number': job['part'], 'etag': resp.headers['ETag']}
 
 
-def multipart_upload(apikey, filepath, storage, upload_processes=None, params=None, security=None):
+def multipart_upload(apikey, filepath, storage, params=None, security=None):
     params = params or {}
 
-    if upload_processes is None:
-        upload_processes = multiprocessing.cpu_count()
+    upload_processes = multiprocessing.cpu_count()
 
     filename = params.get('filename')
     mimetype = params.get('mimetype')

@@ -8,21 +8,11 @@ from httmock import urlmatch, HTTMock, response
 
 import filestack.models
 from filestack import Client, Filelink, Transform
+from tests.helpers import DummyHttpResponse
 
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
-
-
-class MockResponse:
-    ok = True
-    headers = {'ETag': 'some_tag'}
-
-    def __init__(self, json=None):
-        self.json_data = defaultdict(str) if json is None else json
-
-    def json(self):
-        return self.json_data
 
 
 @pytest.fixture
@@ -59,8 +49,7 @@ def test_store_filepath(upload_mock, client):
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
     upload_mock.assert_called_once_with(
-        'APIKEY', 'tests/data/bird.jpg', 'S3', params=None,
-        security=None, upload_processes=None
+        'APIKEY', 'tests/data/bird.jpg', 'S3', params=None, security=None
     )
 
 
@@ -94,11 +83,11 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
 
     workflow_ids = ['workflow-id-1', 'workflow-id-2']
     store_params = {'workflows': workflow_ids}
-    put_mock.return_value = MockResponse()
+    put_mock.return_value = DummyHttpResponse(headers={'ETag': 'some_tag'})
     post_mock.side_effect = [
-        MockResponse(),
-        MockResponse(),
-        MockResponse(json={'handle': 'new_handle'})
+        DummyHttpResponse(json_dict=defaultdict(str)),
+        DummyHttpResponse(json_dict=defaultdict(str)),
+        DummyHttpResponse(json_dict={'handle': 'new_handle'})
     ]
 
     new_filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)

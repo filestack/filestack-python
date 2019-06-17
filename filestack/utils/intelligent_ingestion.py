@@ -163,4 +163,4 @@ def upload(apikey, filepath, storage, params=None, security=None):
         log.error('Did not receive a correct complete response: %s. Content %s', complete_response, complete_response.content)
         raise
 
-    return complete_response
+    return complete_response.json()
