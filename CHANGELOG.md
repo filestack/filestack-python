@@ -1,5 +1,10 @@
 # Filestack-Python Changelog
 
+
+### 2.8.0 (June 17th, 2019)
+- Simplified FII uploads
+- Updated uploads to use JSON-based API
+
 ### 2.7.0 (May 30th, 2019)
 - Refactored and renamed webhook verification method
 - Added new transformation tasks: callbak, pdf_info and pdf_convert
