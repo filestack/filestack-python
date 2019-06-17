@@ -7,7 +7,7 @@ import requests
 import mimetypes
 
 import filestack.models
-
+from filestack.uploads.external_url import upload_external_url
 from filestack.config import API_URL, CDN_URL, STORE_PATH, HEADERS
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
 from filestack.utils import utils, upload_utils, intelligent_ingestion
@@ -62,7 +62,7 @@ class Client:
 
         url_task = utils.return_transform_task('urlscreenshot', params)
 
-        new_transform = filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        new_transform = filestack.models.Transform(self.apikey, security=self.security, external_url=external_url)
         new_transform._transformation_tasks.append(url_task)
 
         return new_transform
@@ -94,7 +94,11 @@ class Client:
 
             return response.text
 
-    def upload(self, url=None, filepath=None, multipart=True, params=None, upload_processes=None, intelligent=False):
+    def upload_url(self, url, store_params=None):
+        handle = upload_external_url(url, self.apikey, store_params)
+        return filestack.models.Filelink(handle=handle)
+
+    def upload(self, filepath=None,  store_params=None, upload_processes=None, intelligent=False):
         """
         Uploads a file either through a local filepath or external_url.
         Uses multipart by default and Intelligent Ingestion by default (if enabled).
@@ -119,81 +123,24 @@ class Client:
         ```
         """
 
-        if params:  # Check the structure of parameters
-            STORE_SCHEMA.check(params)
+        if store_params:  # Check the structure of parameters
+            STORE_SCHEMA.check(store_params)
 
-        if filepath and url:  # Raise an error for using both filepath and external url
-            raise ValueError("Cannot upload file and external url at the same time")
+        if intelligent:
+            response = intelligent_ingestion.upload(
+                self.apikey, filepath, self.storage, params=store_params, security=self.security
+            )
 
-        if filepath:  # Uploading from local drive
-            if intelligent:
-                response = intelligent_ingestion.upload(
-                    self.apikey, filepath, self.storage, params=params, security=self.security
-                )
-
-            elif multipart:
-                response = upload_utils.multipart_upload(
-                    self.apikey, filepath, self.storage,
-                    upload_processes=upload_processes, params=params, security=self.security
-                )
-                handle = response['handle']
-                return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
-
-            else:  # Uploading with multipart=False
-                filename = os.path.basename(filepath)
-                mimetype = mimetypes.guess_type(filepath)[0]
-                files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
-
-                if params:
-                    params['key'] = self.apikey
-                else:
-                    params = {'key': self.apikey}
-
-                path = '{path}/{storage}'.format(path=STORE_PATH, storage=self.storage)
-
-                if self.security:
-                    path = "{path}?policy={policy}&signature={signature}".format(
-                        path=path, policy=self.security['policy'].decode('utf-8'),
-                        signature=self.security['signature']
-                    )
-
-                response = utils.make_call(
-                    API_URL, 'post', path=path, params=params, files=files
-                )
-
-        else:  # Uploading from an external URL
-            tasks = []
-            request_url_list = []
-
-            if utils.store_params_checker(params):
-                store_task = utils.store_params_maker(params)
-                tasks.append(store_task)
-
-            if self.security:
-                tasks.append(
-                    'security=p:{policy},s:{signature}'.format(
-                        policy=self.security['policy'].decode('utf-8'),
-                        signature=self.security['signature']
-                    )
-                )
-
-            tasks = '/'.join(tasks)
-
-            if tasks:
-                request_url_list.extend((CDN_URL, self.apikey, tasks, url))
-            else:
-                request_url_list.extend((CDN_URL, self.apikey, url))
-
-            request_url = '/'.join(request_url_list)
-
-            response = requests.post(request_url, headers=HEADERS)
+        else:
+            response = upload_utils.multipart_upload(
+                self.apikey, filepath, self.storage,
+                upload_processes=upload_processes, params=store_params, security=self.security
+            )
+            handle = response['handle']
+            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
 
         if response.ok:
-            response = response.json()
-            handle = re.match(
-                r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
-                response['url']
-            ).group(1)
+            handle = response.json()['handle']
             return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
         else:
             raise Exception('Invalid API response')

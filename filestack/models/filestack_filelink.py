@@ -6,8 +6,10 @@ from filestack.utils.utils import get_url, make_call, get_transform_url
 
 class Filelink(ImageTransformationMixin, CommonMixin):
     """
-    Filelinks are object representations of Filestack Filehandles. You can perform all actions that is allowed through our REST API,
-    including downloading, deleting, overwriting and retrieving metadata. You can also get image tags, SFW filters, and directly
+    Filelinks are object representations of Filestack Filehandles.
+    You can perform all actions that is allowed through our REST API,
+    including downloading, deleting, overwriting and retrieving metadata.
+    You can also get image tags, SFW filters, and directly
     call any of our available transformations.
     """
 
@@ -15,6 +17,9 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         self._apikey = apikey
         self._handle = handle
         self._security = security
+
+    def __repr__(self):
+        return '<Filelink {}>'.format(self.handle)
 
     def tags(self):
         """

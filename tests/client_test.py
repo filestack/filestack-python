@@ -1,12 +1,13 @@
-import filestack.models
-import pytest
-
-from mock import patch
+from unittest.mock import patch
 from base64 import b64encode
-from filestack import Client, Filelink, Transform
-from httmock import urlmatch, HTTMock, response
-from trafaret import DataError
 from collections import defaultdict
+
+import pytest
+from trafaret import DataError
+from httmock import urlmatch, HTTMock, response
+
+import filestack.models
+from filestack import Client, Filelink, Transform
 
 
 APIKEY = 'APIKEY'
@@ -38,38 +39,29 @@ def test_wrong_storage():
     pytest.raises(DataError, Client, **kwargs)
 
 
-def test_store(client):
+def test_store_external_url(client):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
     def api_store(url, request):
-        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
+        return response(200, {'handle': HANDLE})
 
     with HTTMock(api_store):
-        filelink = client.upload(url="someurl", params={'filename': 'something.jpg'}, multipart=False)
+        filelink = client.upload_url(url="someurl", store_params={'filename': 'something.jpg'})
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
 
 
-def test_store_filepath(client):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/store', method='post', scheme='https')
-    def api_store(url, request):
-        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
-
-    with HTTMock(api_store):
-        filelink = client.upload(filepath="tests/data/bird.jpg", multipart=False)
+@patch('filestack.models.filestack_client.upload_utils.multipart_upload')
+def test_store_filepath(upload_mock, client):
+    upload_mock.return_value = {'handle': HANDLE}
+    filelink = client.upload(filepath='tests/data/bird.jpg')
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
-
-
-def test_wrong_store_params(client):
-    kwargs = {'params': {'call': 'someparameter'}, 'url': 'someurl'}
-    pytest.raises(DataError, client.upload, **kwargs)
-
-
-def test_bad_store_params(client):
-    kwargs = {'params': {'access': True}, 'url': 'someurl'}
-    pytest.raises(DataError, client.upload, **kwargs)
+    upload_mock.assert_called_once_with(
+        'APIKEY', 'tests/data/bird.jpg', 'S3', params=None,
+        security={'policy': b'c29tZXBvbGljeQ==', 'signature': 'somesignature'}, upload_processes=None
+    )
 
 
 def test_url_screenshot(client):
@@ -96,29 +88,6 @@ def test_zip(client):
         assert zip_response.status_code == 200
 
 
-@pytest.mark.parametrize('store_params, expected_url_part', [
-    [{'filename': 'image.jpg'}, 'filename:image.jpg'],
-    [{'location': 'S3'}, 'location:S3'],
-    [{'path': 'some_path'}, 'path:some_path'],
-    [{'container': 'container_id'}, 'container:container_id'],
-    [{'region': 'us-east-1'}, 'region:us-east-1'],
-    [{'access': 'public'}, 'access:public'],
-    [{'base64decode': True}, 'base64decode:True'],
-    [{'workflows': ['workflows_id_1']}, 'workflows:[%22workflows_id_1%22]']
-])
-def test_url_store_task(store_params, expected_url_part, client):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
-    def api_store(url, request):
-        assert expected_url_part in request.url
-        return response(200, {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE)})
-
-    with HTTMock(api_store):
-        filelink = client.upload(url="someurl", params=store_params, multipart=False)
-
-    assert isinstance(filelink, Filelink)
-    assert filelink.handle == HANDLE
-
-
 @patch('requests.put')
 @patch('requests.post')
 def test_upload_multipart_workflows(post_mock, put_mock, client):
@@ -133,11 +102,7 @@ def test_upload_multipart_workflows(post_mock, put_mock, client):
         MockResponse(json={'handle': 'new_handle'})
     ]
 
-    new_filelink = client.upload(
-        filepath='tests/data/bird.jpg',
-        params=store_params,
-        multipart=True
-    )
+    new_filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)
 
     post_args, post_kwargs = post_mock.call_args
     assert post_kwargs['json']['store']['workflows'] == workflow_ids

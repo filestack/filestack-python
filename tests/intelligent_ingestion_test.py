@@ -1,4 +1,4 @@
-from mock import patch, call, ANY
+from unittest.mock import patch, call, ANY
 from collections import defaultdict
 
 import pytest
