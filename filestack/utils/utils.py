@@ -9,13 +9,6 @@ def get_security_path(url, security):
     )
 
 
-def store_params(params):
-    return {
-        'store_{}'.format(key): value for key, value in params.items()
-        if key in ('path', 'location', 'region', 'container', 'access')
-    }
-
-
 def get_url(base, handle=None, path=None, security=None):
     url_components = [base]
 
