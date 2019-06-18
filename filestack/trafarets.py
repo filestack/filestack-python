@@ -1,13 +1,6 @@
 import trafaret as t
 
 
-CONTENT_DOWNLOAD_SCHEMA = t.Dict({
-    'dl': t.Bool(),
-    'cache': t.Bool()
-})
-
-CONTENT_DOWNLOAD_SCHEMA.make_optional('*')
-
 OVERWRITE_SCHEMA = t.Dict({
     'url': t.String(),
     'base64decode': t.Bool()

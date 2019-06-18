@@ -1,10 +1,11 @@
 import mimetypes
 import os
 
-import filestack.models
+import requests
 
+import filestack.models
 from filestack.config import CDN_URL, API_URL, FILE_PATH
-from filestack.trafarets import CONTENT_DOWNLOAD_SCHEMA, OVERWRITE_SCHEMA
+from filestack.trafarets import OVERWRITE_SCHEMA
 from filestack.utils import utils
 
 
@@ -34,7 +35,7 @@ class CommonMixin(object):
             raise Exception('Ssecurity object is required to sign url')
         return self._build_url(security=sec)
 
-    def download(self, destination_path, params=None):
+    def download(self, destination_path, security=None):
         """
         Downloads a file to the given local path and returns the size of the downloaded file if successful
 
@@ -49,26 +50,22 @@ class CommonMixin(object):
         response = filelink.download('path/to/file')
         ```
         """
-        if params:
-            CONTENT_DOWNLOAD_SCHEMA.check(params)
-        with open(destination_path, 'wb') as new_file:
-            response = utils.make_call(CDN_URL, 'get',
-                                       handle=self.handle,
-                                       params=params,
-                                       security=self.security,
-                                       transform_url=(self.url if isinstance(self, filestack.models.Transform) else None))
+        sec = security or self.security
+        total_bytes = 0
 
-            if response.ok:
-                for chunk in response.iter_content(1024):
-                    if not chunk:
-                        break
-                    new_file.write(chunk)
+        with open(destination_path, 'wb') as f:
+            response = requests.get(self._build_url(security=sec), stream=True)
+            if not response.ok:
+                raise Exception(response.text)
+            for data_chunk in response.iter_content(5 * 1024 ** 2):
+                f.write(data_chunk)
+                total_bytes += len(data_chunk)
 
-            return response
+        return total_bytes
 
-    def get_content(self, params=None):
+    def get_content(self, security=None):
         """
-        Returns the raw byte content of a given Filelink
+        Returns the raw byte content of a given object
 
         *returns* [Bytes]
         ```python
@@ -79,14 +76,10 @@ class CommonMixin(object):
         byte_content = filelink.get_content()
         ```
         """
-        if params:
-            CONTENT_DOWNLOAD_SCHEMA.check(params)
-        response = utils.make_call(CDN_URL, 'get',
-                                   handle=self.handle,
-                                   params=params,
-                                   security=self.security,
-                                   transform_url=(self.url if isinstance(self, filestack.models.Transform) else None))
-
+        sec = security or self.security
+        response = requests.get(self._build_url(security=sec))
+        if not response.ok:
+            raise Exception(response.text)
         return response.content
 
     def get_metadata(self, params=None):

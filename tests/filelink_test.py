@@ -62,37 +62,6 @@ def test_get_metadata(filelink):
     assert metadata['filename'] == 'somefile.jpg'
 
 
-def test_get_content_params(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
-    def api_download(url, request):
-        return response(200, b'SOMEBYTESCONTENT')
-
-    with HTTMock(api_download):
-        content = filelink.get_content(params={'dl': True})
-
-    assert content == b'SOMEBYTESCONTENT'
-
-
-def test_get_content_bad_params(filelink):
-    kwargs = {'params': {'call': ['read']}}
-    pytest.raises(DataError, filelink.get_content, **kwargs)
-
-
-def test_get_content_bad_param_value(filelink):
-    kwargs = {'params': {'dl': 'true'}}
-    pytest.raises(DataError, filelink.get_content, **kwargs)
-
-
-def test_download_bad_params(filelink):
-    kwargs = {'params': {'call': ['read']}}
-    pytest.raises(DataError, filelink.download, 'somepath', **kwargs)
-
-
-def test_download_bad_param_value(filelink):
-    kwargs = {'params': {'dl': 'true'}}
-    pytest.raises(DataError, filelink.download, 'somepath', **kwargs)
-
-
 def test_download(filelink):
     @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
@@ -100,8 +69,8 @@ def test_download(filelink):
             return response(200, b64encode(f.read()))
 
     with HTTMock(api_download):
-        download_response = filelink.download('tests/data/test_download.jpg')
-        assert download_response.status_code == 200
+        file_size = filelink.download('tests/data/test_download.jpg')
+        assert file_size == 26392
 
 
 def test_overwrite_content(secure_filelink):
