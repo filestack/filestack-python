@@ -94,7 +94,7 @@ def test_download_bad_param_value(filelink):
 
 
 def test_download(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
         with open('tests/data/bird.jpg', 'rb') as f:
             return response(200, b64encode(f.read()))

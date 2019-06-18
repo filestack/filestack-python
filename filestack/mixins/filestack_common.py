@@ -12,6 +12,28 @@ class CommonMixin(object):
     """
     Contains all functions related to the manipulation of Filelinks
     """
+
+    @property
+    def url(self):
+        """
+        Returns object's URL
+
+        *returns* [String]
+
+        ```python
+        filelink = client.upload(filepath='/path/to/file')
+        filelink.url
+        # https://cdn.filestackcontent.com/FILE_HANDLE
+        ```
+        """
+        return self._build_url()
+
+    def signed_url(self, security=None):
+        sec = security or self.security  # TODO test overwriting default security
+        if sec is None:
+            raise Exception('Ssecurity object is required to sign url')
+        return self._build_url(security=sec)
+
     def download(self, destination_path, params=None):
         """
         Downloads a file to the given local path and returns the size of the downloaded file if successful

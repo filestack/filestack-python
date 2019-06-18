@@ -92,29 +92,7 @@ class Transform(ImageTransformationMixin, CommonMixin):
         # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
         ```
         """
-
         return self._security
-
-    @property
-    def url(self):
-        """
-        Returns the URL for the current transformation
-
-        *returns* [String]
-
-        ```python
-        transform = client.upload(filepath='/path/to/file')
-        transform.url()
-        # https://cdn.filestackcontent.com/TRANSFORMS/FILE_HANDLE
-        ```
-        """
-        return self._build_url()
-
-    def signed_url(self, security=None):
-        sec = security or self.security  # TODO test overwriting default security
-        if sec is None:
-            raise Exception('Ssecurity object is required to sign url')
-        return self._build_url(security=sec)
 
     def _build_url(self, security=None):
         url_elements = [config.CDN_URL, self.handle or self._external_url]

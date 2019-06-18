@@ -27,27 +27,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     # TODO - add tags & stw for filelink
     # TODO - add delete() method
 
-    @property
-    def url(self):
-        """
-        Returns filelink's URL
-
-        *returns* [String]
-
-        ```python
-        filelink = client.upload(filepath='/path/to/file')
-        filelink.url
-        # https://cdn.filestackcontent.com/FILE_HANDLE
-        ```
-        """
-        return self._build_url()
-
-    def signed_url(self, security=None):
-        sec = security or self.security  # TODO test overwriting default security
-        if sec is None:
-            raise Exception('Ssecurity object is required to sign url')
-        return self._build_url(security=sec)
-
     def _build_url(self, security=None):
         url_elements = [config.CDN_URL, self.handle]
         if security is not None:

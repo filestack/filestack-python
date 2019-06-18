@@ -93,7 +93,7 @@ class Client:
         handle = upload_external_url(url, self.apikey, store_params)
         return filestack.models.Filelink(handle=handle)
 
-    def upload(self, filepath=None,  store_params=None, upload_processes=None, intelligent=False):
+    def upload(self, filepath=None,  store_params=None, intelligent=False):
         """
         Uploads a file either through a local filepath or external_url.
         Uses multipart by default and Intelligent Ingestion by default (if enabled).
