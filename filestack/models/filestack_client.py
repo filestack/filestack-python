@@ -1,6 +1,8 @@
 import hmac
 import hashlib
 
+import requests
+
 import filestack.models
 from filestack import config
 from filestack.uploads.external_url import upload_external_url
@@ -62,7 +64,7 @@ class Client:
 
         return new_transform
 
-    def zip(self, destination_path, files):
+    def zip(self, destination_path, file_handles):
         """
         Takes array of files and downloads a compressed ZIP archive
         to provided path
@@ -76,18 +78,20 @@ class Client:
         client.zip('/path/to/file/destination', ['files'])
         ```
         """
-        zip_url = "{}/{}/zip/[{}]".format(config.CDN_URL, self.apikey, ','.join(files))
-        with open(destination_path, 'wb') as new_file:
-            response = utils.make_call(zip_url, 'get')
-            if response.ok:
-                for chunk in response.iter_content(1024):
-                    if not chunk:
-                        break
-                    new_file.write(chunk)
+        # TODO - should this use security too?
+        zip_url = '{}/{}/zip/[{}]'.format(config.CDN_URL, self.apikey, ','.join(file_handles))
+        total_bytes = 0
 
-                return response
+        with open(destination_path, 'wb') as f:
+            response = requests.get(zip_url, stream=True)
+            if not response.ok:
+                raise Exception(response.text)
 
-            return response.text
+            for chunk in response.iter_content(5 * 1024 ** 2):
+                f.write(chunk)
+                total_bytes += len(chunk)
+
+        return total_bytes
 
     def upload_url(self, url, store_params=None):
         handle = upload_external_url(url, self.apikey, store_params)

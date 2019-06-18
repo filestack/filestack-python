@@ -1,10 +1,12 @@
-import pytest
-
 from base64 import b64encode
+from unittest.mock import mock_open, patch
+
+import pytest
+from trafaret import DataError
+from httmock import urlmatch, HTTMock, response
+
 from filestack import Filelink, Security
 from filestack.config import CDN_URL
-from httmock import urlmatch, HTTMock, response
-from trafaret import DataError
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
@@ -65,12 +67,14 @@ def test_get_metadata(filelink):
 def test_download(filelink):
     @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
     def api_download(url, request):
-        with open('tests/data/bird.jpg', 'rb') as f:
-            return response(200, b64encode(f.read()))
+        return response(200, b'file-content')
 
-    with HTTMock(api_download):
-        file_size = filelink.download('tests/data/test_download.jpg')
-        assert file_size == 26392
+    m = mock_open()
+    with patch('filestack.mixins.filestack_common.open', m):
+        with HTTMock(api_download):
+            file_size = filelink.download('tests/data/test_download.jpg')
+            assert file_size == 12
+    m().write.assert_called_once_with(b'file-content')
 
 
 def test_overwrite_content(secure_filelink):

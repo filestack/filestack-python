@@ -1,5 +1,4 @@
-from unittest.mock import patch
-from base64 import b64encode
+from unittest.mock import patch, mock_open
 from collections import defaultdict
 
 import pytest
@@ -44,13 +43,11 @@ def test_store_external_url(client):
 @patch('filestack.models.filestack_client.upload_utils.multipart_upload')
 def test_store_filepath(upload_mock, client):
     upload_mock.return_value = {'handle': HANDLE}
-    filelink = client.upload(filepath='tests/data/bird.jpg')
+    filelink = client.upload(filepath='path/to/image.jpg')
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
-    upload_mock.assert_called_once_with(
-        'APIKEY', 'tests/data/bird.jpg', 'S3', params=None, security=None
-    )
+    upload_mock.assert_called_once_with('APIKEY', 'path/to/image.jpg', 'S3', params=None, security=None)
 
 
 def test_url_screenshot(client):
@@ -68,13 +65,15 @@ def test_transform_external(client):
 def test_zip(client):
     @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
     def api_zip(url, request):
-        with open('tests/data/bird.jpg', 'rb') as f:
-            return response(200, b64encode(f.read()))
+        return response(200, b'zip-bytes')
 
-    with HTTMock(api_zip):
-        zip_response = client.zip('test.zip', 'tests/data/bird.jpg')
+    m = mock_open()
+    with patch('filestack.models.filestack_client.open', m):
+        with HTTMock(api_zip):
+            zip_size = client.zip('test.zip', ['handle1', 'handle2'])
 
-        assert zip_response.status_code == 200
+    assert zip_size == 9
+    m().write.assert_called_once_with(b'zip-bytes')
 
 
 @patch('requests.put')
