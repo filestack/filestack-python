@@ -1,4 +1,3 @@
-from base64 import b64encode
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -53,7 +52,7 @@ def test_bad_call(filelink):
 
 
 def test_get_metadata(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent.com', method='get', scheme='https')
+    @urlmatch(netloc=r'cdn.filestackcontent.com', path=r'/\w+/metadata', method='get', scheme='https')
     def api_metadata(url, request):
         return response(200, '{"filename": "somefile.jpg"}')
 

@@ -4,7 +4,7 @@ import os
 import requests
 
 import filestack.models
-from filestack.config import CDN_URL, API_URL, FILE_PATH
+from filestack.config import API_URL, FILE_PATH
 from filestack.trafarets import OVERWRITE_SCHEMA
 from filestack.utils import utils
 
@@ -81,29 +81,6 @@ class CommonMixin(object):
         if not response.ok:
             raise Exception(response.text)
         return response.content
-
-    def get_metadata(self, params=None):
-        """
-        Metadata provides certain information about a Filehandle, and you can specify which pieces
-        of information you will receive back by passing in optional parameters.
-
-        ```python
-        from filestack import Client
-
-        client =  Client('API_KEY')
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        metadata = filelink.get_metadata()
-        # or define specific metadata to receive
-        metadata = filelink.get_metadata({'filename': true})
-        ```
-        """
-        metadata_url = "{CDN_URL}/{handle}/metadata".format(
-            CDN_URL=CDN_URL, handle=self.handle
-        )
-        response = utils.make_call(metadata_url, 'get',
-                                   params=params,
-                                   security=self.security)
-        return response.json()
 
     def overwrite(self, url=None, filepath=None, params=None):
         """
