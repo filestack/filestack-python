@@ -40,14 +40,14 @@ def test_store_external_url(client):
     assert filelink.handle == HANDLE
 
 
-@patch('filestack.models.filestack_client.upload_utils.multipart_upload')
+@patch('filestack.models.filestack_client.multipart_upload')
 def test_store_filepath(upload_mock, client):
     upload_mock.return_value = {'handle': HANDLE}
     filelink = client.upload(filepath='path/to/image.jpg')
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
-    upload_mock.assert_called_once_with('APIKEY', 'path/to/image.jpg', 'S3', params=None, security=None)
+    upload_mock.assert_called_once_with('APIKEY', 'path/to/image.jpg', None, 'S3', params=None, security=None)
 
 
 def test_url_screenshot(client):

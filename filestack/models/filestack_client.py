@@ -7,7 +7,8 @@ import filestack.models
 from filestack import config
 from filestack.uploads.external_url import upload_external_url
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
-from filestack.utils import utils, upload_utils, intelligent_ingestion
+from filestack.utils import utils, intelligent_ingestion
+from filestack.uploads.multipart import multipart_upload
 
 
 class Client:
@@ -97,11 +98,9 @@ class Client:
         handle = upload_external_url(url, self.apikey, store_params)
         return filestack.models.Filelink(handle=handle)
 
-    def upload(self, filepath=None,  store_params=None, intelligent=False):
+    def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False):
         """
         Uploads a file either through a local filepath or external_url.
-        Uses multipart by default and Intelligent Ingestion by default (if enabled).
-        You can specify the number of multipart processes and pass in parameters.
 
         returns [Filestack.Filelink]
         ```python
@@ -125,12 +124,12 @@ class Client:
         if store_params:  # Check the structure of parameters
             STORE_SCHEMA.check(store_params)
 
-        upload_method = upload_utils.multipart_upload
+        upload_method = multipart_upload
         if intelligent:
             upload_method = intelligent_ingestion.upload
 
         response_json = upload_method(
-            self.apikey, filepath, self.storage, params=store_params, security=self.security
+            self.apikey, filepath, file_obj, self.storage, params=store_params, security=self.security
         )
 
         handle = response_json['handle']

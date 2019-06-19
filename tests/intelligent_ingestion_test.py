@@ -138,7 +138,7 @@ def test_wait_for_complete(fs_request, upload_part, post_mock, sleep_mock):
     })
     security = Security({'expires': 999}, 'secret')
     upload_params = {'filename': 'new-filename.mp4', 'path': 'some/new/path'}
-    upload('AAApikeyz', 'tests/data/doom.mp4', 's3', upload_params, security)
+    upload('AAApikeyz', 'tests/data/doom.mp4', None, 's3', upload_params, security)
     assert post_mock.call_count == 4
     req_args, req_kwargs = fs_request.call_args
     url, request_data = req_args

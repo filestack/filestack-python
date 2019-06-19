@@ -99,7 +99,7 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
     filestack_request(url, payload)
 
 
-def upload(apikey, filepath, storage, params=None, security=None):
+def upload(apikey, filepath, file_obj, storage, params=None, security=None):
     params = params or {}
 
     filename = params.get('filename') or os.path.split(filepath)[1]
@@ -160,7 +160,10 @@ def upload(apikey, filepath, storage, params=None, security=None):
         if complete_response.status_code == 200:
             break
     else:
-        log.error('Did not receive a correct complete response: %s. Content %s', complete_response, complete_response.content)
+        log.error(
+            'Did not receive a correct complete response: %s. Content %s',
+            complete_response, complete_response.content
+        )
         raise
 
     return complete_response.json()
