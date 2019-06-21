@@ -133,5 +133,4 @@ def multipart_upload(apikey, filepath, file_obj, storage, params=None, security=
 
     complete_url = 'https://{}/multipart/complete'.format(location_url)
     complete_response = multipart_request(complete_url, payload, params, security)
-    print("CC", complete_response)
     return complete_response

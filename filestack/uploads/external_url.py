@@ -1,18 +1,33 @@
+from collections import OrderedDict
+
 import requests
 
 from filestack import config
 
 
-def upload_external_url(url, apikey, store_params=None, security=None):
-    # TODO handle store_params
-    if security is not None:
-        request_url = '{}/{}/{}/store/{}'.format(
-            config.CDN_URL, apikey, security.as_url_string(), url
-        )
-    else:
-        request_url = '{}/{}/store/{}'.format(config.CDN_URL, apikey, url)
+def build_store_task(store_params):
+    if not store_params:
+        return 'store'
 
-    response = requests.post(request_url)
+    task_args = []
+    store_params = OrderedDict(sorted(store_params.items(), key=lambda t: t[0]))
+    for key, value in store_params.items():
+        if key in ('filename', 'location', 'path', 'container', 'region', 'access', 'base64decode', 'workflows'):
+            if key == 'workflows':
+                value = '[{}]'.format(','.join('"{}"'.format(item) for item in value))
+            task_args.append('{}:{}'.format(key, str(value).lower()))
+
+    return 'store={}'.format(','.join(task_args))
+
+
+def upload_external_url(url, apikey, store_params=None, security=None):
+    store_task = build_store_task(store_params or {})
+    url_elements = [config.CDN_URL, apikey, store_task, url]
+
+    if security is not None:
+        url_elements.insert(2, security.as_url_string())
+
+    response = requests.post('/'.join(url_elements))
 
     if not response.ok:
         raise Exception(response.text)

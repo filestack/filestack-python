@@ -84,27 +84,3 @@ def return_transform_task(transformation, params):
         transformation_url = transformation
 
     return transformation_url
-
-
-def store_params_maker(params):
-    store_task = []
-
-    for key, value in params.items():
-        if key in ('filename', 'location', 'path', 'container', 'region', 'access', 'base64decode'):
-            store_task.append('{key}:{value}'.format(key=key, value=value))
-
-        if key is 'workflows':
-            workflows = ','.join('"{}"'.format(item) for item in value)
-            store_task.append('workflows:[{workflows}]'.format(workflows=workflows))
-
-    return 'store=' + ','.join(store_task)
-
-
-def store_params_checker(params):
-    store_params_list = ['filename', 'location', 'path', 'container',
-                         'region', 'access', 'base64decode', 'workflows']
-
-    if any(key in params for key in store_params_list):
-        return True
-    else:
-        return False
