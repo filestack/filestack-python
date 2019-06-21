@@ -94,8 +94,8 @@ class Client:
 
         return total_bytes
 
-    def upload_url(self, url, store_params=None):
-        handle = upload_external_url(url, self.apikey, store_params)
+    def upload_url(self, url, store_params=None, security=None):
+        handle = upload_external_url(url, self.apikey, store_params, security=security or self.security)
         return filestack.models.Filelink(handle=handle)
 
     def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False):
