@@ -90,9 +90,9 @@ def store_params_maker(params):
 
     for key, value in params.items():
         if key in ('filename', 'location', 'path', 'container', 'region', 'access', 'base64decode'):
-            store_task.append('{key}:{value}'.format(key=key, value=value))
+            store_task.append('{}:{}'.format(key, str(value).lower()))
 
-        if key is 'workflows':
+        if key == 'workflows':
             workflows = ','.join('"{}"'.format(item) for item in value)
             store_task.append('workflows:[{workflows}]'.format(workflows=workflows))
 
