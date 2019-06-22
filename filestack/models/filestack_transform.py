@@ -108,29 +108,6 @@ class Transform(ImageTransformationMixin, CommonMixin):
             url_elements.insert(-1, security.as_url_string())
         return '/'.join(url_elements)
 
-    def store(self, filename=None, location=None, path=None, container=None, region=None, access=None, base64decode=None):
-        """
-        Uploads and stores the current transformation as a Fileink
-
-        *returns* [Filestack.Filelink]
-
-        ```python
-        filelink = transform.store()
-        ```
-        """
-        if path:
-            path = '"{}"'.format(path)
-
-        filelink_obj = self.add_transform_task('store', locals())
-        response = utils.make_call(filelink_obj.url, 'get')
-
-        if response.ok:
-            data = json.loads(response.text)
-            handle = re.match(r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)', data['url']).group(1)
-            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
-        else:
-            raise Exception(response.text)
-
     def debug(self):
         """
         Returns a JSON object with inforamtion regarding the current transformation

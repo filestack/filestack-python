@@ -35,6 +35,16 @@ class CommonMixin(object):
             raise Exception('Ssecurity object is required to sign url')
         return self._build_url(security=sec)
 
+    def store(self, filename=None, location=None, path=None, container=None,
+              region=None, access=None, base64decode=None, workflows=None):
+        instance = self.add_transform_task('store', locals())
+
+        response = requests.post(instance.url)
+        if not response.ok:
+            raise Exception(response.text)
+
+        return filestack.models.Filelink(handle=response.json()['handle'])
+
     def download(self, destination_path, security=None):
         """
         Downloads a file to the given local path and returns the size of the downloaded file if successful

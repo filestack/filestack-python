@@ -1,7 +1,5 @@
-from filestack.config import CDN_URL
-from filestack.utils import utils
-
 import filestack.models
+from filestack.utils import utils
 
 
 class ImageTransformationMixin(object):
@@ -116,23 +114,14 @@ class ImageTransformationMixin(object):
     def quality(self, value=None):
         return self.add_transform_task('quality', locals())
 
-    def zip(self, store=False, store_params=None):
+    def zip(self):
         """
         Returns a zip file of the current transformation. This is different from
         the zip function that lives on the Filestack Client
 
         *returns* [Filestack.Transform]
         """
-        params = locals()
-        params.pop('store')
-        params.pop('store_params')
-
-        new_transform = self.add_transform_task('zip', params)
-
-        if store:
-            return new_transform.store(**store_params) if store_params else new_transform.store()
-
-        return utils.make_call(CDN_URL, 'get', transform_url=new_transform.url)
+        return self.add_transform_task('zip', locals())
 
     def fallback(self, handle=None, cache=None):
         return self.add_transform_task('fallback', locals())
