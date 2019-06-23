@@ -5,7 +5,7 @@ from trafaret import DataError
 from httmock import urlmatch, HTTMock, response
 
 from filestack import Filelink, Security
-from filestack.config import CDN_URL
+from filestack import config
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
@@ -14,12 +14,12 @@ SECURITY = Security({'call': ['read'], 'expiry': 10238239}, 'APPSECRET')
 
 @pytest.fixture
 def filelink():
-    return Filelink(HANDLE, apikey=APIKEY)
+    yield Filelink(HANDLE, apikey=APIKEY)
 
 
 @pytest.fixture
 def secure_filelink():
-    return Filelink(HANDLE, apikey=APIKEY, security=SECURITY)
+    yield Filelink(HANDLE, apikey=APIKEY, security=SECURITY)
 
 
 def test_handle(filelink):
@@ -27,8 +27,28 @@ def test_handle(filelink):
 
 
 def test_url(filelink):
-    url = CDN_URL + '/' + HANDLE
+    url = config.CDN_URL + '/' + HANDLE
     assert url == filelink.url
+
+
+@pytest.mark.parametrize('security_obj, expected_security_part', [
+    [
+        None,
+        (
+            'security=p:eyJjYWxsIjogWyJyZWFkIl0sICJleHBpcnkiOiAxMDIzODIzOX0=,'
+            's:858d1ee9c0a1f06283e495f78dc7950ff6e64136ce960465f35539791fcd486b'
+        )
+    ],
+    [
+        Security({'call': ['write'], 'expiry': 1655992432}, 'another-secret'),
+        (
+            'security=p:eyJjYWxsIjogWyJ3cml0ZSJdLCAiZXhwaXJ5IjogMTY1NTk5MjQzMn0=,'
+            's:625cc5b9beab3e939fb53935f7795919c9f57f628d43adfc14566d2ad9a4ad47'
+        )
+    ],
+])
+def test_signed_url(security_obj, expected_security_part, secure_filelink):
+    assert expected_security_part in secure_filelink.signed_url(security=security_obj)
 
 
 def test_get_content(filelink):

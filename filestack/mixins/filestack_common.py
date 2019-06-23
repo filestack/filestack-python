@@ -30,7 +30,7 @@ class CommonMixin(object):
         return self._build_url()
 
     def signed_url(self, security=None):
-        sec = security or self.security  # TODO test overwriting default security
+        sec = security or self.security
         if sec is None:
             raise Exception('Ssecurity object is required to sign url')
         return self._build_url(security=sec)
