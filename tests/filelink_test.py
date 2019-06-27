@@ -4,6 +4,7 @@ import pytest
 from trafaret import DataError
 from httmock import urlmatch, HTTMock, response
 
+from tests.helpers import DummyHttpResponse
 from filestack import Filelink, Security
 from filestack import config
 
@@ -94,6 +95,54 @@ def test_download(filelink):
             file_size = filelink.download('tests/data/test_download.jpg')
             assert file_size == 12
     m().write.assert_called_once_with(b'file-content')
+
+
+def test_tags_without_security(filelink):
+    with pytest.raises(Exception, match=r'Security object is required'):
+        filelink.tags()
+
+
+@patch('requests.get')
+def test_tags(get_mock, secure_filelink):
+    image_tags = {'tags': {'cat': 99}}
+    get_mock.return_value = DummyHttpResponse(json_dict=image_tags)
+    assert secure_filelink.tags() == image_tags
+    get_mock.assert_called_once_with('{}/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
+
+
+@patch('requests.get')
+def test_tags_on_transformation(get_mock, secure_filelink):
+    transformation = secure_filelink.resize(width=100)
+    image_tags = {'tags': {'cat': 99}}
+    get_mock.return_value = DummyHttpResponse(json_dict=image_tags)
+    assert transformation.tags() == image_tags
+    get_mock.assert_called_once_with(
+        '{}/resize=width:100/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
+    )
+
+
+def test_sfw_without_security(filelink):
+    with pytest.raises(Exception, match=r'Security object is required'):
+        filelink.sfw()
+
+
+@patch('requests.get')
+def test_sfw(get_mock, secure_filelink):
+    sfw_response = {'sfw': False}
+    get_mock.return_value = DummyHttpResponse(json_dict=sfw_response)
+    assert secure_filelink.sfw() == sfw_response
+    get_mock.assert_called_once_with('{}/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
+
+
+@patch('requests.get')
+def test_sfw_on_transformation(get_mock, secure_filelink):
+    transformation = secure_filelink.resize(width=100)
+    sfw_response = {'sfw': True}
+    get_mock.return_value = DummyHttpResponse(json_dict=sfw_response)
+    assert transformation.sfw() == sfw_response
+    get_mock.assert_called_once_with(
+        '{}/resize=width:100/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
+    )
 
 
 def test_overwrite_content(secure_filelink):

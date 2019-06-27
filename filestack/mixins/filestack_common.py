@@ -32,7 +32,7 @@ class CommonMixin(object):
     def signed_url(self, security=None):
         sec = security or self.security
         if sec is None:
-            raise Exception('Ssecurity object is required to sign url')
+            raise ValueError('Security object is required to sign url')
         return self._build_url(security=sec)
 
     def store(self, filename=None, location=None, path=None, container=None,
@@ -91,6 +91,24 @@ class CommonMixin(object):
         if not response.ok:
             raise Exception(response.text)
         return response.content
+
+    def tags(self, security=None):
+        obj = self.add_transform_task('tags', params={'self': None})
+
+        response = requests.get(obj.signed_url(security=security))
+        if not response.ok:
+            raise Exception(response.text)
+
+        return response.json()
+
+    def sfw(self, security=None):
+        obj = self.add_transform_task('sfw', params={'self': None})
+
+        response = requests.get(obj.signed_url(security=security))
+        if not response.ok:
+            raise Exception(response.text)
+
+        return response.json()
 
     def overwrite(self, url=None, filepath=None, params=None):
         """

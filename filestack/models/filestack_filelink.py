@@ -26,7 +26,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     def handle(self):
         return self._handle
 
-    # TODO - add tags & stw for filelink
     # TODO - add delete() method
 
     def _build_url(self, security=None):
