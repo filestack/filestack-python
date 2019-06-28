@@ -8,7 +8,7 @@ from filestack import config
 
 
 def unique_id(length=10):
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+    return ''.join(random.choice(string.ascii_letters + string.digits) for i in range(length))
 
 
 class RequestsWrapper:
