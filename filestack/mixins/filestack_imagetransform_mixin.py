@@ -1,5 +1,5 @@
 import filestack.models
-from filestack.utils import utils
+from filestack import utils
 
 
 class ImageTransformationMixin(object):

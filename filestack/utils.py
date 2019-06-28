@@ -1,6 +1,42 @@
-from filestack.config import CDN_URL, PROCESS_URL, HEADERS
+import time
+import string
+import random
+from functools import partial
+import requests as original_requests
 
-import requests
+from filestack import config
+
+
+def unique_id(length=10):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+
+class RequestsWrapper:
+    """
+    This class wraps selected methods from requests package and adds
+    default headers if not headers were specified.
+    """
+    def __getattr__(self, name):
+        if name in ('get', 'post', 'put'):
+            return partial(self.handle_request, name)
+        return super().__getattribute__(name)
+
+    def handle_request(self, name, *args, **kwargs):
+        if 'headers' not in kwargs:
+            kwargs['headers'] = config.HEADERS
+            kwargs['headers']['Filestack-Trace-Id'] = '{}-{}'.format(int(time.time()), unique_id())
+            kwargs['headers']['Filestack-Trace-Span'] = 'pythonsdk-{}'.format(unique_id())
+
+        requests_method = getattr(original_requests, name)
+        response = requests_method(*args, **kwargs)
+
+        if not response.ok:
+            raise Exception(response.text)
+
+        return response
+
+
+requests = RequestsWrapper()
 
 
 def get_security_path(url, security):
@@ -27,7 +63,7 @@ def get_url(base, handle=None, path=None, security=None):
 
 
 def get_transform_url(tasks, external_url=None, handle=None, security=None, apikey=None, video=False):
-    url_components = [(PROCESS_URL if video else CDN_URL)]
+    url_components = [(config.PROCESS_URL if video else config.CDN_URL)]
     if external_url:
         url_components.append(apikey)
 
@@ -51,12 +87,12 @@ def get_transform_url(tasks, external_url=None, handle=None, security=None, apik
 
 
 def make_call(base, action, handle=None, path=None, params=None, data=None, files=None, security=None, transform_url=None):
-    request_func = getattr(requests, action)
+    request_func = getattr(original_requests, action)
     if transform_url:
-        return request_func(transform_url, params=params, headers=HEADERS, data=data, files=files)
+        return request_func(transform_url, params=params, headers=config.HEADERS, data=data, files=files)
 
     url = get_url(base, path=path, handle=handle, security=security)
-    response = request_func(url, params=params, headers=HEADERS, data=data, files=files)
+    response = request_func(url, params=params, headers=config.HEADERS, data=data, files=files)
 
     if not response.ok:
         raise Exception(response.text)

@@ -1,13 +1,13 @@
 import os
+import hashlib
 import mimetypes
 import multiprocessing
-import hashlib
-import requests
-
 from base64 import b64encode
-from filestack import config
 from functools import partial
 from multiprocessing.pool import ThreadPool
+
+from filestack import config
+from filestack.utils import requests
 
 
 class Chunk:
@@ -44,12 +44,7 @@ def multipart_request(url, payload, params=None, security=None):
             'signature': security.signature
         })
 
-    response = requests.post(url, json=payload, headers=config.HEADERS)
-
-    if not response.ok:
-        raise Exception(response.text)
-
-    return response.json()
+    return requests.post(url, json=payload).json()
 
 
 def make_chunks(filepath=None, file_obj=None, filesize=None):
@@ -83,8 +78,7 @@ def upload_chunk(apikey, filename, storage, start_response, chunk):
 
     fs_resp = requests.post(
         'https://{}/multipart/upload'.format(start_response['location_url']),
-        json=payload,
-        headers=config.HEADERS
+        json=payload
     ).json()
 
     resp = requests.put(fs_resp['url'], headers=fs_resp['headers'], data=chunk.bytes)

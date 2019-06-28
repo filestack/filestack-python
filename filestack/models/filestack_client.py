@@ -1,13 +1,13 @@
 import hmac
 import hashlib
 
-import requests
-
 import filestack.models
 from filestack import config
 from filestack.uploads.external_url import upload_external_url
 from filestack.trafarets import STORE_LOCATION_SCHEMA, STORE_SCHEMA
-from filestack.utils import utils, intelligent_ingestion
+from filestack import utils
+from filestack.utils import requests
+from filestack.uploads import intelligent_ingestion
 from filestack.uploads.multipart import multipart_upload
 
 

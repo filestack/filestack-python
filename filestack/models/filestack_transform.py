@@ -1,7 +1,7 @@
 from filestack import config
 
 from filestack.mixins import ImageTransformationMixin, CommonMixin
-from filestack.utils import utils
+from filestack import utils
 
 
 class Transform(ImageTransformationMixin, CommonMixin):

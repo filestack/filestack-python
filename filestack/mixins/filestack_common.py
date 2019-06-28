@@ -1,12 +1,11 @@
 import mimetypes
 import os
 
-import requests
-
 import filestack.models
 from filestack.config import API_URL, FILE_PATH
 from filestack.trafarets import OVERWRITE_SCHEMA
-from filestack.utils import utils
+from filestack import utils
+from filestack.utils import requests
 
 
 class CommonMixin(object):

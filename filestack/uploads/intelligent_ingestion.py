@@ -11,7 +11,7 @@ import threading
 
 from base64 import b64encode
 
-import requests
+from filestack.utils import requests
 
 from filestack import config
 
@@ -30,15 +30,6 @@ MAX_DELAY = 4
 NUM_THREADS = 4
 
 lock = threading.Lock()
-
-
-def filestack_request(request_url, payload):
-    response = requests.post(request_url, json=payload, headers=config.HEADERS)
-
-    if not response.ok:
-        raise Exception(response.text)
-
-    return response
 
 
 def decrease_chunk_size():
@@ -77,7 +68,7 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
 
         try:
             url = 'https://{}/multipart/upload'.format(start_response['location_url'])
-            api_resp = filestack_request(url, payload).json()
+            api_resp = requests.post(url, json=payload).json()
             s3_resp = requests.put(api_resp['url'], headers=api_resp['headers'], data=chunk_data)
             if not s3_resp.ok:
                 raise Exception('Incorrect S3 response')
@@ -96,7 +87,7 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
     payload.update({'size': filesize})
 
     url = 'https://{}/multipart/commit'.format(start_response['location_url'])
-    filestack_request(url, payload)
+    requests.post(url, json=payload)
 
 
 def upload(apikey, filepath, file_obj, storage, params=None, security=None):
@@ -127,7 +118,7 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
             'signature': security.signature
         })
 
-    start_response = filestack_request(config.MULTIPART_START_URL, payload).json()
+    start_response = requests.post(config.MULTIPART_START_URL, json=payload).json()
     parts = [
         {
             'seek_point': seek_point,

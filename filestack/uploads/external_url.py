@@ -1,6 +1,6 @@
 from collections import OrderedDict
 
-import requests
+from filestack.utils import requests
 
 from filestack import config
 

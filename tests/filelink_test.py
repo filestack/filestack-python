@@ -102,7 +102,7 @@ def test_tags_without_security(filelink):
         filelink.tags()
 
 
-@patch('requests.get')
+@patch('filestack.utils.requests.get')
 def test_tags(get_mock, secure_filelink):
     image_tags = {'tags': {'cat': 99}}
     get_mock.return_value = DummyHttpResponse(json_dict=image_tags)
@@ -110,7 +110,7 @@ def test_tags(get_mock, secure_filelink):
     get_mock.assert_called_once_with('{}/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
 
 
-@patch('requests.get')
+@patch('filestack.utils.requests.get')
 def test_tags_on_transformation(get_mock, secure_filelink):
     transformation = secure_filelink.resize(width=100)
     image_tags = {'tags': {'cat': 99}}
@@ -126,7 +126,7 @@ def test_sfw_without_security(filelink):
         filelink.sfw()
 
 
-@patch('requests.get')
+@patch('filestack.utils.requests.get')
 def test_sfw(get_mock, secure_filelink):
     sfw_response = {'sfw': False}
     get_mock.return_value = DummyHttpResponse(json_dict=sfw_response)
@@ -134,7 +134,7 @@ def test_sfw(get_mock, secure_filelink):
     get_mock.assert_called_once_with('{}/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
 
 
-@patch('requests.get')
+@patch('filestack.utils.requests.get')
 def test_sfw_on_transformation(get_mock, secure_filelink):
     transformation = secure_filelink.resize(width=100)
     sfw_response = {'sfw': True}

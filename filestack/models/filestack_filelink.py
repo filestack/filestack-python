@@ -1,6 +1,5 @@
-import requests
-
 from filestack import config
+from filestack.utils import requests
 from filestack.mixins import CommonMixin
 from filestack.mixins import ImageTransformationMixin
 
@@ -58,7 +57,5 @@ class Filelink(ImageTransformationMixin, CommonMixin):
             params.update({'policy': sec.policy_b64, 'signature': sec.signature})
 
         response = requests.get(request_url, params=params)
-        if not response.ok:
-            raise Exception(response.text)
 
         return response.json()
