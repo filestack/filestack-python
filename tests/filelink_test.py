@@ -1,4 +1,5 @@
-from unittest.mock import mock_open, patch
+import io
+from unittest.mock import mock_open, patch, ANY
 
 import pytest
 from trafaret import DataError
@@ -102,7 +103,7 @@ def test_download(filelink):
 
 
 def test_tags_without_security(filelink):
-    with pytest.raises(Exception, match=r'Security object is required'):
+    with pytest.raises(Exception, match=r'Security is required'):
         filelink.tags()
 
 
@@ -126,7 +127,7 @@ def test_tags_on_transformation(get_mock, secure_filelink):
 
 
 def test_sfw_without_security(filelink):
-    with pytest.raises(Exception, match=r'Security object is required'):
+    with pytest.raises(Exception, match=r'Security is required'):
         filelink.sfw()
 
 
@@ -149,45 +150,64 @@ def test_sfw_on_transformation(get_mock, secure_filelink):
     )
 
 
-def test_overwrite_content(secure_filelink):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
-    def api_delete(url, request):
-        return response(200, {'handle': HANDLE})
-
-    with HTTMock(api_delete):
-        filelink_response = secure_filelink.overwrite(url="http://www.someurl.com")
-
-    assert filelink_response.status_code == 200
+def test_overwrite_without_security(filelink):
+    with pytest.raises(Exception, match='Security is required'):
+        filelink.overwrite(url='https://image.url')
 
 
-def test_overwrite_content_filepath(secure_filelink):
-    @urlmatch(netloc=r'www\.filestackapi\.com', path='/api/file', method='post', scheme='https')
-    def api_delete(url, request):
-        return response(200, {'handle': HANDLE})
-
-    with HTTMock(api_delete):
-        filelink_response = secure_filelink.overwrite(filepath='tests/data/bird.jpg')
-
-    assert filelink_response.status_code == 200
+def test_invalid_overwrite_call(secure_filelink):
+    with pytest.raises(Exception, match='filepath, file_obj or url argument must be provided'):
+        secure_filelink.overwrite(base64decode=True)
 
 
-def test_overwrite_argument_fail(filelink):
-    # passing in neither the url or filepath parameter
-    pytest.raises(ValueError, filelink.overwrite)
+@pytest.mark.parametrize('decode_base64', [True, False])
+@patch('filestack.models.filestack_filelink.requests.post')
+def test_overwrite_with_url(post_mock, decode_base64, secure_filelink):
+    secure_filelink.overwrite(url='http://image.url', base64decode=decode_base64)
+    post_mock.assert_called_once_with(
+        'https://www.filestackapi.com/api/file/{}'.format(HANDLE),
+        data={'url': 'http://image.url'},
+        params={
+            'policy': SECURITY.policy_b64,
+            'signature': SECURITY.signature,
+            'base64decode': 'true' if decode_base64 else 'false'
+        }
+    )
 
 
-def test_overwrite_bad_params(secure_filelink):
-    kwargs = {'params': {'call': ['read']}}
-    pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+@patch('filestack.models.filestack_filelink.requests.post')
+def test_overwrite_with_filepath(post_mock, secure_filelink):
+    with patch('filestack.models.filestack_filelink.open', mock_open(read_data='content')) as m:
+        secure_filelink.overwrite(filepath='path/to/file')
+        post_mock.assert_called_once_with(
+            'https://www.filestackapi.com/api/file/{}'.format(HANDLE),
+            files={'fileUpload': ('filename', ANY, 'application/octet-stream')},
+            params={
+                'policy': SECURITY.policy_b64,
+                'signature': SECURITY.signature,
+                'base64decode': 'false'
+            }
+        )
+        m.assert_called_once_with('path/to/file', 'rb')
 
 
-def test_overwrite_bad_param_value(secure_filelink):
-    kwargs = {'params': {'base64decode': 'true'}}
-    pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+@patch('filestack.models.filestack_filelink.requests.post')
+def test_overwrite_with_file_obj(post_mock, secure_filelink):
+    fobj = io.BytesIO(b'file-content')
+    secure_filelink.overwrite(file_obj=fobj)
+    post_mock.assert_called_once_with(
+        'https://www.filestackapi.com/api/file/{}'.format(HANDLE),
+        files={'fileUpload': ('filename', fobj, 'application/octet-stream')},
+        params={
+            'policy': SECURITY.policy_b64,
+            'signature': SECURITY.signature,
+            'base64decode': 'false'
+        }
+    )
 
 
 @pytest.mark.parametrize('flink, exc_message', [
-    (Filelink('handle', apikey=APIKEY), 'Security object is required'),
+    (Filelink('handle', apikey=APIKEY), 'Security is required'),
     (Filelink('handle', security=SECURITY), 'Apikey is required')
 ])
 def test_delete_without_apikey_or_security(flink, exc_message):

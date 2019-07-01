@@ -37,7 +37,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         apikey = apikey or self.apikey
 
         if sec is None:
-            raise Exception('Security object is required to delete filelink')
+            raise Exception('Security is required to delete filelink')
 
         if apikey is None:
             raise Exception('Apikey is required to delete filelink')
@@ -49,3 +49,28 @@ class Filelink(ImageTransformationMixin, CommonMixin):
             'signature': sec.signature
         }
         requests.delete(url, params=delete_params)
+
+    def overwrite(self, *, filepath=None, url=None, file_obj=None, base64decode=False, security=None):
+        sec = security or self.security
+        if sec is None:
+            raise Exception('Security is required to overwrite filelink')
+        req_params = {
+            'policy': sec.policy_b64,
+            'signature': sec.signature,
+            'base64decode': str(base64decode).lower()
+        }
+
+        request_url = '{}/file/{}'.format(config.API_URL, self.handle)
+        if url:
+            requests.post(request_url, params=req_params, data={'url': url})
+        elif filepath:
+            with open(filepath, 'rb') as f:
+                files = {'fileUpload': ('filename', f, 'application/octet-stream')}
+                requests.post(request_url, params=req_params, files=files)
+        elif file_obj:
+            files = {'fileUpload': ('filename', file_obj, 'application/octet-stream')}
+            requests.post(request_url, params=req_params, files=files)
+        else:
+            raise Exception('filepath, file_obj or url argument must be provided')
+
+        return self

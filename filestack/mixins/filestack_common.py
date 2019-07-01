@@ -31,7 +31,7 @@ class CommonMixin(object):
     def signed_url(self, security=None):
         sec = security or self.security
         if sec is None:
-            raise ValueError('Security object is required to sign url')
+            raise ValueError('Security is required to sign url')
         return self._build_url(security=sec)
 
     def store(self, filename=None, location=None, path=None, container=None,
@@ -92,40 +92,3 @@ class CommonMixin(object):
         obj = self.add_transform_task('sfw', params={'self': None})
         response = requests.get(obj.signed_url(security=security))
         return response.json()
-
-    def overwrite(self, url=None, filepath=None, params=None):
-        """
-        You may overwrite any Filelink by supplying a new file. The Filehandle will remain the same.
-
-        *returns* [requests.response]
-
-        ```python
-        from filestack import Client, security
-
-        # a policy requires at least an expiry
-        policy = {'expiry': 56589012}
-        sec = security(policy, 'APP_SECRET')
-
-        client =  Client('API_KEY', security=sec)
-        ```
-        """
-        if params:
-            OVERWRITE_SCHEMA.check(params)
-        data, files = None, None
-        if url:
-            data = {'url': url}
-        elif filepath:
-            filename = os.path.basename(filepath)
-            mimetype = mimetypes.guess_type(filepath)[0]
-            files = {'fileUpload': (filename, open(filepath, 'rb'), mimetype)}
-        else:
-            raise ValueError("You must include a url or filepath parameter")
-
-        return utils.make_call(API_URL, 'post',
-                               path=FILE_PATH,
-                               params=params,
-                               handle=self.handle,
-                               data=data,
-                               files=files,
-                               security=self.security,
-                               transform_url=self.url if isinstance(self, filestack.models.Transform) else None)
