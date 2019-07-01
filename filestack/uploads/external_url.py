@@ -28,8 +28,4 @@ def upload_external_url(url, apikey, store_params=None, security=None):
         url_elements.insert(2, security.as_url_string())
 
     response = requests.post('/'.join(url_elements))
-
-    if not response.ok:
-        raise Exception(response.text)
-
     return response.json()['handle']

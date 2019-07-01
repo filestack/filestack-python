@@ -33,29 +33,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
             url_elements.insert(-1, security.as_url_string())
         return '/'.join(url_elements)
 
-    def get_metadata(self, params=None, security=None):
-        """
-        Metadata provides certain information about a Filehandle, and you can specify
-        which pieces of information you will receive back by passing in optional parameters.
-
-        ```python
-        from filestack import Client
-
-        client =  Client('API_KEY')
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        metadata = filelink.get_metadata()
-        # or define specific metadata to receive
-        metadata = filelink.get_metadata({'filename': true})
-        ```
-        """
-        # TODO should we allow only specific params here?
-        params = params or {}
-        sec = security or self.security
-        request_url = self.url + '/metadata'
-
-        if sec is not None:
-            params.update({'policy': sec.policy_b64, 'signature': sec.signature})
-
-        response = requests.get(request_url, params=params)
-
-        return response.json()
+    def metadata(self, attributes_list, security=None):
+        attr_string = '[{}]'.format(','.join(attributes_list))
+        obj = self.add_transform_task('metadata', params={'self': None, 'p': attr_string})
+        return requests.get(obj._build_url(security=security or self.security)).json()

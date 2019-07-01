@@ -37,11 +37,7 @@ class CommonMixin(object):
     def store(self, filename=None, location=None, path=None, container=None,
               region=None, access=None, base64decode=None, workflows=None):
         instance = self.add_transform_task('store', locals())
-
         response = requests.post(instance.url)
-        if not response.ok:
-            raise Exception(response.text)
-
         return filestack.models.Filelink(handle=response.json()['handle'])
 
     def download(self, destination_path, security=None):
@@ -64,8 +60,6 @@ class CommonMixin(object):
 
         with open(destination_path, 'wb') as f:
             response = requests.get(self._build_url(security=sec), stream=True)
-            if not response.ok:
-                raise Exception(response.text)
             for data_chunk in response.iter_content(5 * 1024 ** 2):
                 f.write(data_chunk)
                 total_bytes += len(data_chunk)
@@ -87,26 +81,16 @@ class CommonMixin(object):
         """
         sec = security or self.security
         response = requests.get(self._build_url(security=sec))
-        if not response.ok:
-            raise Exception(response.text)
         return response.content
 
     def tags(self, security=None):
         obj = self.add_transform_task('tags', params={'self': None})
-
         response = requests.get(obj.signed_url(security=security))
-        if not response.ok:
-            raise Exception(response.text)
-
         return response.json()
 
     def sfw(self, security=None):
         obj = self.add_transform_task('sfw', params={'self': None})
-
         response = requests.get(obj.signed_url(security=security))
-        if not response.ok:
-            raise Exception(response.text)
-
         return response.json()
 
     def overwrite(self, url=None, filepath=None, params=None):

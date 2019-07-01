@@ -72,16 +72,20 @@ def test_bad_call(filelink):
         pytest.raises(Exception, filelink.get_content)
 
 
-def test_get_metadata(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent.com', path=r'/\w+/metadata', method='get', scheme='https')
-    def api_metadata(url, request):
-        return response(200, '{"filename": "somefile.jpg"}')
-
-    with HTTMock(api_metadata):
-        metadata_response = filelink.get_metadata()
-        metadata = metadata_response
-
-    assert metadata['filename'] == 'somefile.jpg'
+@pytest.mark.parametrize('security, security_url_part', [
+    (None, ''),
+    (
+        Security({'expiry': 123}, 'secret'),
+        'security=p:eyJleHBpcnkiOiAxMjN9,s:4de8b7441b3daf0d68b4f8ebcf7e015d07aef43a1295476a1dde1aed327abc01/'
+    )
+])
+@patch('filestack.models.filestack_filelink.requests.get')
+def test_metadata(get_mock, security, security_url_part, filelink):
+    get_mock.return_value = DummyHttpResponse(json_dict={'metadata': 'content'})
+    metadata_response = filelink.metadata(['filename', 'size'], security=security)
+    assert metadata_response == {'metadata': 'content'}
+    expected_url = '{}/metadata=p:[filename,size]/{}SOMEHANDLE'.format(config.CDN_URL, security_url_part)
+    get_mock.assert_called_once_with(expected_url)
 
 
 def test_download(filelink):

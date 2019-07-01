@@ -85,9 +85,6 @@ class Client:
 
         with open(destination_path, 'wb') as f:
             response = requests.get(zip_url, stream=True)
-            if not response.ok:
-                raise Exception(response.text)
-
             for chunk in response.iter_content(5 * 1024 ** 2):
                 f.write(chunk)
                 total_bytes += len(chunk)
