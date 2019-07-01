@@ -312,13 +312,3 @@ def test_av_convert(transform):
         assert isinstance(new_av, AudioVisual)
         assert new_av.uuid == 'someuuid'
         assert new_av.timestamp == 'sometimestamp'
-
-
-def test_debug(transform):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
-    def debug(url, request):
-        return response(200, {'data': 'somedata'})
-
-    with HTTMock(debug):
-        debug_response = transform.resize(width=500, height=500).debug()
-        assert debug_response['data'] == 'somedata'

@@ -61,13 +61,3 @@ class Transform(ImageTransformationMixin, CommonMixin):
         if security is not None:
             url_elements.insert(-1, security.as_url_string())
         return '/'.join(url_elements)
-
-    def debug(self):
-        """
-        Returns a JSON object with inforamtion regarding the current transformation
-
-        *returns* [Dict]
-        """
-        debug_instance = self.add_transform_task('debug', locals())
-        response = utils.make_call(debug_instance.url, 'get')
-        return response.json()
