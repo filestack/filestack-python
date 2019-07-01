@@ -184,3 +184,29 @@ def test_overwrite_bad_params(secure_filelink):
 def test_overwrite_bad_param_value(secure_filelink):
     kwargs = {'params': {'base64decode': 'true'}}
     pytest.raises(DataError, secure_filelink.overwrite, **kwargs)
+
+
+@pytest.mark.parametrize('flink, exc_message', [
+    (Filelink('handle', apikey=APIKEY), 'Security object is required'),
+    (Filelink('handle', security=SECURITY), 'Apikey is required')
+])
+def test_delete_without_apikey_or_security(flink, exc_message):
+    with pytest.raises(Exception, match=exc_message):
+        flink.delete()
+
+
+@pytest.mark.parametrize('flink, security_arg', [
+    (Filelink(HANDLE, apikey=APIKEY), SECURITY),
+    (Filelink(HANDLE, apikey=APIKEY, security=SECURITY), None)
+])
+@patch('filestack.models.filestack_filelink.requests.delete')
+def test_successful_delete(delete_mock, flink, security_arg):
+    flink.delete(security=security_arg)
+    delete_mock.assert_called_once_with(
+        '{}/file/{}'.format(config.API_URL, HANDLE),
+        params={
+            'key': APIKEY,
+            'policy': SECURITY.policy_b64,
+            'signature': SECURITY.signature
+        }
+    )

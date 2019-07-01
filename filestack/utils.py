@@ -17,7 +17,7 @@ class RequestsWrapper:
     default headers if not headers were specified.
     """
     def __getattr__(self, name):
-        if name in ('get', 'post', 'put'):
+        if name in ('get', 'post', 'put', 'delete'):
             return partial(self.handle_request, name)
         return super().__getattribute__(name)
 

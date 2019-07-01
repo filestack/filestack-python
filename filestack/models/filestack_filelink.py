@@ -14,18 +14,12 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     """
 
     def __init__(self, handle, apikey=None, security=None):
-        self._apikey = apikey
-        self._handle = handle
+        self.apikey = apikey
+        self.handle = handle
         self.security = security
 
     def __repr__(self):
         return '<Filelink {}>'.format(self.handle)
-
-    @property
-    def handle(self):
-        return self._handle
-
-    # TODO - add delete() method
 
     def _build_url(self, security=None):
         url_elements = [config.CDN_URL, self.handle]
@@ -37,3 +31,21 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         attr_string = '[{}]'.format(','.join(attributes_list))
         obj = self.add_transform_task('metadata', params={'self': None, 'p': attr_string})
         return requests.get(obj._build_url(security=security or self.security)).json()
+
+    def delete(self, apikey=None, security=None):
+        sec = security or self.security
+        apikey = apikey or self.apikey
+
+        if sec is None:
+            raise Exception('Security object is required to delete filelink')
+
+        if apikey is None:
+            raise Exception('Apikey is required to delete filelink')
+
+        url = '{}/file/{}'.format(config.API_URL, self.handle)
+        delete_params = {
+            'key': apikey,
+            'policy': sec.policy_b64,
+            'signature': sec.signature
+        }
+        requests.delete(url, params=delete_params)

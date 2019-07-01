@@ -28,25 +28,11 @@ class Transform(ImageTransformationMixin, CommonMixin):
         new_filelink = transform.store()
         ```
         """
-        self._apikey = apikey
-        self._handle = handle
-        self._security = security
+        self.apikey = apikey
+        self.handle = handle
+        self.security = security
         self._external_url = external_url
         self._transformation_tasks = []
-
-    @property
-    def handle(self):
-        """
-        Returns the handle associated with the instance (if any)
-
-        *returns* [String]
-
-        ```python
-        transform.handle
-        # YOUR_HANDLE
-        ```
-        """
-        return self._handle
 
     @property
     def external_url(self):
@@ -61,34 +47,6 @@ class Transform(ImageTransformationMixin, CommonMixin):
         ```
         """
         return self._external_url
-
-    @property
-    def apikey(self):
-        """
-        Returns the API key associated with the instance
-
-        *returns* [String]
-
-        ```python
-        transform.apikey
-        # YOUR_API_KEY
-        ```
-        """
-        return self._apikey
-
-    @property
-    def security(self):
-        """
-        Returns the security object associated with the instance (if any)
-
-        *returns* [Dict]
-
-        ```python
-        transform.security
-        # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
-        ```
-        """
-        return self._security
 
     def _build_url(self, security=None):
         url_elements = [config.CDN_URL, self.handle or self._external_url]
