@@ -1,10 +1,4 @@
-import mimetypes
-import os
-
 import filestack.models
-from filestack.config import API_URL, FILE_PATH
-from filestack.trafarets import OVERWRITE_SCHEMA
-from filestack import utils
 from filestack.utils import requests
 
 

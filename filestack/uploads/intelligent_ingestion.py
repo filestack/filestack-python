@@ -130,9 +130,8 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
         upload_part, apikey, filename, filepath, filesize, storage, start_response
     )
 
-    pool = ThreadPool(NUM_THREADS)
-    pool.map(fii_upload, parts)
-    pool.close()
+    with ThreadPool(NUM_THREADS) as pool:
+        pool.map(fii_upload, parts)
 
     payload.update({
         'uri': start_response['uri'],

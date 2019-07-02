@@ -1,13 +1,5 @@
 import trafaret as t
 
-
-OVERWRITE_SCHEMA = t.Dict({
-    'url': t.String(),
-    'base64decode': t.Bool()
-})
-
-OVERWRITE_SCHEMA.make_optional('*')
-
 STORE_LOCATION_SCHEMA = t.Enum('S3', 'gcs', 'azure', 'rackspace', 'dropbox')
 
 STORE_SCHEMA = t.Dict({

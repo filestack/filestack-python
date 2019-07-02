@@ -17,10 +17,10 @@ class Client:
     to Transform objects, takes a URL screenshot and returns zipped files.
     """
     def __init__(self, apikey, security=None, storage='S3'):
-        self._apikey = apikey
-        self._security = security
+        self.apikey = apikey
+        self.security = security
         STORE_LOCATION_SCHEMA.check(storage)
-        self._storage = storage
+        self.storage = storage
 
     def transform_external(self, external_url):
         """
@@ -35,7 +35,7 @@ class Client:
         transform = client.transform_external('http://www.example.com')
         ```
         """
-        return filestack.models.Transform(apikey=self.apikey, security=self.security, external_url=external_url)
+        return filestack.models.Transformation(apikey=self.apikey, security=self.security, external_url=external_url)
 
     def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
         """
@@ -60,7 +60,9 @@ class Client:
 
         url_task = utils.return_transform_task('urlscreenshot', params)
 
-        new_transform = filestack.models.Transform(self.apikey, security=self.security, external_url=external_url)
+        new_transform = filestack.models.Transformation(
+            self.apikey, security=self.security, external_url=external_url
+        )
         new_transform._transformation_tasks.append(url_task)
 
         return new_transform
@@ -190,45 +192,3 @@ class Client:
         if 'fs-timestamp' not in headers_prepared:
             error = 'Missing `Timestamp` value in provided headers'
         return error, headers_prepared
-
-    @property
-    def security(self):
-        """
-        Returns the security object associated with the instance (if any)
-
-        *returns* [Dict]
-
-        ```python
-        client.security
-        # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
-        ```
-        """
-        return self._security
-
-    @property
-    def storage(self):
-        """
-        Returns the storage associated with the client (defaults to 'S3')
-
-        *returns* [Dict]
-
-        ```python
-        client.storage
-        # S3
-        ```
-        """
-        return self._storage
-
-    @property
-    def apikey(self):
-        """
-        Returns the API key associated with the instance
-
-        *returns* [String]
-
-        ```python
-        client.apikey
-        # YOUR_API_KEY
-        ```
-        """
-        return self._apikey

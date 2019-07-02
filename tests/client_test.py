@@ -6,7 +6,7 @@ from trafaret import DataError
 from httmock import urlmatch, HTTMock, response
 
 import filestack.models
-from filestack import Client, Filelink, Transform
+from filestack import Client, Filelink, Transformation
 from tests.helpers import DummyHttpResponse
 
 
@@ -40,7 +40,7 @@ def test_store_external_url(client):
     assert filelink.handle == HANDLE
 
 
-@patch('filestack.models.filestack_client.multipart_upload')
+@patch('filestack.models.client.multipart_upload')
 def test_store_filepath(upload_mock, client):
     upload_mock.return_value = {'handle': HANDLE}
     filelink = client.upload(filepath='path/to/image.jpg')
@@ -53,13 +53,13 @@ def test_store_filepath(upload_mock, client):
 def test_url_screenshot(client):
     external_url = 'https//www.someexternalurl'
     transform = client.urlscreenshot(external_url)
-    assert isinstance(transform, filestack.models.Transform)
+    assert isinstance(transform, filestack.models.Transformation)
     assert transform.apikey == APIKEY
 
 
 def test_transform_external(client):
     new_transform = client.transform_external('SOMEURL')
-    assert isinstance(new_transform, Transform)
+    assert isinstance(new_transform, Transformation)
 
 
 def test_zip(client):
@@ -68,7 +68,7 @@ def test_zip(client):
         return response(200, b'zip-bytes')
 
     m = mock_open()
-    with patch('filestack.models.filestack_client.open', m):
+    with patch('filestack.models.client.open', m):
         with HTTMock(api_zip):
             zip_size = client.zip('test.zip', ['handle1', 'handle2'])
 

@@ -2,7 +2,6 @@ import io
 from unittest.mock import mock_open, patch, ANY
 
 import pytest
-from trafaret import DataError
 from httmock import urlmatch, HTTMock, response
 
 from tests.helpers import DummyHttpResponse
@@ -80,7 +79,7 @@ def test_bad_call(filelink):
         'security=p:eyJleHBpcnkiOiAxMjN9,s:4de8b7441b3daf0d68b4f8ebcf7e015d07aef43a1295476a1dde1aed327abc01/'
     )
 ])
-@patch('filestack.models.filestack_filelink.requests.get')
+@patch('filestack.models.filelink.requests.get')
 def test_metadata(get_mock, security, security_url_part, filelink):
     get_mock.return_value = DummyHttpResponse(json_dict={'metadata': 'content'})
     metadata_response = filelink.metadata(['filename', 'size'], security=security)
@@ -95,7 +94,7 @@ def test_download(filelink):
         return response(200, b'file-content')
 
     m = mock_open()
-    with patch('filestack.mixins.filestack_common.open', m):
+    with patch('filestack.mixins.common.open', m):
         with HTTMock(api_download):
             file_size = filelink.download('tests/data/test_download.jpg')
             assert file_size == 12
@@ -161,7 +160,7 @@ def test_invalid_overwrite_call(secure_filelink):
 
 
 @pytest.mark.parametrize('decode_base64', [True, False])
-@patch('filestack.models.filestack_filelink.requests.post')
+@patch('filestack.models.filelink.requests.post')
 def test_overwrite_with_url(post_mock, decode_base64, secure_filelink):
     secure_filelink.overwrite(url='http://image.url', base64decode=decode_base64)
     post_mock.assert_called_once_with(
@@ -175,9 +174,9 @@ def test_overwrite_with_url(post_mock, decode_base64, secure_filelink):
     )
 
 
-@patch('filestack.models.filestack_filelink.requests.post')
+@patch('filestack.models.filelink.requests.post')
 def test_overwrite_with_filepath(post_mock, secure_filelink):
-    with patch('filestack.models.filestack_filelink.open', mock_open(read_data='content')) as m:
+    with patch('filestack.models.filelink.open', mock_open(read_data='content')) as m:
         secure_filelink.overwrite(filepath='path/to/file')
         post_mock.assert_called_once_with(
             'https://www.filestackapi.com/api/file/{}'.format(HANDLE),
@@ -191,7 +190,7 @@ def test_overwrite_with_filepath(post_mock, secure_filelink):
         m.assert_called_once_with('path/to/file', 'rb')
 
 
-@patch('filestack.models.filestack_filelink.requests.post')
+@patch('filestack.models.filelink.requests.post')
 def test_overwrite_with_file_obj(post_mock, secure_filelink):
     fobj = io.BytesIO(b'file-content')
     secure_filelink.overwrite(file_obj=fobj)
@@ -219,7 +218,7 @@ def test_delete_without_apikey_or_security(flink, exc_message):
     (Filelink(HANDLE, apikey=APIKEY), SECURITY),
     (Filelink(HANDLE, apikey=APIKEY, security=SECURITY), None)
 ])
-@patch('filestack.models.filestack_filelink.requests.delete')
+@patch('filestack.models.filelink.requests.delete')
 def test_successful_delete(delete_mock, flink, security_arg):
     flink.delete(security=security_arg)
     delete_mock.assert_called_once_with(

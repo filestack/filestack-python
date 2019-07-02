@@ -170,10 +170,10 @@ class ImageTransformationMixin(object):
 
         *returns* Filestack.Transform
         """
-        if isinstance(self, filestack.models.Transform):
+        if isinstance(self, filestack.models.Transformation):
             instance = self
         else:
-            instance = filestack.models.Transform(apikey=None, security=self.security, handle=self.handle)
+            instance = filestack.models.Transformation(apikey=None, security=self.security, handle=self.handle)
 
         params.pop('self')
         params = {k: v for k, v in params.items() if v is not None}

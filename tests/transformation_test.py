@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from filestack import Transform, AudioVisual
+from filestack import Transformation, AudioVisual
 from filestack import config
 from tests.helpers import DummyHttpResponse
 
@@ -13,7 +13,7 @@ EXTERNAL_URL = 'SOMEEXTERNALURL'
 
 @pytest.fixture
 def transform():
-    return Transform(apikey=APIKEY, external_url=EXTERNAL_URL)
+    return Transformation(apikey=APIKEY, external_url=EXTERNAL_URL)
 
 
 def test_sanity(transform):
@@ -288,7 +288,7 @@ def test_no_metadata(transform):
     assert no_metadata.url == target_url
 
 
-@patch('filestack.mixins.filestack_common.requests.post')
+@patch('filestack.mixins.common.requests.post')
 def test_chain_tasks_and_store(post_mock, transform):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': HANDLE})
     transform_obj = transform.flip().resize(width=100)
@@ -301,7 +301,7 @@ def test_chain_tasks_and_store(post_mock, transform):
     )
 
 
-@patch('filestack.mixins.filestack_imagetransform_mixin.utils.requests.get')
+@patch('filestack.mixins.imagetransform_mixin.utils.requests.get')
 def test_av_convert(post_mock, transform):
     post_mock.return_value = DummyHttpResponse(json_dict={
         'url': transform.url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'
