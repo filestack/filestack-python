@@ -132,7 +132,7 @@ class ImageTransformationMixin(object):
     def pdf_convert(self, pageorientation=None, pageformat=None, pages=None):
         return self.add_transform_task('pdfconvert', locals())
 
-    def av_convert(self, preset=None, force=None, title=None, extname=None, filename=None,
+    def av_convert(self, *, preset=None, force=None, title=None, extname=None, filename=None,
                    width=None, height=None, upscale=None, aspect_mode=None, two_pass=None,
                    video_bitrate=None, fps=None, keyframe_interval=None, location=None,
                    watermark_url=None, watermark_top=None, watermark_bottom=None,
@@ -156,22 +156,12 @@ class ImageTransformationMixin(object):
         """
 
         new_transform = self.add_transform_task('video_convert', locals())
-        transform_url = utils.get_transform_url(
-            new_transform._transformation_tasks, external_url=new_transform.external_url,
-            handle=new_transform.handle, security=new_transform.security,
-            apikey=new_transform.apikey, video=True
-        )
-
-        response = utils.make_call(transform_url, 'get')
-
-        if not response.ok:
-            raise Exception(response.text)
-
-        uuid = response.json()['uuid']
-        timestamp = response.json()['timestamp']
+        response = utils.requests.get(new_transform.url).json()
+        uuid = response['uuid']
+        timestamp = response['timestamp']
 
         return filestack.models.AudioVisual(
-            transform_url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
+            new_transform.url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
         )
 
     def add_transform_task(self, transformation, params):

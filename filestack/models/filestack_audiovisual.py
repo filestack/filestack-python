@@ -1,8 +1,5 @@
-import re
-
 import filestack.models
-
-from filestack import utils
+from filestack.utils import requests
 
 
 class AudioVisual:
@@ -25,11 +22,11 @@ class AudioVisual:
         print(filelink.url)
         ```
         """
-        self._url = url
-        self._apikey = apikey
-        self._security = security
-        self._uuid = uuid
-        self._timestamp = timestamp
+        self.url = url
+        self.apikey = apikey
+        self.security = security
+        self.uuid = uuid
+        self.timestamp = timestamp
 
     def to_filelink(self):
         """
@@ -42,19 +39,11 @@ class AudioVisual:
         ```
         """
         if self.status != 'completed':
-            return 'Audio/video conversion not complete!'
+            raise Exception('Audio/video conversion not complete!')
 
-        response = utils.make_call(self.url, 'get')
-
-        if response.ok:
-            response = response.json()
-            handle = re.match(
-                r'(?:https:\/\/cdn\.filestackcontent\.com\/)(\w+)',
-                response['data']['url']
-            ).group(1)
-            return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
-
-        raise Exception(response.text)
+        response = requests.get(self.url).json()
+        handle = response['data']['url'].split('/')[-1]
+        return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
 
     @property
     def status(self):
@@ -69,46 +58,4 @@ class AudioVisual:
             print(av_convert.status)
         ```
         """
-        response = utils.make_call(self.url, 'get')
-        return response.json()['status']
-
-    @property
-    def url(self):
-        return self._url
-
-    @property
-    def apikey(self):
-        """
-        Returns the handle associated with the instance (if any)
-
-        *returns* [String]
-
-        ```python
-        av.handle
-        # YOUR_HANDLE
-        ```
-        """
-        return self._apikey
-
-    @property
-    def security(self):
-        """
-        Returns the security object associated with the instance (if any)
-
-        *returns* [Dict]
-
-        ```python
-        av.security
-        # {'policy': 'YOUR_ENCODED_POLICY', 'signature': 'YOUR_ENCODED_SIGNATURE'}
-        ```
-        """
-
-        return self._security
-
-    @property
-    def uuid(self):
-        return self._uuid
-
-    @property
-    def timestamp(self):
-        return self._timestamp
+        return requests.get(self.url).json()['status']

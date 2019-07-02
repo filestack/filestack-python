@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from httmock import urlmatch, HTTMock, response
 
 from filestack import Transform, AudioVisual
 from filestack import config
@@ -302,13 +301,12 @@ def test_chain_tasks_and_store(post_mock, transform):
     )
 
 
-def test_av_convert(transform):
-    @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
-    def av_convert(url, request):
-        return response(200, {'url': url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'})
-
-    with HTTMock(av_convert):
-        new_av = transform.av_convert(width=500, height=500)
-        assert isinstance(new_av, AudioVisual)
-        assert new_av.uuid == 'someuuid'
-        assert new_av.timestamp == 'sometimestamp'
+@patch('filestack.mixins.filestack_imagetransform_mixin.utils.requests.get')
+def test_av_convert(post_mock, transform):
+    post_mock.return_value = DummyHttpResponse(json_dict={
+        'url': transform.url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'
+    })
+    new_av = transform.av_convert(width=500, height=500)
+    assert isinstance(new_av, AudioVisual)
+    assert new_av.uuid == 'someuuid'
+    assert new_av.timestamp == 'sometimestamp'
