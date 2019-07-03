@@ -98,12 +98,12 @@ def test_zip(client):
 
 @pytest.mark.parametrize('store_params, expected_url_part', [
     [{'filename': 'image.jpg'}, 'filename:image.jpg'],
-    [{'location': 'S3'}, 'location:S3'],
+    [{'location': 'S3'}, 'location:s3'],
     [{'path': 'some_path'}, 'path:some_path'],
     [{'container': 'container_id'}, 'container:container_id'],
     [{'region': 'us-east-1'}, 'region:us-east-1'],
     [{'access': 'public'}, 'access:public'],
-    [{'base64decode': True}, 'base64decode:True'],
+    [{'base64decode': True}, 'base64decode:true'],
     [{'workflows': ['workflows_id_1']}, 'workflows:[%22workflows_id_1%22]']
 ])
 def test_url_store_task(store_params, expected_url_part, client):
