@@ -1,4 +1,4 @@
-__version__ = '2.8.0'
+__version__ = '2.8.1'
 from .models.filestack_client import Client
 from .models.filestack_filelink import Filelink
 from .models.filestack_security import security
