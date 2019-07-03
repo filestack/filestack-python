@@ -5,7 +5,7 @@ from filestack import utils
 class ImageTransformationMixin(object):
     """
     All transformations and related/dependent tasks live here. They can
-    be directly called by Transform or Filelink objects.
+    be directly called by Transformation or Filelink objects.
     """
     def resize(self, width=None, height=None, fit=None, align=None):
         return self.add_transform_task('resize', locals())
@@ -119,7 +119,7 @@ class ImageTransformationMixin(object):
         Returns a zip file of the current transformation. This is different from
         the zip function that lives on the Filestack Client
 
-        *returns* [Filestack.Transform]
+        *returns* [Filestack.Transformation]
         """
         return self.add_transform_task('zip', locals())
 
@@ -168,7 +168,7 @@ class ImageTransformationMixin(object):
         """
         Adds a transform task to the current instance and returns it
 
-        *returns* Filestack.Transform
+        *returns* Filestack.Transformation
         """
         if isinstance(self, filestack.models.Transformation):
             instance = self

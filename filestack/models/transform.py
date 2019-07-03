@@ -13,8 +13,6 @@ class Transformation(ImageTransformationMixin, CommonMixin):
     self._transformation_tasks
     """
 
-    # TODO - should this class have a delete() method?
-
     def __init__(self, apikey=None, handle=None, external_url=None, security=None):
         """
         ```python

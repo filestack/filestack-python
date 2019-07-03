@@ -1,6 +1,3 @@
-import hmac
-import hashlib
-
 import filestack.models
 from filestack import config
 from filestack.uploads.external_url import upload_external_url
@@ -14,7 +11,7 @@ from filestack.uploads.multipart import multipart_upload
 class Client:
     """
     The hub for all Filestack operations. Creates Filelinks, converts external urls
-    to Transform objects, takes a URL screenshot and returns zipped files.
+    to Transformation objects, takes a URL screenshot and returns zipped files.
     """
     def __init__(self, apikey, security=None, storage='S3'):
         self.apikey = apikey
@@ -24,9 +21,9 @@ class Client:
 
     def transform_external(self, external_url):
         """
-        Turns an external URL into a Filestack Transform object
+        Turns an external URL into a Filestack Transformation object
 
-        *returns* [Filestack.Transform]
+        *returns* [Filestack.Transformation]
 
         ```python
         from filestack import Client, Filelink
@@ -41,13 +38,13 @@ class Client:
         """
         Takes a 'screenshot' of the given URL
 
-        *returns* [Filestack.Transform]
+        *returns* [Filestack.Transformation]
 
         ```python
         from filestack import Client
 
         client = Client("API_KEY")
-        # returns a Transform object
+        # returns a Transformation object
         screenshot = client.url_screenshot('https://www.example.com', width=100, height=100, agent="desktop")
         filelink = screenshot.store()
         ````
@@ -67,7 +64,7 @@ class Client:
 
         return new_transform
 
-    def zip(self, destination_path, file_handles):
+    def zip(self, destination_path, file_handles, security=None):
         """
         Takes array of files and downloads a compressed ZIP archive
         to provided path
@@ -81,10 +78,12 @@ class Client:
         client.zip('/path/to/file/destination', ['files'])
         ```
         """
-        # TODO - should this use security too?
-        zip_url = '{}/{}/zip/[{}]'.format(config.CDN_URL, self.apikey, ','.join(file_handles))
+        url_parts = [config.CDN_URL, self.apikey, 'zip', '[{}]'.format(','.join(file_handles))]
+        sec = security or self.security
+        if sec is not None:
+            url_parts.insert(3, sec.as_url_string())
+        zip_url = '/'.join(url_parts)
         total_bytes = 0
-
         with open(destination_path, 'wb') as f:
             response = requests.get(zip_url, stream=True)
             for chunk in response.iter_content(5 * 1024 ** 2):
