@@ -15,6 +15,8 @@ def build_store_task(store_params):
         if key in ('filename', 'location', 'path', 'container', 'region', 'access', 'base64decode', 'workflows'):
             if key == 'workflows':
                 value = '[{}]'.format(','.join('"{}"'.format(item) for item in value))
+            if key == 'path':
+                value = '"{}"'.format(value)
             task_args.append('{}:{}'.format(key, str(value).lower()))
 
     return 'store={}'.format(','.join(task_args))
@@ -25,7 +27,7 @@ def upload_external_url(url, apikey, store_params=None, security=None):
     url_elements = [config.CDN_URL, apikey, store_task, url]
 
     if security is not None:
-        url_elements.insert(2, security.as_url_string())
+        url_elements.insert(3, security.as_url_string())
 
     response = requests.post('/'.join(url_elements))
     return response.json()['handle']

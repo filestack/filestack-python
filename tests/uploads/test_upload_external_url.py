@@ -22,6 +22,7 @@ def test_upload(post_mock):
 
 @pytest.mark.parametrize('store_params, expected_store_task', [
     [{'location': 'S3'}, 'store=location:s3'],
+    [{'path': 'store/path/image.jpg'}, 'store=path:"store/path/image.jpg"'],
     [{'base64decode': True, 'access': 'public'}, 'store=access:public,base64decode:true'],
     [
         {'workflows': ['uuid-1', 'uuid-2'], 'container': 'bucket-name'},
@@ -45,7 +46,7 @@ def test_upload_with_security(post_mock):
     security = Security({'expiry': 123123123123, 'call': ['write']}, 'SECRET')
     handle = upload_external_url(url, apikey, security=security)
     assert handle == 'newHandle'
-    expected_url = '{}/{}/{}/store/{}'.format(
+    expected_url = '{}/{}/store/{}/{}'.format(
         config.CDN_URL, apikey, security.as_url_string(), url
     )
     post_mock.assert_called_once_with(expected_url)
