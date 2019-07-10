@@ -12,13 +12,13 @@ class CommonMixin(object):
         """
         Returns object's URL
 
-        *returns* [String]
+        >>> filelink.url
+        'https://cdn.filestackcontent.com/FILE_HANDLE'
+        >>> transformation.url
+        'https://cdn.filestackcontent.com/resize=width:800/FILE_HANDLE'
 
-        ```python
-        filelink = client.upload(filepath='/path/to/file')
-        filelink.url
-        # https://cdn.filestackcontent.com/FILE_HANDLE
-        ```
+        Returns:
+            str: object's URL
         """
         return self._build_url()
 
@@ -37,17 +37,6 @@ class CommonMixin(object):
     def download(self, destination_path, security=None):
         """
         Downloads a file to the given local path and returns the size of the downloaded file if successful
-
-        *returns* [Integer]
-
-        ```python
-        from filestack import Client
-
-        client =  Client('API_KEY', security=sec)
-        filelink = client.upload(filepath='/path/to/file')
-        # if successful, returns size of downloaded file in bytes
-        response = filelink.download('path/to/file')
-        ```
         """
         sec = security or self.security
         total_bytes = 0
@@ -63,15 +52,6 @@ class CommonMixin(object):
     def get_content(self, security=None):
         """
         Returns the raw byte content of a given object
-
-        *returns* [Bytes]
-        ```python
-        from filestack import Client
-
-        client =  Client('API_KEY')
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        byte_content = filelink.get_content()
-        ```
         """
         sec = security or self.security
         response = requests.get(self._build_url(security=sec))

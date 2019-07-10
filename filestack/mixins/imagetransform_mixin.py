@@ -140,21 +140,6 @@ class ImageTransformationMixin(object):
                    path=None, access=None, container=None, audio_bitrate=None, audio_sample_rate=None,
                    audio_channels=None, clip_length=None, clip_offset=None):
 
-        """
-        ```python
-        from filestack import Client
-
-        client = Client("<API_KEY>")
-        filelink = client.upload(filepath='path/to/file/doom.mp4')
-        av_convert= filelink.av_convert(width=100, height=100)
-        while av_convert.status != 'completed':
-            print(av_convert.status)
-
-        filelink = av_convert.to_filelink()
-        print(filelink.url)
-        ```
-        """
-
         new_transform = self.add_transform_task('video_convert', locals())
         response = utils.requests.get(new_transform.url).json()
         uuid = response['uuid']
@@ -165,11 +150,6 @@ class ImageTransformationMixin(object):
         )
 
     def add_transform_task(self, transformation, params):
-        """
-        Adds a transform task to the current instance and returns it
-
-        *returns* Filestack.Transformation
-        """
         if isinstance(self, filestack.models.Transformation):
             instance = self
         else:

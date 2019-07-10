@@ -14,6 +14,13 @@ class Client:
     to Transformation objects, takes a URL screenshot and returns zipped files.
     """
     def __init__(self, apikey, security=None, storage='S3'):
+        """
+        Args:
+            apikey (str): The path of the file to wrap
+            storage (str): default storage to be used for uploads (one of S3, `gcs`, dropbox, azure)
+            security (:class:`filestack.Security`): Security object that will be used by default
+                for all API calls
+        """
         self.apikey = apikey
         self.security = security
         STORE_LOCATION_SCHEMA.check(storage)
@@ -23,14 +30,14 @@ class Client:
         """
         Turns an external URL into a Filestack Transformation object
 
-        *returns* [Filestack.Transformation]
+        >>> t_obj = client.transform_external('https://image.url')
+        >>> t_obj.resize(width=800)  # now you can do this
 
-        ```python
-        from filestack import Client, Filelink
+        Args:
+            external_url (str): file URL
 
-        client = Client("API_KEY")
-        transform = client.transform_external('http://www.example.com')
-        ```
+        Returns:
+            :class:`filestack.Transformation`
         """
         return filestack.models.Transformation(apikey=self.apikey, security=self.security, external_url=external_url)
 
@@ -38,16 +45,15 @@ class Client:
         """
         Takes a 'screenshot' of the given URL
 
-        *returns* [Filestack.Transformation]
+        Args:
+            external_url (str): URL
+            agent (str): one of: :data:`"desktop"` :data:`"mobile"`
+            mode (str): one of: :data:`"all"` :data:`"window"`
+            width (int): screen width
+            height (int): screen height
 
-        ```python
-        from filestack import Client
-
-        client = Client("API_KEY")
-        # returns a Transformation object
-        screenshot = client.url_screenshot('https://www.example.com', width=100, height=100, agent="desktop")
-        filelink = screenshot.store()
-        ````
+        Returns:
+            :class:`filestack.Transformation`
         """
         params = locals()
         params.pop('self')
@@ -66,17 +72,17 @@ class Client:
 
     def zip(self, destination_path, file_handles, security=None):
         """
-        Takes array of files and downloads a compressed ZIP archive
+        Takes array of handles and downloads a compressed ZIP archive
         to provided path
 
-        *returns* [requests.response]
+        Args:
+            destination_path (str): path where the ZIP file should be stored
+            file_handles (list): list of filelink handles and/or URLs
+            security (:class:`filestack.Security`): Security object that will be used
+                for this API call
 
-        ```python
-        from filestack import Client
-
-        client = Client("<API_KEY>")
-        client.zip('/path/to/file/destination', ['files'])
-        ```
+        Returns:
+            int: ZIP archive size in bytes
         """
         url_parts = [config.CDN_URL, self.apikey, 'zip', '[{}]'.format(','.join(file_handles))]
         sec = security or self.security
@@ -93,31 +99,38 @@ class Client:
         return total_bytes
 
     def upload_url(self, url, store_params=None, security=None):
+        """
+        Uploads local file from external url
+
+        Args:
+            url (str): file URL
+            store_params (dict): store parameters to be used during upload
+            security (:class:`filestack.Security`): Security object that will be used
+                for this API call
+
+        Returns:
+            :class:`filestack.Filelink`: new Filelink object
+        """
         handle = upload_external_url(url, self.apikey, store_params, security=security or self.security)
         return filestack.models.Filelink(handle=handle)
 
     def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False):
         """
-        Uploads a file either through a local filepath or external_url.
+        Uploads local file or file-like object.
 
-        returns [Filestack.Filelink]
-        ```python
-        from filestack import Client
+        Args:
+            filepath (str): path to file
+            file_obj (io.BytesIO or similar): file-like object
+            store_params (dict): store parameters to be used during upload
+            intelligent (bool): upload file using Filestack Intelligent Ingestion
 
-        client = Client("<API_KEY>")
-        filelink = client.upload(filepath='/path/to/file')
+        Returns:
+            :class:`filestack.Filelink`: new Filelink object
 
-        # to use different storage:
-        client = FilestackClient.new('API_KEY', storage='dropbox')
-        filelink = client.upload(filepath='/path/to/file', params={'container': 'my-container'})
-
-        # to use an external URL:
-        filelink = client.upload(external_url='https://www.example.com')
-
-        # to disable intelligent ingestion:
-        filelink = client.upload(filepath='/path/to/file', intelligent=False)
-        ```
+        Important:
+            fix this
         """
+        # TODO: add security to metho arguments
 
         if store_params:  # Check the structure of parameters
             STORE_SCHEMA.check(store_params)

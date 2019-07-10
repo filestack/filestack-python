@@ -11,9 +11,19 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     including downloading, deleting, overwriting and retrieving metadata.
     You can also get image tags, SFW filters, and directly
     call any of our available transformations.
-    """
 
+    Attributes:
+        abc (str): hello
+    """
     def __init__(self, handle, apikey=None, security=None):
+        """
+        Args:
+            handle (str): The path of the file to wrap
+            apikey (str): Filestack API key that may be required for some API calls
+            security (:class:`filestack.Security`): Security object that will be used by default
+               for all API calls
+
+        """
         self.apikey = apikey
         self.handle = handle
         self.security = security
@@ -28,11 +38,42 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         return '/'.join(url_elements)
 
     def metadata(self, attributes_list, security=None):
+        """
+        Retrieves filelink's metadata.
+
+        Args:
+            attributes_list (list): The path of the file to wrap
+            security (:class:`filestack.Security`): Security object that will be used
+                to retrieve metadata
+
+        >>> filelink.metadata(['size', 'filename'])
+        {'filename': 'envelope.jpg', 'size': 171832}
+
+        Returns:
+            `dict`: A buffered writable file descriptor
+
+        Raises:
+            Exception: if API call fails, Exception will be raised
+        """
         attr_string = '[{}]'.format(','.join(attributes_list))
         obj = self.add_transform_task('metadata', params={'self': None, 'p': attr_string})
         return requests.get(obj._build_url(security=security or self.security)).json()
 
     def delete(self, apikey=None, security=None):
+        """
+        Deletes filelink.
+
+        Args:
+            apikey (str): Filestack API key that will be used for this API call
+            security (:class:`filestack.Security`): Security object that will be used
+                to delete filelink
+
+        Returns:
+            None
+
+        Raises:
+            Exception: if API call fails, Exception will be raised
+        """
         sec = security or self.security
         apikey = apikey or self.apikey
 
@@ -51,6 +92,21 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         requests.delete(url, params=delete_params)
 
     def overwrite(self, *, filepath=None, url=None, file_obj=None, base64decode=False, security=None):
+        """
+        Overwrites filelink with new content
+
+        Args:
+            filepach (str): path to file
+            url (str): file URL
+            file_obj (io.BytesIO or similar): file-like object
+            base64decode (bool): indicates if content should be decoded before it is stored
+            security (:class:`filestack.Security`): Security object that will be used
+                to overwrite filelink
+
+        Note:
+            This method only accepts keyword arguments.
+            Out of filepath, url and file_obj only one should be provided.
+        """
         sec = security or self.security
         if sec is None:
             raise Exception('Security is required to overwrite filelink')

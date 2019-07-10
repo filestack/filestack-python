@@ -20,3 +20,4 @@ Table of Contents
    Installation <installation>
    Uploading files <uploading_files>
    Filestack Classes <classes>
+   API Reference <api_reference>
