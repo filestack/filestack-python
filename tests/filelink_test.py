@@ -72,20 +72,34 @@ def test_bad_call(filelink):
         pytest.raises(Exception, filelink.get_content)
 
 
-@pytest.mark.parametrize('security, security_url_part', [
-    (None, ''),
+@pytest.mark.parametrize('attributes, security, expected_params', [
+    (None, None, {}),
     (
+        None,
         Security({'expiry': 123}, 'secret'),
-        'security=p:eyJleHBpcnkiOiAxMjN9,s:4de8b7441b3daf0d68b4f8ebcf7e015d07aef43a1295476a1dde1aed327abc01/'
-    )
+        {
+            'policy': 'eyJleHBpcnkiOiAxMjN9',
+            'signature': '4de8b7441b3daf0d68b4f8ebcf7e015d07aef43a1295476a1dde1aed327abc01'
+        }
+    ),
+    (
+        ['size', 'filename'],
+        Security({'expiry': 123}, 'secret'),
+        {
+            'size': 'true',
+            'filename': 'true',
+            'policy': 'eyJleHBpcnkiOiAxMjN9',
+            'signature': '4de8b7441b3daf0d68b4f8ebcf7e015d07aef43a1295476a1dde1aed327abc01'
+        }
+    ),
 ])
 @patch('filestack.models.filelink.requests.get')
-def test_metadata(get_mock, security, security_url_part, filelink):
+def test_metadata(get_mock, attributes, security, expected_params, filelink):
     get_mock.return_value = DummyHttpResponse(json_dict={'metadata': 'content'})
-    metadata_response = filelink.metadata(['filename', 'size'], security=security)
+    metadata_response = filelink.metadata(attributes_list=attributes, security=security)
     assert metadata_response == {'metadata': 'content'}
-    expected_url = '{}/metadata=p:[filename,size]/{}SOMEHANDLE'.format(config.CDN_URL, security_url_part)
-    get_mock.assert_called_once_with(expected_url)
+    expected_url = '{}/SOMEHANDLE/metadata'.format(config.CDN_URL)
+    get_mock.assert_called_once_with(expected_url, params=expected_params)
 
 
 def test_download(filelink):

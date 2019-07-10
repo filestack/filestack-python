@@ -33,12 +33,13 @@ class Filelink(ImageTransformationMixin, CommonMixin):
             url_elements.insert(-1, security.as_url_string())
         return '/'.join(url_elements)
 
-    def metadata(self, attributes_list, security=None):
+    def metadata(self, attributes_list=None, security=None):
         """
         Retrieves filelink's metadata.
 
         Args:
-            attributes_list (list): The path of the file to wrap
+            attributes_list (list): list of attributes that you wish to receive. When not provided,
+                default set of parameters will be returned (may differ depending on your storage settings)
             security (:class:`filestack.Security`): Security object that will be used
                 to retrieve metadata
 
@@ -51,9 +52,14 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         Raises:
             Exception: if API call fails, Exception will be raised
         """
-        attr_string = '[{}]'.format(','.join(attributes_list))
-        obj = self.add_transform_task('metadata', params={'self': None, 'p': attr_string})
-        return requests.get(obj._build_url(security=security or self.security)).json()
+        attributes_list = attributes_list or []
+        params = {}
+        for item in attributes_list:
+            params[item] = 'true'
+        sec = security or self.security
+        if sec is not None:
+            params.update({'policy': sec.policy_b64, 'signature': sec.signature})
+        return requests.get(self.url + '/metadata', params=params).json()
 
     def delete(self, apikey=None, security=None):
         """
