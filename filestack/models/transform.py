@@ -14,17 +14,6 @@ class Transformation(ImageTransformationMixin, CommonMixin):
     """
 
     def __init__(self, apikey=None, handle=None, external_url=None, security=None):
-        """
-        ```python
-        from filestack import Client
-
-        client = Client("<API_KEY>")
-        filelink = client.upload(filepath='/path/to/file/foo.jpg')
-        transform = filelink.resize(width=100, height=100).rotate(deg=90)
-
-        new_filelink = transform.store()
-        ```
-        """
         self.apikey = apikey
         self.handle = handle
         self.security = security

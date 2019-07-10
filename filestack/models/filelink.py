@@ -11,9 +11,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     including downloading, deleting, overwriting and retrieving metadata.
     You can also get image tags, SFW filters, and directly
     call any of our available transformations.
-
-    Attributes:
-        abc (str): hello
     """
     def __init__(self, handle, apikey=None, security=None):
         """
@@ -22,7 +19,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
             apikey (str): Filestack API key that may be required for some API calls
             security (:class:`filestack.Security`): Security object that will be used by default
                for all API calls
-
         """
         self.apikey = apikey
         self.handle = handle
