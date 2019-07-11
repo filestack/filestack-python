@@ -301,7 +301,7 @@ def test_chain_tasks_and_store(post_mock, transform):
     )
 
 
-@patch('filestack.mixins.imagetransform_mixin.utils.requests.get')
+@patch('filestack.mixins.imagetransformation.utils.requests.get')
 def test_av_convert(post_mock, transform):
     post_mock.return_value = DummyHttpResponse(json_dict={
         'url': transform.url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'
