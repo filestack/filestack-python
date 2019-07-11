@@ -13,7 +13,7 @@ class Client:
     The hub for all Filestack operations. Creates Filelinks, converts external urls
     to Transformation objects, takes a URL screenshot and returns zipped files.
     """
-    def __init__(self, apikey, security=None, storage='S3'):
+    def __init__(self, apikey, storage='S3', security=None):
         """
         Args:
             apikey (str): The path of the file to wrap
@@ -41,12 +41,12 @@ class Client:
         """
         return filestack.models.Transformation(apikey=self.apikey, security=self.security, external_url=external_url)
 
-    def urlscreenshot(self, external_url, agent=None, mode=None, width=None, height=None, delay=None):
+    def urlscreenshot(self, url, agent=None, mode=None, width=None, height=None, delay=None):
         """
         Takes a 'screenshot' of the given URL
 
         Args:
-            external_url (str): URL
+            url (str): website URL
             agent (str): one of: :data:`"desktop"` :data:`"mobile"`
             mode (str): one of: :data:`"all"` :data:`"window"`
             width (int): screen width
@@ -57,14 +57,14 @@ class Client:
         """
         params = locals()
         params.pop('self')
-        params.pop('external_url')
+        params.pop('url')
 
         params = {k: v for k, v in params.items() if v is not None}
 
         url_task = utils.return_transform_task('urlscreenshot', params)
 
         new_transform = filestack.models.Transformation(
-            self.apikey, security=self.security, external_url=external_url
+            self.apikey, security=self.security, external_url=url
         )
         new_transform._transformation_tasks.append(url_task)
 
@@ -105,8 +105,7 @@ class Client:
         Args:
             url (str): file URL
             store_params (dict): store parameters to be used during upload
-            security (:class:`filestack.Security`): Security object that will be used
-                for this API call
+            security (:class:`filestack.Security`): Security object that will be used for this API call
 
         Returns:
             :class:`filestack.Filelink`: new Filelink object
@@ -114,7 +113,7 @@ class Client:
         handle = upload_external_url(url, self.apikey, store_params, security=security or self.security)
         return filestack.models.Filelink(handle=handle)
 
-    def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False):
+    def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False, security=None):
         """
         Uploads local file or file-like object.
 
@@ -122,16 +121,13 @@ class Client:
             filepath (str): path to file
             file_obj (io.BytesIO or similar): file-like object
             store_params (dict): store parameters to be used during upload
-            intelligent (bool): upload file using Filestack Intelligent Ingestion
+            intelligent (bool): upload file using `Filestack Intelligent Ingestion
+                <https://www.filestack.com/products/file-upload/technology/>`_.
+            security (:class:`filestack.Security`): Security object that will be used for this API call
 
         Returns:
             :class:`filestack.Filelink`: new Filelink object
-
-        Important:
-            fix this
         """
-        # TODO: add security to metho arguments
-
         if store_params:  # Check the structure of parameters
             STORE_SCHEMA.check(store_params)
 
@@ -140,7 +136,7 @@ class Client:
             upload_method = intelligent_ingestion.upload
 
         response_json = upload_method(
-            self.apikey, filepath, file_obj, self.storage, params=store_params, security=self.security
+            self.apikey, filepath, file_obj, self.storage, params=store_params, security=security or self.security
         )
 
         handle = response_json['handle']
