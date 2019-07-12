@@ -8,8 +8,6 @@ Client
 ------
 This class is responsible for uploading files (creating Filelinks), converting external urls to Transformation objects, takes url screenshots and returns zipped files (multiple Filelinks).
 
-In order to make calls to the API, you'll need an instance of the Dropbox object. To instantiate, pass in the access token for the account you want to link. (Tip: You can generate an access token for your own account through the App Console).
-
 In order to create a client instance, pass in your Filestack API key. You can also specify which storage should be used for your uploads and provide a Security object to sign all your API calls.
 
 
