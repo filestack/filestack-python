@@ -48,6 +48,19 @@ class CommonMixin:
         """
         Stores current object as a new :class:`filestack.Filelink`.
 
+        Args:
+            filename (str): name for the stored file
+            location (str): your storage location, one of: :data:`"s3"` :data:`"azure"`
+                :data:`"dropbox"` :data:`"rackspace"` :data:`"gcs"`
+            container (str): the bucket or container (folder) in which to store the file
+                (does not apply when storing to Dropbox)
+            path (str): the path to store the file within the specified container
+            region (str): your storage region (applies to S3 only)
+            access (str): :data:`"public"` or :data:`"private"` (applies to S3 only)
+            base64decode (bool): indicates if content should be decoded before it is stored
+            workflows (list): ids of `Filestack Workflows
+                <https://www.filestack.com/products/workflows>`_ that should be triggered after upload
+
         Returns:
             :class:`filestack.Filelink`: new Filelink object
         """
@@ -73,6 +86,9 @@ class CommonMixin:
     def get_content(self, security=None):
         """
         Returns the raw byte content of a given object
+
+        Returns:
+            `bytes`: file content
         """
         sec = security or self.security
         response = requests.get(self._build_url(security=sec))
