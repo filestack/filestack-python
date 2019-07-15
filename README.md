@@ -4,15 +4,18 @@
   <a href="http://travis-ci.org/filestack/filestack-python">
     <img src="https://img.shields.io/travis/filestack/filestack-python.svg">
   </a>
-  <a href="https://pypi.python.org/pypi/filestack-python/2.3.1">
+  <a href="https://pypi.python.org/pypi/filestack-python">
     <img src="https://img.shields.io/pypi/v/filestack-python.svg">
   </a>
+    <img src="https://img.shields.io/pypi/pyversions/filestack-python.svg">
 </p>
 This is the official Python SDK for Filestack - API and content management system that makes it easy to add powerful file uploading and transformation capabilities to any web or mobile application.
 
 ## Resources
 
-* [API Reference](https://filestack.github.io/filestack-python)
+To learn more about this SDK, please visit our API Reference
+
+* [API Reference](https://filestack-python.readthedocs.io)
 
 ## Installing
 
@@ -28,49 +31,53 @@ or directly from GitHub
 pip install git+https://github.com/filestack/filestack-python.git
 ```
 
-## Usage
+## Quickstart
 
 The Filestack SDK allows you to upload and handle filelinks using two main classes: Client and Filelink.
 
-### Uploading New File with Client
+### Uploading files with `filestack.Client`
 ``` python
 from filestack import Client
-client = Client("<YOUR_API_KEY>")
+client = Client('<YOUR_API_KEY>')
 
-params = {'mimetype': 'image/png'}
-new_filelink = client.upload(filepath="path/to/file", params=params)
+new_filelink = client.upload(filepath='path/to/file')
 print(new_filelink.url)
 ```
-Uploading local files will use Filestack's multipart upload by default. To disable, just set the argument to false.
 
-```python
-new_filelink = client.upload(filepath="path/to/file", multipart=False)
-```
 #### Uploading files using Filestack Intelligent Ingestion
 To upload files using Filestack Intelligent Ingestion, simply add `intelligent=True` argument
 ```python
-new_filelink = client.upload(filepath="path/to/file", intelligent=True)
+new_filelink = client.upload(filepath='path/to/file', intelligent=True)
 ```
 FII always uses multipart uploads. In case of network issues, it will dynamically split file parts into smaller chunks (sacrificing upload speed in favour of upload reliability).
 
-### Create Filelink using Existing Handle
+### Working with Filelinks
+Filelink objects can by created by uploading new files, or by initializing `filestack.Filelink` with already existing file handle
 ```python
-from filestack import Filelink
-new_filelink = Filelink("<YOUR_HANDLE>")
+from filestack import Filelink, Client
+
+client = Client('<APIKEY>')
+filelink = client.upload(filepath='path/to/file')
+filelink.url  # 'https://cdn.filestackcontent.com/FILE_HANDLE
+
+# work with previously uploaded file
+filelink = Filelink('FILE_HANDLE')
 ```
 
 ### Basic Filelink Functions
 
-With a Filelink, you can download to a local path or get the content of a file. You can also delete or overwrite files if you have security enabled on your account.
+With a Filelink, you can download to a local path or get the content of a file. You can also perform various transformations.
 
 ```python
 file_content = new_filelink.get_content()
 
-response = new_filelink.download("/path/to/file")
+size_in_bytes = new_filelink.download('/path/to/file')
 
-filelink.overwrite(filepath="path/to/new/file")
+filelink.overwrite(filepath='path/to/new/file')
 
-response = filelink.delete()
+filelink.resize(width=400).flip()
+
+filelink.delete()
 ```
 
 ### Transformations
@@ -81,7 +88,7 @@ You can chain transformations on both Filelinks and external URLs. Storing trans
 transform = client.transform_external('http://<SOME_URL>')
 new_filelink = transform.resize(width=500, height=500).flip().enhance().store()
 
-filelink = Filelink("<YOUR_HANDLE">)
+filelink = Filelink('<YOUR_HANDLE'>)
 new_filelink = filelink.resize(width=500, height=500).flip().enhance().store()
 ```
 
@@ -113,40 +120,55 @@ filelink = av_object.to_filelink()
 
 ### Security Objects
 
-Security is set on Client or Filelink classes upon instantiation.
+Security is set on Client or Filelink classes upon instantiation and is used to sign all API calls.
 
 ```python
-from filestack import security
+from filestack import Security
 
-json_policy = {"expiry": 253381964415}
-security = security(json_policy, '<YOUR_APP_SECRET>')
-client = Client("<YOUR_API_KEY", security=security)
+policy = {'expiry': 253381964415}  # 'expiry' is the only required key
+security = Security(policy, '<YOUR_APP_SECRET>')
+client = Client('<YOUR_API_KEY', security=security)
 
 # new Filelink object inherits security and will use for all calls
-new_filelink = client.upload(filepath="path/to/file")
+new_filelink = client.upload(filepath='path/to/file')
+
+# you can also provide Security objects explicitly for some methods
+size_in_bytes = filelink.download(security=security)
+```
+
+You can also retrieve security details straight from the object:
+```python
+>>> policy = {'expiry': 253381964415, 'call': ['read']}
+>>> security = Security(policy, 'SECURITY-SECRET')
+>>> security.policy_b64
+'eyJjYWxsIjogWyJyZWFkIl0sICJleHBpcnkiOiAyNTMzODE5NjQ0MTV9'
+>>> security.signature
+'f61fa1effb0638ab5b6e208d5d2fd9343f8557d8a0bf529c6d8542935f77bb3c'
 ```
 
 ### Webhook verification
 
-You can use `Client.verify_webhook_signature` method to make sure that the webhooks you receive are sent by Filestack.
+You can use `filestack.helpers.verify_webhook_signature` method to make sure that the webhooks you receive are sent by Filestack.
 
 ```python
-from filestack import Client
+from filestack.helpers import verify_webhook_signature
 
 # webhook_data is raw content you receive
 webhook_data = b'{"action": "fp.upload", "text": {"container": "some-bucket", "url": "https://cdn.filestackcontent.com/Handle", "filename": "filename.png", "client": "Computer", "key": "key_filename.png", "type": "image/png", "size": 1000000}, "id": 50006}'
 
-resp = Client.verify_webhook_signature(
-    '<YOUR_WEBHOOK_SECRET>', webhook_data,
-    {'FS-Signature': '<SIGNATURE-FROM-REQUEST-HEADERS>', 'FS-Timestamp': '<TIMESTAMP-FROM-REQUEST-HEADERS>'}
+result, details = verify_webhook_signature(
+    '<YOUR_WEBHOOK_SECRET>',
+    webhook_data,
+    {
+      'FS-Signature': '<SIGNATURE-FROM-REQUEST-HEADERS>',
+      'FS-Timestamp': '<TIMESTAMP-FROM-REQUEST-HEADERS>'
+    }
 )
 
-if not resp['valid'] and resp['error'] is None:
-    raise Exception('Webhook signature is invalid')
-elif resp['error']:
-    print('Please check input params: {}'.format(resp['error']))
-else:
+if result is True:
     print('Webhook is valid and was generated by Filestack')
+else:
+    raise Exception(details['error'])
 ```
 
 ## Versioning
