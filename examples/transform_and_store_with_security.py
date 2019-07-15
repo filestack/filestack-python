@@ -1,8 +1,8 @@
-from filestack import security, Filelink
+from filestack import Security, Filelink
 
-json_policy = {"expiry": 253381964415}
+policy = {"expiry": 253381964415}
 
-security = security(json_policy, '<YOUR_APP_SECRET>')
+security = Security(policy, '<YOUR_APP_SECRET>')
 
 link = Filelink('YOUR_FILE_HANDLE', security=security)
 

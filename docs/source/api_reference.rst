@@ -30,6 +30,5 @@ Transformation
 --------------
 
 .. autoclass:: filestack.Transformation
-   :special-members: __init__
    :members:
    :inherited-members:

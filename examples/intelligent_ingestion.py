@@ -4,7 +4,7 @@
 
 from filestack import Client
 
-filepath = '<PATH_TO_FILE>'
+filepath = '/path/to/video.mp4'
 APIKEY = '<YOUR_APIKEY>'
 
 client = Client(APIKEY)

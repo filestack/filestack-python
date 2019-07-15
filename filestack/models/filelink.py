@@ -6,11 +6,14 @@ from filestack.mixins import ImageTransformationMixin
 
 class Filelink(ImageTransformationMixin, CommonMixin):
     """
-    Filelinks are object representations of Filestack Filehandles.
-    You can perform all actions that is allowed through our REST API,
-    including downloading, deleting, overwriting and retrieving metadata.
-    You can also get image tags, SFW filters, and directly
-    call any of our available transformations.
+    Filelink object represents a file that whas uploaded to Filestack.
+    A filelink object can be created by uploading a file using Client instance,
+    or by initializing Filelink class with a handle (unique id) of already uploaded file.
+
+    >>> from filestack import Filelink
+    >>> flink = Filelink('sm9IEXAMPLEQuzfJykmA')
+    >>> flink.url
+    'https://cdn.filestackcontent.com/sm9IEXAMPLEQuzfJykmA'
     """
     def __init__(self, handle, apikey=None, security=None):
         """

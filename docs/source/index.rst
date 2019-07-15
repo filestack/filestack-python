@@ -17,7 +17,6 @@ Table of Contents
 
 .. toctree::
 
-   Installation <installation>
+   Installation & Quickstart <installation>
    Uploading files <uploading_files>
-   Filestack Classes <classes>
    API Reference <api_reference>

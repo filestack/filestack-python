@@ -10,8 +10,17 @@ from filestack.uploads.multipart import multipart_upload
 
 class Client:
     """
-    The hub for all Filestack operations. Creates Filelinks, converts external urls
-    to Transformation objects, takes a URL screenshot and returns zipped files.
+    This class is responsible for uploading files (creating Filelinks),
+    converting external urls to Transformation objects, taking url screenshots
+    and returning zipped files (multiple Filelinks).
+
+    In order to create a client instance, pass in your Filestack API key.
+    You can also specify which storage should be used for your uploads
+    and provide a Security object to sign all your API calls.
+
+    >>> from filestack import Client, Security
+    >>> security = Security(policy={'expiry': 1594200833, '<YOUR APP SECRET>'})
+    >>> cli = Client('<FILESTACK_APIKEY>', storage='gcs', security=security)
     """
     def __init__(self, apikey, storage='S3', security=None):
         """

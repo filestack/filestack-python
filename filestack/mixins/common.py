@@ -58,7 +58,7 @@ class CommonMixin:
             region (str): your storage region (applies to S3 only)
             access (str): :data:`"public"` or :data:`"private"` (applies to S3 only)
             base64decode (bool): indicates if content should be decoded before it is stored
-            workflows (list): ids of `Filestack Workflows
+            workflows (list): IDs of `Filestack Workflows
                 <https://www.filestack.com/products/workflows>`_ that should be triggered after upload
 
         Returns:

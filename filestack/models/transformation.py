@@ -5,12 +5,18 @@ from filestack.mixins import ImageTransformationMixin, CommonMixin
 
 class Transformation(ImageTransformationMixin, CommonMixin):
     """
-    Transformation objects take either a handle or an external URL. They act similarly to
-    Filelinks, but have specific methods like store, debug, and also construct
-    URLs differently.
+    Transformation objects represent the result of image transformation performed
+    on Filelinks or other Transformations (as they can be chained).
+    Unless explicitly stored, no Filelinks are created when
+    image transformations are performed.
 
-    Transformation objects can be chained to build up multi-task transform URLs, each one saved in
-    self._transformation_tasks
+    >>> from filestack import Filelink
+    >>> transformation= Filelink('sm9IEXAMPLEQuzfJykmA').resize(width=800)
+    >>> transformation.url
+    'https://cdn.filestackcontent.com/resize=width:800/sm9IEXAMPLEQuzfJykmA'
+    >>> new_filelink = transformation.store()
+    >>> new_filelink.url
+    'https://cdn.filestackcontent.com/NEW_HANDLE'
     """
 
     def __init__(self, apikey=None, handle=None, external_url=None, security=None):
