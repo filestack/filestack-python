@@ -1,4 +1,4 @@
-__version__ = '2.8.0'
+__version__ = '2.8.1'
 from .models.client import Client
 from .models.filelink import Filelink
 from .models.security import Security

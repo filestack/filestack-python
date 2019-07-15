@@ -1,5 +1,7 @@
 # Filestack-Python Changelog
 
+### 2.8.1 (July 3th, 2019)
+- Fixed store params in external url upload
 
 ### 2.8.0 (June 17th, 2019)
 - Simplified FII uploads
