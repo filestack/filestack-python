@@ -16,7 +16,7 @@ setup(
     name='filestack-python',
     version=read_version(),
     license='Apache 2.0',
-    description='Filestack REST API Library',
+    description='Filestack Python SDK',
     long_description='Visit: https://github.com/filestack/filestack-python',
     url='https://github.com/filestack/filestack-python',
     author='filestack.com',
