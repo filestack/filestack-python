@@ -1,5 +1,11 @@
 # Filestack-Python Changelog
 
+### 3.0.0 (July 16th, 2019)
+- Dropped support for Python 2.7
+- client.upload() now handles local files and file-like objects, accepts keyword arguments only
+- client.upload_url() handles external url uploads
+- Please see [API Reference](https://filestack-python.readthedocs.io) to learn more
+
 ### 2.8.1 (July 3th, 2019)
 - Fixed store params in external url upload
 
