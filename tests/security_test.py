@@ -1,26 +1,19 @@
-import json
-import pytest
-
-from base64 import b64decode
-
-from filestack import security
-from filestack.exceptions import SecurityError
-
-GOOD_POLICY = {'call': ['read'], 'expiry': 154323, 'minSize': 293042}
-BAD_POLICY = {'call': ['read'], 'expiry': 154323, 'minSize': '293042'}
-SECRET = 'APPSECRET'
+from filestack import Security
 
 
-def test_bad_policy():
-    pytest.raises(SecurityError, security, BAD_POLICY, SECRET)
+def test_security():
+    policy = {'expires': 123}
+    security_obj = Security(policy, 'secret')
+    assert security_obj.policy == policy
+    assert security_obj.policy_b64 == 'eyJleHBpcmVzIjogMTIzfQ=='
+    assert security_obj.signature == '379d2ba0d5be34eddf09f873b7f38643dc51599b0afcd564f52733b52d698748'
 
 
-def test_good_policy_json():
-    policy = security(GOOD_POLICY, SECRET)
-    assert policy['policy']
-    assert policy['signature']
+def test_security_as_url_string():
+    policy = {'expires': 999999999999}
+    security_obj = Security(policy, 'secret')
 
-
-def test_correct_encoding():
-    policy = security(GOOD_POLICY, SECRET)
-    assert b64decode(policy['policy']).decode('utf-8') == json.dumps(GOOD_POLICY)
+    assert security_obj.as_url_string() == (
+        'security=p:eyJleHBpcmVzIjogOTk5OTk5OTk5OTk5fQ==,'
+        's:8c75305f7615776a892ddd165111dba0fa24b45107024a55a7170a7d1d60157a'
+    )

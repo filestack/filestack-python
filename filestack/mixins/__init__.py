@@ -1,2 +1,2 @@
-from .filestack_imagetransform_mixin import ImageTransformationMixin
-from .filestack_common import CommonMixin
+from .imagetransformation import ImageTransformationMixin
+from .common import CommonMixin

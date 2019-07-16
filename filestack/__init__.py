@@ -1,8 +1,8 @@
-__version__ = '2.8.1'
-from .models.filestack_client import Client
-from .models.filestack_filelink import Filelink
-from .models.filestack_security import security
-from .models.filestack_transform import Transform
-from .models.filestack_audiovisual import AudioVisual
-from .mixins.filestack_common import CommonMixin
-from .mixins.filestack_imagetransform_mixin import ImageTransformationMixin
+__version__ = '3.0.0'
+from .models.client import Client
+from .models.filelink import Filelink
+from .models.security import Security
+from .models.transformation import Transformation
+from .models.audiovisual import AudioVisual
+from .mixins.common import CommonMixin
+from .mixins.imagetransformation import ImageTransformationMixin

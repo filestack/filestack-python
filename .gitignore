@@ -8,3 +8,5 @@ tests/data/test_download.jpg
 .coverage
 .idea
 .venv
+
+docs/build/*
