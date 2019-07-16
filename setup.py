@@ -22,16 +22,18 @@ setup(
     author='filestack.com',
     author_email='support@filestack.com',
     packages=find_packages(),
-    install_requires=['requests', 'trafaret', 'future'],
+    install_requires=[
+        'requests==2.22.0',
+        'trafaret==1.2.0'
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
     ],
 )
