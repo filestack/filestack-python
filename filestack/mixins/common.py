@@ -15,7 +15,7 @@ class CommonMixin:
         >>> filelink.url
         'https://cdn.filestackcontent.com/FILE_HANDLE'
         >>> transformation.url
-        'https://cdn.filestackcontent.com/resize=width:800/file_handle'
+        'https://cdn.filestackcontent.com/resize=width:800/FILE_HANDLE'
 
         Returns:
             str: object's URL
@@ -29,7 +29,7 @@ class CommonMixin:
         >>> filelink.url
         'https://cdn.filestackcontent.com/security=p:<encoded_policy>,s:<signature>/FILE_HANDLE'
         >>> transformation.url
-        'https://cdn.filestackcontent.com/resize=width:800/security=p:<encoded_policy>,s:<signature>/file_handle'
+        'https://cdn.filestackcontent.com/resize=width:800/security=p:<encoded_policy>,s:<signature>/FILE_HANDLE'
 
         Args:
             security (:class:`filestack.Security`): Security object that will be used
@@ -64,7 +64,7 @@ class CommonMixin:
         Returns:
             :class:`filestack.Filelink`: new Filelink object
         """
-        instance = self.add_transform_task('store', locals())
+        instance = self._add_transform_task('store', locals())
         response = requests.post(instance.url)
         return filestack.models.Filelink(handle=response.json()['handle'])
 
@@ -105,7 +105,7 @@ class CommonMixin:
         Returns:
             `dict`: dictionary containing image tags
         """
-        obj = self.add_transform_task('tags', params={'self': None})
+        obj = self._add_transform_task('tags', params={'self': None})
         response = requests.get(obj.signed_url(security=security))
         return response.json()
 
@@ -120,6 +120,6 @@ class CommonMixin:
         Returns:
             `dict`: dictionary containing SFW result
         """
-        obj = self.add_transform_task('sfw', params={'self': None})
+        obj = self._add_transform_task('sfw', params={'self': None})
         response = requests.get(obj.signed_url(security=security))
         return response.json()

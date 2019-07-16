@@ -79,21 +79,21 @@ class Client:
 
         return new_transform
 
-    def zip(self, destination_path, file_handles, security=None):
+    def zip(self, destination_path, files, security=None):
         """
         Takes array of handles and downloads a compressed ZIP archive
         to provided path
 
         Args:
             destination_path (str): path where the ZIP file should be stored
-            file_handles (list): list of filelink handles and/or URLs
+            file (list): list of filelink handles and/or URLs
             security (:class:`filestack.Security`): Security object that will be used
                 for this API call
 
         Returns:
             int: ZIP archive size in bytes
         """
-        url_parts = [config.CDN_URL, self.apikey, 'zip', '[{}]'.format(','.join(file_handles))]
+        url_parts = [config.CDN_URL, self.apikey, 'zip', '[{}]'.format(','.join(files))]
         sec = security or self.security
         if sec is not None:
             url_parts.insert(3, sec.as_url_string())
@@ -122,7 +122,7 @@ class Client:
         handle = upload_external_url(url, self.apikey, store_params, security=security or self.security)
         return filestack.models.Filelink(handle=handle)
 
-    def upload(self, filepath=None, file_obj=None, store_params=None, intelligent=False, security=None):
+    def upload(self, *, filepath=None, file_obj=None, store_params=None, intelligent=False, security=None):
         """
         Uploads local file or file-like object.
 
@@ -136,6 +136,10 @@ class Client:
 
         Returns:
             :class:`filestack.Filelink`: new Filelink object
+
+        Note:
+            This method accepts keyword arguments only.
+            Out of filepath and file_obj only one should be provided.
         """
         if store_params:  # Check the structure of parameters
             STORE_SCHEMA.check(store_params)

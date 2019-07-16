@@ -51,9 +51,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
 
         Returns:
             `dict`: A buffered writable file descriptor
-
-        Raises:
-            Exception: if API call fails, Exception will be raised
         """
         attributes_list = attributes_list or []
         params = {}
@@ -75,9 +72,6 @@ class Filelink(ImageTransformationMixin, CommonMixin):
 
         Returns:
             None
-
-        Raises:
-            Exception: if API call fails, Exception will be raised
         """
         sec = security or self.security
         apikey = apikey or self.apikey
@@ -109,7 +103,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
                 to overwrite filelink
 
         Note:
-            This method only accepts keyword arguments.
+            This method accepts keyword arguments only.
             Out of filepath, url and file_obj only one should be provided.
         """
         sec = security or self.security
