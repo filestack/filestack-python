@@ -1,5 +1,9 @@
 # Filestack-Python Changelog
 
+### 3.0.1 (July 22nd, 2019)
+- Added enhance presets
+- Set filelink security when uploading from url
+
 ### 3.0.0 (July 16th, 2019)
 - Dropped support for Python 2.7
 - client.upload() now handles local files and file-like objects, accepts keyword arguments only
