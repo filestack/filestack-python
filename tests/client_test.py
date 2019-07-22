@@ -6,7 +6,7 @@ from trafaret import DataError
 from httmock import urlmatch, HTTMock, response
 
 import filestack.models
-from filestack import Client, Filelink, Transformation
+from filestack import Client, Filelink, Transformation, Security
 from tests.helpers import DummyHttpResponse
 
 
@@ -48,6 +48,24 @@ def test_store_filepath(upload_mock, client):
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
     upload_mock.assert_called_once_with('APIKEY', 'path/to/image.jpg', None, 'S3', params=None, security=None)
+
+
+@patch('filestack.models.client.multipart_upload')
+@patch('filestack.models.client.upload_external_url')
+def test_security_inheritance(upload_external_mock, multipart_mock):
+    upload_external_mock.return_value = 'URL_HANDLE'
+    multipart_mock.return_value = {'handle': 'FILE_HANDLE'}
+
+    policy = {'expiry': 1900}
+    cli = Client(APIKEY, security=Security(policy, 'SECRET'))
+
+    flink_from_url = cli.upload_url('https://just.some/url')
+    assert flink_from_url.handle == 'URL_HANDLE'
+    assert flink_from_url.security.policy == policy
+
+    flink = cli.upload(filepath='/dummy/path')
+    assert flink.handle == 'FILE_HANDLE'
+    assert flink.security.policy == policy
 
 
 def test_url_screenshot(client):
