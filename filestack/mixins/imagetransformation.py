@@ -94,7 +94,7 @@ class ImageTransformationMixin:
     def upscale(self, upscale=None, noise=None, style=None):
         return self._add_transform_task('upscale', locals())
 
-    def enhance(self):
+    def enhance(self, preset=None):
         return self._add_transform_task('enhance', locals())
 
     def redeye(self):

@@ -1,4 +1,4 @@
-__version__ = '3.0.0'
+__version__ = '3.0.1'
 from .models.client import Client
 from .models.filelink import Filelink
 from .models.security import Security
