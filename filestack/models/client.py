@@ -109,7 +109,7 @@ class Client:
 
     def upload_url(self, url, store_params=None, security=None):
         """
-        Uploads local file from external url
+        Uploads file from external url
 
         Args:
             url (str): file URL
