@@ -310,3 +310,9 @@ def test_av_convert(post_mock, transform):
     assert isinstance(new_av, AudioVisual)
     assert new_av.uuid == 'someuuid'
     assert new_av.timestamp == 'sometimestamp'
+
+
+def test_auto_image(transform):
+    target_url = '{}/{}/auto_image/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    auto_image = transform.auto_image()
+    assert auto_image.url == target_url
