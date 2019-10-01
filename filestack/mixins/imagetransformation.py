@@ -143,6 +143,9 @@ class ImageTransformationMixin:
             new_transform.url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
         )
 
+    def auto_image(self):
+        return self._add_transform_task('auto_image', locals())
+
     def _add_transform_task(self, transformation, params):
         if isinstance(self, filestack.models.Transformation):
             instance = self
