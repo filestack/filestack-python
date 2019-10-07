@@ -258,6 +258,18 @@ def test_pdf_convert(transform):
     result = transform.pdf_convert(pageorientation='landscape')
     assert result.url == target_url
 
+def test_minify_css(transform):
+    target_url = '{}/{}/minify_css/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.minify_css()
+    assert result.url == target_url
+
+
+def test_minify_css_with_params(transform):
+    target_url = '{}/{}/minify_css=gzip:fals    e,level:1/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.minify_css(level=1,gzip=False)
+    print(result.url)
+    print(target_url)
+    assert result.url == target_url    
 
 def quality(transform):
     target_url = '{}/{}/quality=value:75/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
