@@ -252,7 +252,6 @@ def test_pdf_info(transform):
     result = transform.pdf_info(colorinfo=True)
     assert result.url == target_url
 
-
 def test_pdf_convert(transform):
     target_url = '{}/{}/pdfconvert=pageorientation:landscape/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
     result = transform.pdf_convert(pageorientation='landscape')
@@ -262,7 +261,6 @@ def test_minify_css(transform):
     target_url = '{}/{}/minify_css/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
     result = transform.minify_css()
     assert result.url == target_url
-
 
 def test_minify_css_with_params(transform):
     target_url = '{}/{}/minify_css=gzip:false,level:1/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
