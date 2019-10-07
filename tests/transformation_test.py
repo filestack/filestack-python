@@ -252,6 +252,7 @@ def test_pdf_info(transform):
     result = transform.pdf_info(colorinfo=True)
     assert result.url == target_url
 
+
 def test_pdf_convert(transform):
     target_url = '{}/{}/pdfconvert=pageorientation:landscape/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
     result = transform.pdf_convert(pageorientation='landscape')
