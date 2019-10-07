@@ -127,7 +127,7 @@ class ImageTransformationMixin:
         return self._add_transform_task('pdfconvert', locals())
 
     def minify_css(self, level=None, gzip=None):
-        return self._add_transform_task('minify_css',locals())
+        return self._add_transform_task('minify_css', locals())
 
     def av_convert(self, *, preset=None, force=None, title=None, extname=None, filename=None,
                    width=None, height=None, upscale=None, aspect_mode=None, two_pass=None,

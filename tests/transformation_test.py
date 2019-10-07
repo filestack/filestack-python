@@ -266,7 +266,7 @@ def test_minify_css(transform):
 
 def test_minify_css_with_params(transform):
     target_url = '{}/{}/minify_css=gzip:false,level:1/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
-    result = transform.minify_css(level=1,gzip=False)
+    result = transform.minify_css(level=1, gzip=False)
     assert result.url == target_url    
 
 def quality(transform):
