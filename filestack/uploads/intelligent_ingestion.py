@@ -4,10 +4,10 @@ import sys
 import mimetypes
 import hashlib
 import logging
-import time
 import functools
-from multiprocessing.pool import ThreadPool
 import threading
+from urllib3.util.retry import Retry
+from multiprocessing.pool import ThreadPool
 
 from base64 import b64encode
 
@@ -143,17 +143,12 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
         payload['store']['workflows'] = params['workflows']
 
     complete_url = 'https://{}/multipart/complete'.format(start_response['location_url'])
-    for wait_time in (0, 1, 2, 3, 5):
-        time.sleep(wait_time)
-        complete_response = requests.post(complete_url, json=payload, headers=config.HEADERS)
-        log.debug('Complete response: %s. Content: %s', complete_response, complete_response.content)
-        if complete_response.status_code == 200:
-            break
-    else:
-        log.error(
-            'Did not receive a correct complete response: %s. Content %s',
-            complete_response, complete_response.content
-        )
-        raise
+    session = requests.Session()
+    retries = Retry(total=7, backoff_factor=0.2, status_forcelist=[202], method_whitelist=frozenset(['POST']))
+    session.mount('http://', requests.adapters.HTTPAdapter(max_retries=retries))
+    response = session.post(complete_url, json=payload, headers=config.HEADERS)
+    if response.status_code != 200:
+        log.error('Did not receive a correct complete response: %s. Content %s', response, response.content)
+        raise Exception('Invalid complete response: {}'.format(response.content))
 
-    return complete_response.json()
+    return response.json()
