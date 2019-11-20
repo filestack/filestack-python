@@ -19,7 +19,7 @@ class RequestsWrapper:
     def __getattr__(self, name):
         if name in ('get', 'post', 'put', 'delete'):
             return partial(self.handle_request, name)
-        return super().__getattribute__(name)
+        return original_requests.__getattribute__(name)
 
     def handle_request(self, name, *args, **kwargs):
         if 'headers' not in kwargs:

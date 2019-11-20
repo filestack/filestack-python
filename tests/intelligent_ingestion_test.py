@@ -90,31 +90,3 @@ def test_min_chunk_size_exception(post_mock, put_mock):
         upload_part(
             'Aaaaapikey', 'file.txt', 'tests/data/doom.mp4', 5415034, 's3', defaultdict(lambda: 'fs-upload.com'), part
         )
-
-
-@patch('filestack.uploads.intelligent_ingestion.time.sleep')
-@patch('filestack.uploads.intelligent_ingestion.requests.post')
-@patch('filestack.uploads.intelligent_ingestion.upload_part')
-def test_wait_for_complete(upload_part, post_mock, sleep_mock):
-    post_mock.side_effect = [
-        DummyHttpResponse(json_dict={
-            'uri': 'upload-uri', 'region': 'upload-region', 'upload_id': 'upload-id',
-            'location_url': 'upload-loc-url'
-        }),  # start response
-        DummyHttpResponse(status_code=202),
-        DummyHttpResponse(status_code=202),
-        DummyHttpResponse(status_code=202),
-        DummyHttpResponse(status_code=200)
-    ]
-    security = Security({'expires': 999}, 'secret')
-    upload_params = {'filename': 'new-filename.mp4', 'path': 'some/new/path'}
-    upload('AAApikeyz', 'tests/data/doom.mp4', None, 's3', upload_params, security)
-    assert post_mock.call_count == 5
-    start_resp_args, start_resp_kwargs = post_mock.call_args_list[0]
-    url = start_resp_args[0]
-    request_payload = start_resp_kwargs['json']
-    assert url == 'https://upload.filestackapi.com/multipart/start'
-    assert request_payload['store']['path'] == 'some/new/path'
-    assert request_payload['filename'] == 'new-filename.mp4'
-    assert request_payload['policy'] == 'eyJleHBpcmVzIjogOTk5fQ=='
-    assert request_payload['signature'] == 'c0b1b4d794f867287eedb34e477805aa7f5e1c9d1ec24fc55a085608b79e65fa'
