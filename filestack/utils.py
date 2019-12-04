@@ -43,7 +43,6 @@ def return_transform_task(transformation, params):
     transform_tasks = []
 
     for key, value in params.items():
-
         if isinstance(value, list):
             value = str(value).replace("'", "").replace('"', '').replace(" ", "")
         if isinstance(value, bool):
