@@ -16,7 +16,7 @@ class CFG:
 
     @property
     def CDN_URL(self):
-        return 'https://{}'.format(self.CNAME or 'cdn.filestackcontent.com')
+        return 'https://cdn.{}'.format(self.CNAME or 'filestackcontent.com')
 
     @property
     def MULTIPART_START_URL(self):
