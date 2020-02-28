@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import patch
 
 import pytest
@@ -8,6 +9,7 @@ from filestack.models import Security
 from filestack.uploads.external_url import upload_external_url
 
 url = 'http://image.url'
+encoded_url = 'b64://{}'.format(base64.b64encode(url.encode()).decode())
 apikey = 'TESTAPIKEY'
 
 
@@ -17,7 +19,7 @@ def test_upload(post_mock):
 
     handle = upload_external_url(url, apikey)
     assert handle == 'newHandle'
-    post_mock.assert_called_once_with('{}/{}/store/{}'.format(config.CDN_URL, apikey, url))
+    post_mock.assert_called_once_with('{}/{}/store/{}'.format(config.CDN_URL, apikey, encoded_url))
 
 
 @pytest.mark.parametrize('store_params, expected_store_task', [
@@ -47,7 +49,7 @@ def test_upload_with_security(post_mock):
     handle = upload_external_url(url, apikey, security=security)
     assert handle == 'newHandle'
     expected_url = '{}/{}/store/{}/{}'.format(
-        config.CDN_URL, apikey, security.as_url_string(), url
+        config.CDN_URL, apikey, security.as_url_string(), encoded_url
     )
     post_mock.assert_called_once_with(expected_url)
 

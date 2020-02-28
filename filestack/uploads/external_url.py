@@ -1,3 +1,4 @@
+import base64
 from collections import OrderedDict
 
 from filestack.utils import requests
@@ -24,7 +25,8 @@ def build_store_task(store_params):
 
 def upload_external_url(url, apikey, store_params=None, security=None):
     store_task = build_store_task(store_params or {})
-    url_elements = [config.CDN_URL, apikey, store_task, url]
+    encoded_url = 'b64://{}'.format(base64.b64encode(url.encode()).decode())
+    url_elements = [config.CDN_URL, apikey, store_task, encoded_url]
 
     if security is not None:
         url_elements.insert(3, security.as_url_string())
