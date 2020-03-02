@@ -9,7 +9,7 @@ from filestack.models import Security
 from filestack.uploads.external_url import upload_external_url
 
 url = 'http://image.url'
-encoded_url = 'b64://{}'.format(base64.b64encode(url.encode()).decode())
+encoded_url = 'b64://{}'.format(base64.urlsafe_b64encode(url.encode()).decode())
 apikey = 'TESTAPIKEY'
 
 

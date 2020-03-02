@@ -25,7 +25,7 @@ def build_store_task(store_params):
 
 def upload_external_url(url, apikey, store_params=None, security=None):
     store_task = build_store_task(store_params or {})
-    encoded_url = 'b64://{}'.format(base64.b64encode(url.encode()).decode())
+    encoded_url = 'b64://{}'.format(base64.urlsafe_b64encode(url.encode()).decode())
     url_elements = [config.CDN_URL, apikey, store_task, encoded_url]
 
     if security is not None:
