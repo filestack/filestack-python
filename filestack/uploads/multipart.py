@@ -33,7 +33,6 @@ class Chunk:
 
 
 def multipart_request(url, payload, params=None, security=None):
-
     for key in ('path', 'location', 'region', 'container', 'access'):
         if key in params:
             payload['store'][key] = params[key]

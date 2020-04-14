@@ -259,6 +259,24 @@ def test_pdf_convert(transform):
     assert result.url == target_url
 
 
+def test_minify_css(transform):
+    target_url = '{}/{}/minify_css/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.minify_css()
+    assert result.url == target_url
+
+
+def test_minify_css_with_params(transform):
+    target_url = '{}/{}/minify_css=gzip:false,level:1/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.minify_css(level=1, gzip=False)
+    assert result.url == target_url
+
+
+def test_minify_js(transform):
+    target_url = '{}/{}/minify_js=gzip:false,targets:not dead,> 1%/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    result = transform.minify_js(gzip=False, targets='not dead,> 1%')
+    assert result.url == target_url
+
+
 def quality(transform):
     target_url = '{}/{}/quality=value:75/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
     quality = transform.quality(75)
@@ -292,10 +310,10 @@ def test_no_metadata(transform):
 def test_chain_tasks_and_store(post_mock, transform):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': HANDLE})
     transform_obj = transform.flip().resize(width=100)
-    new_filelink = transform_obj.store(filename='filename', location='S3', container='bucket')
+    new_filelink = transform_obj.store(filename='filename', location='S3', container='bucket', path='folder/image.jpg')
     assert new_filelink.handle == HANDLE
     post_mock.assert_called_once_with(
-        '{}/{}/flip/resize=width:100/store=container:bucket,filename:filename,location:S3/{}'.format(
+        '{}/{}/flip/resize=width:100/store=container:bucket,filename:filename,location:S3,path:"folder/image.jpg"/{}'.format(
             config.CDN_URL, APIKEY, EXTERNAL_URL
         )
     )
@@ -310,3 +328,9 @@ def test_av_convert(post_mock, transform):
     assert isinstance(new_av, AudioVisual)
     assert new_av.uuid == 'someuuid'
     assert new_av.timestamp == 'sometimestamp'
+
+
+def test_auto_image(transform):
+    target_url = '{}/{}/auto_image/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    auto_image = transform.auto_image()
+    assert auto_image.url == target_url

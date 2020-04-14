@@ -126,6 +126,13 @@ class ImageTransformationMixin:
     def pdf_convert(self, pageorientation=None, pageformat=None, pages=None):
         return self._add_transform_task('pdfconvert', locals())
 
+    def minify_js(self, gzip=None, use_babel_polyfill=None, keep_fn_name=None, keep_class_name=None,
+                  mangle=None, merge_vars=None, remove_console=None, remove_undefined=None, targets=None):
+        return self._add_transform_task('minify_js', locals())
+
+    def minify_css(self, level=None, gzip=None):
+        return self._add_transform_task('minify_css', locals())
+
     def av_convert(self, *, preset=None, force=None, title=None, extname=None, filename=None,
                    width=None, height=None, upscale=None, aspect_mode=None, two_pass=None,
                    video_bitrate=None, fps=None, keyframe_interval=None, location=None,
@@ -142,6 +149,9 @@ class ImageTransformationMixin:
         return filestack.models.AudioVisual(
             new_transform.url, uuid, timestamp, apikey=new_transform.apikey, security=new_transform.security
         )
+
+    def auto_image(self):
+        return self._add_transform_task('auto_image', locals())
 
     def _add_transform_task(self, transformation, params):
         if isinstance(self, filestack.models.Transformation):

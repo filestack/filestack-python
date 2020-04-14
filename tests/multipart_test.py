@@ -8,7 +8,7 @@ from httmock import HTTMock, response, urlmatch
 
 from tests.helpers import DummyHttpResponse
 from filestack import Client
-from filestack.config import MULTIPART_START_URL
+from filestack import config
 from filestack.uploads.multipart import upload_chunk, Chunk
 
 APIKEY = 'APIKEY'
@@ -27,7 +27,7 @@ def test_upload_filepath():
 
     # add the different HTTP responses that are called during the multipart upload
     responses.add(
-        responses.POST, MULTIPART_START_URL, status=200, content_type='application/json',
+        responses.POST, config.MULTIPART_START_URL, status=200, content_type='application/json',
         json={'region': 'us-east-1', 'upload_id': 'someuuid', 'uri': 'someuri', 'location_url': 'fs-uploads.com'}
     )
     responses.add(

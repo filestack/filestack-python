@@ -25,7 +25,7 @@ class Client:
     def __init__(self, apikey, storage='S3', security=None):
         """
         Args:
-            apikey (str): The path of the file to wrap
+            apikey (str): your Filestack API key
             storage (str): default storage to be used for uploads (one of S3, `gcs`, dropbox, azure)
             security (:class:`filestack.Security`): Security object that will be used by default
                 for all API calls
@@ -109,7 +109,7 @@ class Client:
 
     def upload_url(self, url, store_params=None, security=None):
         """
-        Uploads local file from external url
+        Uploads file from external url
 
         Args:
             url (str): file URL

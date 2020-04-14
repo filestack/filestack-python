@@ -1,5 +1,10 @@
 # Filestack-Python Changelog
 
+### 3.1.0 (April 14th, 2020)
+- Transformations added: auto_image, minify_js, minify_css
+- Added configurable CNAME
+- Fixed path param in store task
+
 ### 3.0.1 (July 22nd, 2019)
 - Added enhance presets
 - Set filelink security when uploading from url

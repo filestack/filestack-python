@@ -64,6 +64,8 @@ class CommonMixin:
         Returns:
             :class:`filestack.Filelink`: new Filelink object
         """
+        if path:
+            path = '"{}"'.format(path)
         instance = self._add_transform_task('store', locals())
         response = requests.post(instance.url)
         return filestack.models.Filelink(handle=response.json()['handle'])
