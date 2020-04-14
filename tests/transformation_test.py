@@ -310,10 +310,10 @@ def test_no_metadata(transform):
 def test_chain_tasks_and_store(post_mock, transform):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': HANDLE})
     transform_obj = transform.flip().resize(width=100)
-    new_filelink = transform_obj.store(filename='filename', location='S3', container='bucket')
+    new_filelink = transform_obj.store(filename='filename', location='S3', container='bucket', path='folder/image.jpg')
     assert new_filelink.handle == HANDLE
     post_mock.assert_called_once_with(
-        '{}/{}/flip/resize=width:100/store=container:bucket,filename:filename,location:S3/{}'.format(
+        '{}/{}/flip/resize=width:100/store=container:bucket,filename:filename,location:S3,path:"folder/image.jpg"/{}'.format(
             config.CDN_URL, APIKEY, EXTERNAL_URL
         )
     )
