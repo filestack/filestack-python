@@ -139,8 +139,11 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
         'upload_id': start_response['upload_id'],
     })
 
-    if params.get('workflows'):
-        payload['store']['workflows'] = params['workflows']
+    if 'workflows' in params:
+        payload['store']['workflows'] = params.pop('workflows')
+
+    if 'upload_tags' in params:
+        payload['upload_tags'] = params.pop('upload_tags')
 
     complete_url = 'https://{}/multipart/complete'.format(start_response['location_url'])
     session = requests.Session()

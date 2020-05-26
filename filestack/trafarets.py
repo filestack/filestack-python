@@ -11,5 +11,6 @@ STORE_SCHEMA = t.Dict({
     'region': t.String(),
     'access': t.String(),
     'base64decode': t.Bool(),
-    'workflows': t.List(t.String())
+    'workflows': t.List(t.String()),
+    'upload_tags': t.Mapping(t.String(), t.String())
 }).make_optional('*')
