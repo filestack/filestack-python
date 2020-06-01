@@ -22,7 +22,11 @@ setup(
     author='filestack.com',
     author_email='support@filestack.com',
     packages=find_packages(),
-    install_requires=['requests', 'trafaret', 'future'],
+    install_requires=[
+        'requests==2.22.0',
+        'trafaret==1.2.0',
+        'future==0.18.2'
+    ],
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
