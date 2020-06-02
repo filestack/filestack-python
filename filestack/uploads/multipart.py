@@ -121,8 +121,11 @@ def multipart_upload(apikey, filepath, file_obj, storage, params=None, security=
     payload.update(start_response)
     payload['parts'] = uploaded_parts
 
-    if params.get('workflows'):
-        payload['store']['workflows'] = params['workflows']
+    if 'workflows' in params:
+        payload['store']['workflows'] = params.pop('workflows')
+
+    if 'upload_tags' in params:
+        payload['upload_tags'] = params.pop('upload_tags')
 
     complete_url = 'https://{}/multipart/complete'.format(location_url)
     complete_response = multipart_request(complete_url, payload, params, security)

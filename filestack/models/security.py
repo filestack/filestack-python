@@ -35,6 +35,6 @@ class Security:
         Returns the security part of signed urls
 
         Returns:
-            str: url part in the form of :data:`security=p:\<encoded policy>,s:\<signature>`
+            str: url part in the form of :data:`security=p:\\<encoded policy>,s:\\<signature>`
         """
         return 'security=p:{},s:{}'.format(self.policy_b64, self.signature)
