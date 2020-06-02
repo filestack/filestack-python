@@ -79,11 +79,15 @@ Each upload function shown above takes a :data:`store_params` argument which is 
         'region': 'string',
         'access': 'string',
         'base64decode': True|False,
-        'workflows': ['workflow-id-1', 'workflow-id-2']
+        'workflows': ['workflow-id-1', 'workflow-id-2'],
+        'upload_tags': {
+            'key': 'value',
+            'key2': 'value'
+        }
     }
 
 * **filename** - name for the stored file
-* **location** - name for the stored file
+* **location** - storage provider to be used
 * **path** - the path to store the file within the specified container
 * **container** - the bucket or container (folder) in which to store the file (does not apply when storing to Dropbox)
 * **mimetype** - mime type that should be stored in file's metadata
@@ -91,3 +95,4 @@ Each upload function shown above takes a :data:`store_params` argument which is 
 * **access** - should the file be stored as :data:`"public"` or :data:`"private"` (applies to S3 only)
 * **base64decode** - indicates if content should be decoded before it is stored
 * **workflows** - IDs of `Filestack Workflows <https://www.filestack.com/products/workflows>`_ that should be triggered after upload
+* **upload_tags** - set of :data:`key: value` pairs that will be returned with webhook for particular upload

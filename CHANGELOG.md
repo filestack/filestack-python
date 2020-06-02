@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 3.2.0 (June 2nd, 2020)
+- Added upload tags
+
 ### 3.1.0 (April 14th, 2020)
 - Transformations added: auto_image, minify_js, minify_css
 - Added configurable CNAME
