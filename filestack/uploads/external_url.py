@@ -31,5 +31,6 @@ def upload_external_url(url, apikey, store_params=None, security=None):
     if security is not None:
         url_elements.insert(3, security.as_url_string())
 
-    response = requests.post('/'.join(url_elements))
+    # TODO: use processing endpoint and "store" task for uploading external urls
+    response = requests.get('/'.join(url_elements))
     return response.json()['handle']
