@@ -13,7 +13,7 @@ encoded_url = 'b64://{}'.format(base64.urlsafe_b64encode(url.encode()).decode())
 apikey = 'TESTAPIKEY'
 
 
-@patch('filestack.uploads.external_url.requests.post')
+@patch('filestack.uploads.external_url.requests.get')
 def test_upload(post_mock):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': 'newHandle'})
 
@@ -31,7 +31,7 @@ def test_upload(post_mock):
         'store=container:bucket-name,workflows:["uuid-1","uuid-2"]'
     ],
 ])
-@patch('filestack.uploads.external_url.requests.post')
+@patch('filestack.uploads.external_url.requests.get')
 def test_upload_with_store_params(post_mock, store_params, expected_store_task):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': 'newHandle'})
 
@@ -42,7 +42,7 @@ def test_upload_with_store_params(post_mock, store_params, expected_store_task):
     assert expected_store_task in req_url
 
 
-@patch('filestack.uploads.external_url.requests.post')
+@patch('filestack.uploads.external_url.requests.get')
 def test_upload_with_security(post_mock):
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': 'newHandle'})
     security = Security({'expiry': 123123123123, 'call': ['write']}, 'SECRET')
@@ -54,7 +54,7 @@ def test_upload_with_security(post_mock):
     post_mock.assert_called_once_with(expected_url)
 
 
-@patch('filestack.uploads.external_url.requests.post')
+@patch('filestack.uploads.external_url.requests.get')
 def test_upload_exception(post_mock):
     error_message = 'Oops!'
     post_mock.side_effect = Exception(error_message)
