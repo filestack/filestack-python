@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 3.2.1 (July 22nd, 2020)
+- FS-7797 changed http method used when uploading external urls
+
 ### 3.2.0 (June 2nd, 2020)
 - Added upload tags
 
