@@ -23,7 +23,7 @@ setup(
     author_email='support@filestack.com',
     packages=find_packages(),
     install_requires=[
-        'requests==2.23.0',
+        'requests==2.24.0',
         'trafaret==2.0.2'
     ],
     classifiers=[
