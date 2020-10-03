@@ -19,7 +19,7 @@ class Client:
     and provide a Security object to sign all your API calls.
 
     >>> from filestack import Client, Security
-    >>> security = Security(policy={'expiry': 1594200833, '<YOUR APP SECRET>'})
+    >>> security = Security(policy={'expiry': 1594200833}, secret='YOUR APP SECRET')
     >>> cli = Client('<FILESTACK_APIKEY>', storage='gcs', security=security)
     """
     def __init__(self, apikey, storage='S3', security=None):
