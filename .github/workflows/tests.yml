@@ -3,14 +3,12 @@ name: Run Tests
 on: [push]
 
 jobs:
-  build:
-
+  tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         python-version: [3.5, 3.6, 3.7, 3.8]
-
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -21,3 +19,18 @@ jobs:
       run: pip install -r requirements.txt
     - name: Run tests
       run: pytest -v --cov=filestack tests
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install tools
+      run: pip install flake8 bandit
+    - name: Run analysis
+      run: |
+        flake8 filestack/
+        bandit -r -lll filestack/
