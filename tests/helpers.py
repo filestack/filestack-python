@@ -1,3 +1,4 @@
+from requests.exceptions import HTTPError
 
 
 class DummyHttpResponse:
@@ -11,3 +12,12 @@ class DummyHttpResponse:
 
     def json(self):
         return self.json_dict
+
+    def raise_for_status(self):
+        """
+        Return a dummy error if 'ok' was specified as False.
+
+        Note that in the original 'requests', response.ok calls raise_for_status() instead
+        """
+        if not self.ok:
+            raise HTTPError("HTTP request failed.")

@@ -3,8 +3,10 @@ import string
 import random
 from functools import partial
 import requests as original_requests
+from requests.exceptions import HTTPError
 
 from filestack import config
+from filestack.exceptions import FilestackHTTPError
 
 
 def unique_id(length=10):
@@ -30,8 +32,10 @@ class RequestsWrapper:
         requests_method = getattr(original_requests, name)
         response = requests_method(*args, **kwargs)
 
-        if not response.ok:
-            raise Exception(response.text)
+        try:
+            response.raise_for_status()
+        except HTTPError as e:
+            raise FilestackHTTPError(response.text) from e
 
         return response
 
