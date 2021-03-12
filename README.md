@@ -1,8 +1,8 @@
 <p align="center"><img src="logo.svg" align="center" width="100"/></p>
 <h1 align="center">Filestack Python</h1>
 <p align="center">
-  <a href="http://travis-ci.org/filestack/filestack-python">
-    <img src="https://img.shields.io/travis/filestack/filestack-python.svg">
+  <a href="https://img.shields.io/pypi/pyversions/filestack-python.svg">
+    <img src="https://github.com/filestack/filestack-python/actions/workflows/tests.yml/badge.svg">
   </a>
   <a href="https://pypi.python.org/pypi/filestack-python">
     <img src="https://img.shields.io/pypi/v/filestack-python.svg">
