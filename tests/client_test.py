@@ -29,7 +29,7 @@ def test_wrong_storage():
 
 
 def test_store_external_url(client):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
+    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
     def api_store(url, request):
         return response(200, {'handle': HANDLE})
 

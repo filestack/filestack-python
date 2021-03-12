@@ -2,6 +2,6 @@ coveralls==1.1
 httmock==1.2.6
 pytest==4.6.3
 pytest-cov==2.5.0
-requests==2.22.0
+requests==2.25.1
 responses==0.10.6
-trafaret==1.2.0
+trafaret==2.0.2

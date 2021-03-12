@@ -98,7 +98,7 @@ class CommonMixin:
 
     def tags(self, security=None):
         """
-        Performs image tagging operation on current object
+        Performs image tagging operation on current object (image)
 
         Args:
             security (:class:`filestack.Security`): Security object that will be used
@@ -123,5 +123,20 @@ class CommonMixin:
             `dict`: dictionary containing SFW result
         """
         obj = self._add_transform_task('sfw', params={'self': None})
+        response = requests.get(obj.signed_url(security=security))
+        return response.json()
+
+    def ocr(self, security=None):
+        """
+        Performs OCR on current object (image)
+
+        Args:
+            security (:class:`filestack.Security`): Security object that will be used
+                to run OCR
+
+        Returns:
+            `dict`: dictionary containing OCR data
+        """
+        obj = self._add_transform_task('ocr', params={'self': None})
         response = requests.get(obj.signed_url(security=security))
         return response.json()

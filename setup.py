@@ -23,7 +23,7 @@ setup(
     author_email='support@filestack.com',
     packages=find_packages(),
     install_requires=[
-        'requests==2.23.0',
+        'requests==2.25.1',
         'trafaret==2.0.2'
     ],
     classifiers=[
@@ -34,6 +34,7 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Internet :: WWW/HTTP',
     ],
 )
