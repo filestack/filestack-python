@@ -1,5 +1,10 @@
 # Filestack-Python Changelog
 
+### 3.3.0 (March 12th, 2021)
+- Added Image OCR [#52](https://github.com/filestack/filestack-python/pull/52)
+- Changed how files from external urls are uploaded [#54](https://github.com/filestack/filestack-python/pull/54)
+- Added custom exception for HTTP errors [#57](https://github.com/filestack/filestack-python/pull/57)
+
 ### 3.2.1 (July 22nd, 2020)
 - FS-7797 changed http method used when uploading external urls
 
