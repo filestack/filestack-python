@@ -42,7 +42,7 @@ def test_upload_with_store_params(post_mock, store_params, security, expected_st
     }
     post_mock.return_value = DummyHttpResponse(json_dict={'handle': 'newHandle'})
 
-    handle = upload_external_url(url, apikey, store_params=store_params, security=security)
-    assert handle == 'newHandle'
+    upload_response = upload_external_url(url, apikey, store_params=store_params, security=security)
+    assert upload_response['handle'] == 'newHandle'
     post_args, _ = post_mock.call_args
     post_mock.assert_called_once_with('{}/process'.format(config.CDN_URL), json=expected_payload)

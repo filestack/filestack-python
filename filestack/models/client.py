@@ -120,8 +120,13 @@ class Client:
             :class:`filestack.Filelink`: new Filelink object
         """
         sec = security or self.security
-        handle = upload_external_url(url, self.apikey, store_params, security=sec)
-        return filestack.models.Filelink(handle=handle, security=sec)
+        upload_response = upload_external_url(url, self.apikey, store_params, security=sec)
+        return filestack.models.Filelink(
+            handle=upload_response['handle'],
+            apikey=self.apikey,
+            security=sec,
+            upload_response=upload_response
+        )
 
     def upload(self, *, filepath=None, file_obj=None, store_params=None, intelligent=False, security=None):
         """
@@ -154,4 +159,9 @@ class Client:
         )
 
         handle = response_json['handle']
-        return filestack.models.Filelink(handle, apikey=self.apikey, security=self.security)
+        return filestack.models.Filelink(
+            handle,
+            apikey=self.apikey,
+            security=self.security,
+            upload_response=response_json
+        )

@@ -53,7 +53,7 @@ def test_store_filepath(upload_mock, client):
 @patch('filestack.models.client.multipart_upload')
 @patch('filestack.models.client.upload_external_url')
 def test_security_inheritance(upload_external_mock, multipart_mock):
-    upload_external_mock.return_value = 'URL_HANDLE'
+    upload_external_mock.return_value = {'handle': 'URL_HANDLE'}
     multipart_mock.return_value = {'handle': 'FILE_HANDLE'}
 
     policy = {'expiry': 1900}
