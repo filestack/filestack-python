@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 3.4.0 (May 13th, 2021)
+- Store upload response in Filelink object [#59](https://github.com/filestack/filestack-python/pull/59)
+
 ### 3.3.0 (March 12th, 2021)
 - Added Image OCR [#52](https://github.com/filestack/filestack-python/pull/52)
 - Changed how files from external urls are uploaded [#54](https://github.com/filestack/filestack-python/pull/54)
