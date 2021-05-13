@@ -28,4 +28,4 @@ def upload_external_url(url, apikey, store_params=None, security=None):
         })
 
     response = requests.post('{}/process'.format(config.CDN_URL), json=payload)
-    return response.json()['handle']
+    return response.json()

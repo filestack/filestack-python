@@ -15,7 +15,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
     >>> flink.url
     'https://cdn.filestackcontent.com/sm9IEXAMPLEQuzfJykmA'
     """
-    def __init__(self, handle, apikey=None, security=None):
+    def __init__(self, handle, apikey=None, security=None, upload_response=None):
         """
         Args:
             handle (str): The path of the file to wrap
@@ -26,6 +26,7 @@ class Filelink(ImageTransformationMixin, CommonMixin):
         self.apikey = apikey
         self.handle = handle
         self.security = security
+        self.upload_response = upload_response
 
     def __repr__(self):
         return '<Filelink {}>'.format(self.handle)

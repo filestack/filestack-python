@@ -47,7 +47,7 @@ To upload in-memory bytes:
     bytes_to_upload = b'content'
 
     cli = Client('<FILESTACK_APIKEY>')
-    filelink = cli.uploads(file_obj=io.BytesIO(bytes_to_upload))
+    filelink = cli.upload(file_obj=io.BytesIO(bytes_to_upload))
 
 
 External urls
