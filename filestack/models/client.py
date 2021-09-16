@@ -120,7 +120,7 @@ class Client:
             :class:`filestack.Filelink`: new Filelink object
         """
         sec = security or self.security
-        upload_response = upload_external_url(url, self.apikey, store_params, security=sec)
+        upload_response = upload_external_url(url, self.apikey, self.storage, store_params, security=sec)
         return filestack.models.Filelink(
             handle=upload_response['handle'],
             apikey=self.apikey,
