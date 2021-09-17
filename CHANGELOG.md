@@ -1,5 +1,9 @@
 # Filestack-Python Changelog
 
+### 3.5.0 (September 17th, 2021)
+- Broaden pinned requests version from 2.24.0 to >=2.25.1 [#61](https://github.com/filestack/filestack-python/pull/61)
+- Use Client's storage when uploading external urls [#62](https://github.com/filestack/filestack-python/pull/62)
+
 ### 3.4.0 (May 13th, 2021)
 - Store upload response in Filelink object [#59](https://github.com/filestack/filestack-python/pull/59)
 

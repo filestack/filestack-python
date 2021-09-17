@@ -2,8 +2,10 @@ from filestack import config
 from filestack.utils import requests
 
 
-def upload_external_url(url, apikey, store_params=None, security=None):
+def upload_external_url(url, apikey, storage, store_params=None, security=None):
     store_params = store_params or {}
+    if storage and not store_params.get('location'):
+        store_params['location'] = storage
 
     # remove params that are currently not supported in external url upload
     for item in ('mimetype', 'upload_tags'):
