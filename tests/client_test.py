@@ -1,5 +1,4 @@
 from unittest.mock import patch, mock_open
-from collections import defaultdict
 
 import pytest
 from trafaret import DataError
@@ -7,7 +6,6 @@ from httmock import urlmatch, HTTMock, response
 
 import filestack.models
 from filestack import Client, Filelink, Transformation, Security
-from tests.helpers import DummyHttpResponse
 
 
 APIKEY = 'APIKEY'
@@ -92,23 +90,3 @@ def test_zip(client):
 
     assert zip_size == 9
     m().write.assert_called_once_with(b'zip-bytes')
-
-
-@patch('requests.put')
-@patch('requests.post')
-def test_upload_multipart_workflows(post_mock, put_mock, client):
-
-    workflow_ids = ['workflow-id-1', 'workflow-id-2']
-    store_params = {'workflows': workflow_ids}
-    put_mock.return_value = DummyHttpResponse(headers={'ETag': 'some_tag'})
-    post_mock.side_effect = [
-        DummyHttpResponse(json_dict=defaultdict(str)),
-        DummyHttpResponse(json_dict=defaultdict(str)),
-        DummyHttpResponse(json_dict={'handle': 'new_handle'})
-    ]
-
-    new_filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)
-
-    post_args, post_kwargs = post_mock.call_args
-    assert post_kwargs['json']['store']['workflows'] == workflow_ids
-    assert new_filelink.handle == 'new_handle'
