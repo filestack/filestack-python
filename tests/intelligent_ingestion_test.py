@@ -3,8 +3,7 @@ from collections import defaultdict
 
 import pytest
 
-from filestack import Security
-from filestack.uploads.intelligent_ingestion import upload_part,  upload
+from filestack.uploads.intelligent_ingestion import upload_part
 from tests.helpers import DummyHttpResponse
 
 
