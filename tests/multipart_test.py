@@ -31,7 +31,7 @@ def multipart_mock():
         rsps.add(responses.PUT, 'http://somewhere.on.s3', json={}, headers={'ETag': 'abc'})
         rsps.add(
             responses.POST, 'https://fs-uploads.com/multipart/complete', status=200,
-            json={'url': f'https://cdn.filestackcontent.com/{HANDLE}', 'handle': HANDLE}
+            json={'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE), 'handle': HANDLE}
         )
         yield rsps
 
@@ -40,7 +40,7 @@ def test_upload_filepath(multipart_mock):
     client = Client(APIKEY)
     filelink = client.upload(filepath='tests/data/doom.mp4')
     assert filelink.handle == HANDLE
-    assert filelink.upload_response == {'url': f'https://cdn.filestackcontent.com/{HANDLE}', 'handle': HANDLE}
+    assert filelink.upload_response == {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE), 'handle': HANDLE}
 
 
 def test_upload_file_obj(multipart_mock):
@@ -57,7 +57,7 @@ def test_upload_with_workflows(multipart_mock):
     client = Client(APIKEY)
     filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)
     assert filelink.handle == HANDLE
-    multipart_complete_payload = json.loads(multipart_mock.calls[3].request.body)
+    multipart_complete_payload = json.loads(multipart_mock.calls[3].request.body.decode())
     assert multipart_complete_payload['store']['workflows'] == workflow_ids
 
 
