@@ -3,6 +3,19 @@ __version__ = '3.5.0'
 
 class CFG:
     API_URL = 'https://www.filestackapi.com/api'
+
+    CDN_DOMAIN = 'filestackcontent.com'
+    UPLOAD_DOMAIN = 'filestackapi.com'
+
+    CDN_SUBDOMAIN = 'cdn'
+    UPLOAD_SUBDOMAIN = 'upload'
+
+    REQUEST_PROTOCOL = 'https://'
+    MULTIPART_START_PATH = '/multipart/start'
+    MULTIPART_UPLOAD_PATH = '/multipart/upload'
+    MULTIPART_COMMIT_PATH = '/multipart/commit'
+    MULTIPART_COMPLETE_PATH = '/multipart/complete'
+
     DEFAULT_CHUNK_SIZE = 5 * 1024 ** 2
     DEFAULT_UPLOAD_MIMETYPE = 'application/octet-stream'
 
@@ -12,17 +25,42 @@ class CFG:
     }
 
     def __init__(self):
-        self.CNAME = ''
+        self._cname = ''
+
+    @property
+    def _upload_url(self):
+        return "{}{}.{}".format(
+            self.REQUEST_PROTOCOL,
+            self.UPLOAD_SUBDOMAIN,
+            self.UPLOAD_DOMAIN,
+        )
+
+    @property
+    def CNAME(self):
+        return self._cname
+
+    @CNAME.setter
+    def CNAME(self, new_cname):
+        if not isinstance(new_cname, str):
+            raise ValueError("CNAME needs to be set as a non empty string")
+        if new_cname == "":
+            raise ValueError("CNAME should not be empty")
+
+        self._cname = new_cname
+        self.CDN_DOMAIN = new_cname
+        self.UPLOAD_DOMAIN = new_cname
 
     @property
     def CDN_URL(self):
-        return 'https://cdn.{}'.format(self.CNAME or 'filestackcontent.com')
+        return "{}{}.{}".format(
+            self.REQUEST_PROTOCOL,
+            self.CDN_SUBDOMAIN,
+            self.CDN_DOMAIN,
+        )
 
     @property
     def MULTIPART_START_URL(self):
-        return 'https://upload.{}/multipart/start'.format(
-            self.CNAME or 'filestackapi.com'
-        )
+        return self._upload_url + self.MULTIPART_START_PATH
 
 
 config = CFG()

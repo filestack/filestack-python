@@ -6,10 +6,10 @@ import hashlib
 import logging
 import functools
 import threading
+import json
 from urllib3.util.retry import Retry
 from multiprocessing.pool import ThreadPool
-
-from base64 import b64encode
+from base64 import b64encode, urlsafe_b64encode
 
 from filestack.utils import requests
 
@@ -39,7 +39,8 @@ def decrease_chunk_size():
         raise Exception('Minimal chunk size failed')
 
 
-def upload_part(apikey, filename, filepath, filesize, storage, start_response, part):
+def upload_part(apikey, filename, filepath, filesize, storage, start_response,
+                security, secure_mode, part):
     with open(filepath, 'rb') as f:
         f.seek(part['seek_point'])
         part_bytes = io.BytesIO(f.read(DEFAULT_PART_SIZE))
@@ -52,6 +53,12 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
         'store': {'location': storage},
         'part': part['num']
     }
+
+    if security:
+        payload_base.update({
+            'policy': security.policy_b64,
+            'signature': security.signature
+        })
 
     global CHUNK_SIZE
     chunk_data = part_bytes.read(CHUNK_SIZE)
@@ -67,11 +74,25 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
         })
 
         try:
-            url = 'https://{}/multipart/upload'.format(start_response['location_url'])
-            api_resp = requests.post(url, json=payload).json()
-            s3_resp = requests.put(api_resp['url'], headers=api_resp['headers'], data=chunk_data)
+            if secure_mode:
+                encoded_payload = urlsafe_b64encode(str.encode(json.dumps(payload))).decode('utf-8')
+                url = "{}/{}".format(
+                    start_response['secure_upload_url'],
+                    encoded_payload,
+                )
+                s3_resp = requests.put(url, data=chunk_data)
+            else:
+                url = "{}{}{}".format(
+                    config.REQUEST_PROTOCOL,
+                    start_response['location_url'],
+                    config.MULTIPART_UPLOAD_PATH,
+                )
+                api_resp = requests.post(url, json=payload).json()
+                s3_resp = requests.put(api_resp['url'], headers=api_resp['headers'], data=chunk_data)
+
             if not s3_resp.ok:
                 raise Exception('Incorrect S3 response')
+
             offset += len(chunk_data)
             chunk_data = part_bytes.read(CHUNK_SIZE)
         except Exception as e:
@@ -86,7 +107,11 @@ def upload_part(apikey, filename, filepath, filesize, storage, start_response, p
     payload = payload_base.copy()
     payload.update({'size': filesize})
 
-    url = 'https://{}/multipart/commit'.format(start_response['location_url'])
+    url = "{}{}{}".format(
+        config.REQUEST_PROTOCOL,
+        start_response['location_url'],
+        config.MULTIPART_COMMIT_PATH,
+    )
     requests.post(url, json=payload)
 
 
@@ -126,9 +151,17 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
         } for num, seek_point in enumerate(range(0, filesize, DEFAULT_PART_SIZE))
     ]
 
+    secure_mode = 'secure_upload_url' in start_response
+
     fii_upload = functools.partial(
-        upload_part, apikey, filename, filepath, filesize, storage, start_response
+        upload_part, apikey, filename, filepath, filesize, storage,
+        start_response, security, secure_mode,
     )
+
+    # In secure mode we uplaod the first part synchronously.
+    if secure_mode:
+        fii_upload(parts[0])
+        parts = parts[1:]
 
     with ThreadPool(NUM_THREADS) as pool:
         pool.map(fii_upload, parts)
@@ -145,7 +178,11 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
     if 'upload_tags' in params:
         payload['upload_tags'] = params.pop('upload_tags')
 
-    complete_url = 'https://{}/multipart/complete'.format(start_response['location_url'])
+    complete_url = "{}{}{}".format(
+        config.REQUEST_PROTOCOL,
+        start_response['location_url'],
+        config.MULTIPART_COMPLETE_PATH,
+    )
     session = requests.Session()
     retries = Retry(total=7, backoff_factor=0.2, status_forcelist=[202], method_whitelist=frozenset(['POST']))
     session.mount('http://', requests.adapters.HTTPAdapter(max_retries=retries))

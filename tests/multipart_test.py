@@ -82,5 +82,5 @@ def test_upload_chunk():
     start_response = defaultdict(str)
     start_response['location_url'] = 'fsuploads.com'
     with HTTMock(fs_backend_mock), HTTMock(amazon_mock):
-        upload_result = upload_chunk('apikey', 'filename', 's3', start_response, chunk)
+        upload_result = upload_chunk('apikey', 'filename', 's3', start_response, None, False, chunk)
         assert upload_result == {'part_number': 123, 'etag': 'etagX'}
