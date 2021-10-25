@@ -5,8 +5,7 @@ from unittest.mock import mock_open, patch, ANY
 import pytest
 import responses
 
-from httmock import urlmatch, HTTMock, response
-
+from filestack import exceptions
 from filestack import Filelink, Security
 from filestack import config
 
@@ -54,24 +53,22 @@ def test_signed_url(security_obj, expected_security_part, secure_filelink):
     assert expected_security_part in secure_filelink.signed_url(security=security_obj)
 
 
+@responses.activate
 def test_get_content(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
-    def api_download(url, request):
-        return response(200, b'SOMEBYTESCONTENT')
-
-    with HTTMock(api_download):
-        content = filelink.get_content()
-
-    assert content == b'SOMEBYTESCONTENT'
+    responses.add(
+        responses.GET, 'https://cdn.filestackcontent.com/{}'.format(HANDLE), body=b'file-content'
+    )
+    content = filelink.get_content()
+    assert content == b'file-content'
 
 
+@responses.activate
 def test_bad_call(filelink):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
-    def api_bad(url, request):
-        return response(400, b'SOMEBYTESCONTENT')
-
-    with HTTMock(api_bad):
-        pytest.raises(Exception, filelink.get_content)
+    responses.add(
+        responses.GET, 'https://cdn.filestackcontent.com/{}'.format(HANDLE), status=400
+    )
+    with pytest.raises(exceptions.FilestackHTTPError):
+        filelink.get_content()
 
 
 @pytest.mark.parametrize('attributes, security, expected_params', [

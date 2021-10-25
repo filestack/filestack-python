@@ -1,7 +1,7 @@
 import pytest
+import responses
 
 from filestack import AudioVisual, Filelink
-from httmock import urlmatch, HTTMock, response
 
 
 APIKEY = 'APIKEY'
@@ -15,23 +15,18 @@ def av():
     return AudioVisual(PROCESS_URL, 'someuuid', 'sometimetstamp', apikey=APIKEY)
 
 
+@responses.activate
 def test_status(av):
-
-    @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
-    def api_zip(url, request):
-        return response(200, {'url': PROCESS_URL, 'status': 'completed'}, {'content-type': 'application/json'})
-
-    with HTTMock(api_zip):
-        assert av.status == 'completed'
+    responses.add(responses.GET, 'https://process.filestackapi.com/SOMEHANDLE', json={'status': 'completed'})
+    assert av.status == 'completed'
 
 
+@responses.activate
 def test_convert(av):
-
-    @urlmatch(netloc=r'process.filestackapi\.com', method='get', scheme='https')
-    def api_zip(url, request):
-        return response(200, {'status': 'completed', 'data': {'url': URL}}, {'content-type': 'application/json'})
-
-    with HTTMock(api_zip):
-        filelink = av.to_filelink()
-        assert isinstance(filelink, Filelink)
-        assert filelink.handle == HANDLE
+    responses.add(
+        responses.GET, 'https://process.filestackapi.com/SOMEHANDLE',
+        json={'status': 'completed', 'data': {'url': URL}}
+    )
+    filelink = av.to_filelink()
+    assert isinstance(filelink, Filelink)
+    assert filelink.handle == HANDLE
