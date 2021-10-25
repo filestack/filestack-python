@@ -1,38 +1,36 @@
-import re
-from unittest.mock import patch
-
 import pytest
+import responses
 
-from tests.helpers import DummyHttpResponse
 from filestack import __version__
 from filestack.utils import requests
 
-TEST_URL = 'http://just.some.url'
+TEST_URL = 'http://just.some.url/'
 
 
-@patch('filestack.utils.original_requests.post')
-def test_req_wrapper_overwrite_headers(post_mock):
+@responses.activate
+def test_req_wrapper_overwrite_headers():
+    responses.add(responses.POST, TEST_URL)
     requests.post(TEST_URL)
-    post_args, post_kwargs = post_mock.call_args
-    headers_sent = post_kwargs['headers']
-    assert post_args[0] == TEST_URL
-    assert headers_sent['User-Agent'] == 'filestack-python {}'.format(__version__)
-    assert headers_sent['Filestack-Source'] == 'Python-{}'.format(__version__)
-    assert re.match(r'\d+-[a-zA-Z0-9]{10}', headers_sent['Filestack-Trace-Id'])
-    assert re.match(r'pythonsdk-[a-zA-Z0-9]{10}', headers_sent['Filestack-Trace-Span'])
+    mocked_request = responses.calls[0].request
+    assert mocked_request.url == TEST_URL
+    assert 'Filestack-Trace-Id' in mocked_request.headers
+    assert 'Filestack-Trace-Span' in mocked_request.headers
+    assert 'filestack-python {}'.format(__version__) == mocked_request.headers['User-Agent']
+    assert 'Python-{}'.format(__version__) == mocked_request.headers['Filestack-Source']
 
 
-@patch('filestack.utils.original_requests.post')
-def test_req_wrapper_use_provided_headers(post_mock):
+@responses.activate
+def test_req_wrapper_use_provided_headers():
+    responses.add(responses.POST, TEST_URL)
     custom_headers = {'something': 'used explicitly'}
     requests.post(TEST_URL, headers=custom_headers)
-    post_args, post_kwargs = post_mock.call_args
-    assert post_args[0] == TEST_URL
-    assert post_kwargs['headers'] == custom_headers
+    print(responses.calls[0].request.headers)
+    assert responses.calls[0].request.url == TEST_URL
+    assert responses.calls[0].request.headers['something'] == 'used explicitly'
 
 
-@patch('filestack.utils.original_requests.post')
-def test_req_wrapper_raise_exception(post_mock):
-    post_mock.return_value = DummyHttpResponse(ok=False, content=b'oops!')
+@responses.activate
+def test_req_wrapper_raise_exception():
+    responses.add(responses.POST, TEST_URL, status=500, body=b'oops!')
     with pytest.raises(Exception, match='oops!'):
         requests.post(TEST_URL)
