@@ -1,10 +1,12 @@
 import io
+import re
 from unittest.mock import mock_open, patch, ANY
 
 import pytest
+import responses
+
 from httmock import urlmatch, HTTMock, response
 
-from tests.helpers import DummyHttpResponse
 from filestack import Filelink, Security
 from filestack import config
 
@@ -93,25 +95,27 @@ def test_bad_call(filelink):
         }
     ),
 ])
-@patch('filestack.models.filelink.requests.get')
-def test_metadata(get_mock, attributes, security, expected_params, filelink):
-    get_mock.return_value = DummyHttpResponse(json_dict={'metadata': 'content'})
+@responses.activate
+def test_metadata(attributes, security, expected_params, filelink):
+    responses.add(
+        responses.GET,
+        re.compile('https://cdn.filestackcontent.com/SOMEHANDLE/metadata.*'),
+        json={'metadata': 'content'}
+    )
     metadata_response = filelink.metadata(attributes_list=attributes, security=security)
     assert metadata_response == {'metadata': 'content'}
-    expected_url = '{}/SOMEHANDLE/metadata'.format(config.CDN_URL)
-    get_mock.assert_called_once_with(expected_url, params=expected_params)
+    assert responses.calls[0].request.params == expected_params
 
 
+@responses.activate
 def test_download(filelink):
-    @urlmatch(netloc=r'cdn\.filestackcontent\.com', method='get', scheme='https')
-    def api_download(url, request):
-        return response(200, b'file-content')
-
+    responses.add(
+        responses.GET, 'https://cdn.filestackcontent.com/{}'.format(HANDLE), body=b'file-content'
+    )
     m = mock_open()
     with patch('filestack.mixins.common.open', m):
-        with HTTMock(api_download):
-            file_size = filelink.download('tests/data/test_download.jpg')
-            assert file_size == 12
+        file_size = filelink.download('tests/data/test_download.jpg')
+        assert file_size == 12
     m().write.assert_called_once_with(b'file-content')
 
 
@@ -120,22 +124,27 @@ def test_tags_without_security(filelink):
         filelink.tags()
 
 
-@patch('filestack.utils.requests.get')
-def test_tags(get_mock, secure_filelink):
-    image_tags = {'tags': {'cat': 99}}
-    get_mock.return_value = DummyHttpResponse(json_dict=image_tags)
-    assert secure_filelink.tags() == image_tags
-    get_mock.assert_called_once_with('{}/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
+@responses.activate
+def test_tags(secure_filelink):
+    responses.add(
+        responses.GET, re.compile('https://cdn.filestackcontent.com/tags/.*/{}$'.format(HANDLE)),
+        json={'tags': {'cat': 98}}
+    )
+    assert secure_filelink.tags() == {'tags': {'cat': 98}}
+    assert responses.calls[0].request.url == '{}/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
 
 
-@patch('filestack.utils.requests.get')
-def test_tags_on_transformation(get_mock, secure_filelink):
+@responses.activate
+def test_tags_on_transformation(secure_filelink):
     transformation = secure_filelink.resize(width=100)
     image_tags = {'tags': {'cat': 99}}
-    get_mock.return_value = DummyHttpResponse(json_dict=image_tags)
+    responses.add(
+        responses.GET, re.compile('{}/resize.*/{}$'.format(config.CDN_URL, HANDLE)),
+        json=image_tags
+    )
     assert transformation.tags() == image_tags
-    get_mock.assert_called_once_with(
-        '{}/resize=width:100/tags/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
+    assert responses.calls[0].request.url == '{}/resize=width:100/tags/{}/{}'.format(
+        config.CDN_URL, SECURITY.as_url_string(), HANDLE
     )
 
 
@@ -144,22 +153,22 @@ def test_sfw_without_security(filelink):
         filelink.sfw()
 
 
-@patch('filestack.utils.requests.get')
-def test_sfw(get_mock, secure_filelink):
+@responses.activate
+def test_sfw(secure_filelink):
     sfw_response = {'sfw': False}
-    get_mock.return_value = DummyHttpResponse(json_dict=sfw_response)
+    responses.add(responses.GET, re.compile('{}.*'.format(config.CDN_URL)), json=sfw_response)
     assert secure_filelink.sfw() == sfw_response
-    get_mock.assert_called_once_with('{}/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE))
+    assert responses.calls[0].request.url == '{}/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
 
 
-@patch('filestack.utils.requests.get')
-def test_sfw_on_transformation(get_mock, secure_filelink):
+@responses.activate
+def test_sfw_on_transformation(secure_filelink):
     transformation = secure_filelink.resize(width=100)
     sfw_response = {'sfw': True}
-    get_mock.return_value = DummyHttpResponse(json_dict=sfw_response)
+    responses.add(responses.GET, re.compile('{}/resize.*'.format(config.CDN_URL)), json=sfw_response)
     assert transformation.sfw() == sfw_response
-    get_mock.assert_called_once_with(
-        '{}/resize=width:100/sfw/{}/{}'.format(config.CDN_URL, SECURITY.as_url_string(), HANDLE)
+    assert responses.calls[0].request.url == '{}/resize=width:100/sfw/{}/{}'.format(
+        config.CDN_URL, SECURITY.as_url_string(), HANDLE
     )
 
 
