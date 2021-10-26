@@ -1,10 +1,10 @@
-from unittest.mock import patch
+import re
 
 import pytest
+import responses
 
 from filestack import Transformation, AudioVisual
 from filestack import config
-from tests.helpers import DummyHttpResponse
 
 APIKEY = 'SOMEAPIKEY'
 HANDLE = 'SOMEHANDLE'
@@ -306,24 +306,28 @@ def test_no_metadata(transform):
     assert no_metadata.url == target_url
 
 
-@patch('filestack.mixins.common.requests.post')
-def test_chain_tasks_and_store(post_mock, transform):
-    post_mock.return_value = DummyHttpResponse(json_dict={'handle': HANDLE})
+@responses.activate
+def test_chain_tasks_and_store(transform):
+    responses.add(
+        responses.POST, re.compile('https://cdn.filestackcontent.com/SOMEAPIKEY*'),
+        json={'handle': HANDLE}
+    )
     transform_obj = transform.flip().resize(width=100)
     new_filelink = transform_obj.store(filename='filename', location='S3', container='bucket', path='folder/image.jpg')
     assert new_filelink.handle == HANDLE
-    post_mock.assert_called_once_with(
-        '{}/{}/flip/resize=width:100/store=container:bucket,filename:filename,location:S3,path:"folder/image.jpg"/{}'.format(
-            config.CDN_URL, APIKEY, EXTERNAL_URL
-        )
+    assert responses.calls[0].request.url == (
+        '{}/{}/flip/resize=width:100/store=container:bucket,'.format(config.CDN_URL, APIKEY) +
+        'filename:filename,location:S3,path:%22folder/image.jpg%22/{}'.format(EXTERNAL_URL)
     )
 
 
-@patch('filestack.mixins.imagetransformation.utils.requests.get')
-def test_av_convert(post_mock, transform):
-    post_mock.return_value = DummyHttpResponse(json_dict={
-        'url': transform.url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'
-    })
+@responses.activate
+def test_av_convert(transform):
+    responses.add(
+        responses.GET,
+        'https://cdn.filestackcontent.com/SOMEAPIKEY/video_convert=height:500,width:500/SOMEEXTERNALURL',
+        json={'url': transform.url, 'uuid': 'someuuid', 'timestamp': 'sometimestamp'}
+    )
     new_av = transform.av_convert(width=500, height=500)
     assert isinstance(new_av, AudioVisual)
     assert new_av.uuid == 'someuuid'
