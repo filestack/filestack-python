@@ -1,86 +1,76 @@
 import io
 import json
 from collections import defaultdict
-from unittest.mock import patch
 
 import responses
-from httmock import HTTMock, response, urlmatch
+import pytest
 
-from tests.helpers import DummyHttpResponse
 from filestack import Client
 from filestack import config
 from filestack.uploads.multipart import upload_chunk, Chunk
 
 APIKEY = 'APIKEY'
 HANDLE = 'SOMEHANDLE'
-URL = 'https://cdn.filestackcontent.com/{}'.format(HANDLE)
 
 
-def chunk_put_callback(request):
-    body = {'url': URL}
-    return 200, {'ETag': 'someetags'}, json.dumps(body)
+@pytest.fixture
+def multipart_mock():
+    with responses.RequestsMock() as rsps:
+        rsps.add(
+            responses.POST, config.MULTIPART_START_URL, status=200,
+            json={
+                'region': 'us-east-1', 'upload_id': 'someuuid', 'uri': 'someuri',
+                'location_url': 'fs-uploads.com'
+            }
+        )
+        rsps.add(
+            responses.POST, 'https://fs-uploads.com/multipart/upload',
+            status=200, content_type='application/json',
+            json={'url': 'http://somewhere.on.s3', 'headers': {'filestack': 'header'}}
+        )
+        rsps.add(responses.PUT, 'http://somewhere.on.s3', json={}, headers={'ETag': 'abc'})
+        rsps.add(
+            responses.POST, 'https://fs-uploads.com/multipart/complete', status=200,
+            json={'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE), 'handle': HANDLE}
+        )
+        yield rsps
+
+
+def test_upload_filepath(multipart_mock):
+    client = Client(APIKEY)
+    filelink = client.upload(filepath='tests/data/doom.mp4')
+    assert filelink.handle == HANDLE
+    assert filelink.upload_response == {'url': 'https://cdn.filestackcontent.com/{}'.format(HANDLE), 'handle': HANDLE}
+
+
+def test_upload_file_obj(multipart_mock):
+    file_content = b'file bytes'
+    filelink = Client(APIKEY).upload(file_obj=io.BytesIO(file_content))
+    assert filelink.handle == HANDLE
+    assert multipart_mock.calls[2].request.headers['filestack'] == 'header'
+    assert multipart_mock.calls[2].request.body == file_content
+
+
+def test_upload_with_workflows(multipart_mock):
+    workflow_ids = ['workflow-id-1', 'workflow-id-2']
+    store_params = {'workflows': workflow_ids}
+    client = Client(APIKEY)
+    filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)
+    assert filelink.handle == HANDLE
+    multipart_complete_payload = json.loads(multipart_mock.calls[3].request.body.decode())
+    assert multipart_complete_payload['store']['workflows'] == workflow_ids
 
 
 @responses.activate
-def test_upload_filepath():
-    client = Client(APIKEY)
-
-    # add the different HTTP responses that are called during the multipart upload
-    responses.add(
-        responses.POST, config.MULTIPART_START_URL, status=200, content_type='application/json',
-        json={'region': 'us-east-1', 'upload_id': 'someuuid', 'uri': 'someuri', 'location_url': 'fs-uploads.com'}
-    )
-    responses.add(
-        responses.POST, 'https://fs-uploads.com/multipart/upload',
-        status=200, content_type='application/json', json={'url': URL, 'headers': {}}
-    )
-    responses.add_callback(responses.PUT, URL, callback=chunk_put_callback)
-    responses.add(
-        responses.POST, 'https://fs-uploads.com/multipart/complete', status=200,
-        content_type='application/json', json={'url': URL, 'handle': HANDLE}
-    )
-
-    new_filelink = client.upload(filepath='tests/data/doom.mp4')
-    assert new_filelink.handle == HANDLE
-
-
-@patch('filestack.uploads.multipart.requests.put')
-@patch('filestack.uploads.multipart.requests.post')
-def test_upload_file_obj(post_mock, put_mock):
-    start_response = defaultdict(str)
-    start_response['location_url'] = 'fs.api'
-    post_mock.side_effect = [
-        DummyHttpResponse(json_dict=start_response),
-        DummyHttpResponse(json_dict=defaultdict(str)),
-        DummyHttpResponse(json_dict={'handle': 'bytesHandle'})
-    ]
-    put_mock.return_value = DummyHttpResponse(
-        json_dict=defaultdict(str), headers={'ETag': 'etag-1'}
-    )
-    file_content = b'file bytes'
-    filelink = Client(APIKEY).upload(file_obj=io.BytesIO(file_content))
-    assert filelink.handle == 'bytesHandle'
-    put_args, put_kwargs = put_mock.call_args
-    assert put_kwargs['data'] == file_content
-
-
 def test_upload_chunk():
-    @urlmatch(netloc=r'fsuploads\.com', path='/multipart/upload', method='post', scheme='https')
-    def fs_backend_mock(url, request):
-        return {
-            'status_code': 200,
-            'content': json.dumps({
-                'url': 'https://amazon.com/upload', 'headers': {'one': 'two'}
-            })
-        }
-
-    @urlmatch(netloc=r'amazon\.com', path='/upload', method='put', scheme='https')
-    def amazon_mock(url, request):
-        return response(200, b'', {'ETag': 'etagX'}, reason=None, elapsed=0, request=request)
+    responses.add(
+        responses.POST, 'https://fsuploads.com/multipart/upload',
+        status=200, json={'url': 'http://s3-upload.url', 'headers': {}}
+    )
+    responses.add(responses.PUT, 'http://s3-upload.url', headers={'ETag': 'etagX'})
 
     chunk = Chunk(num=123, seek_point=0, filepath='tests/data/doom.mp4')
     start_response = defaultdict(str)
     start_response['location_url'] = 'fsuploads.com'
-    with HTTMock(fs_backend_mock), HTTMock(amazon_mock):
-        upload_result = upload_chunk('apikey', 'filename', 's3', start_response, chunk)
-        assert upload_result == {'part_number': 123, 'etag': 'etagX'}
+    upload_result = upload_chunk('apikey', 'filename', 's3', start_response, chunk)
+    assert upload_result == {'part_number': 123, 'etag': 'etagX'}

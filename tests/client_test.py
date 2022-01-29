@@ -1,13 +1,12 @@
+import re
 from unittest.mock import patch, mock_open
-from collections import defaultdict
 
 import pytest
+import responses
 from trafaret import DataError
-from httmock import urlmatch, HTTMock, response
 
 import filestack.models
 from filestack import Client, Filelink, Transformation, Security
-from tests.helpers import DummyHttpResponse
 
 
 APIKEY = 'APIKEY'
@@ -28,13 +27,12 @@ def test_wrong_storage():
     pytest.raises(DataError, Client, **kwargs)
 
 
+@responses.activate
 def test_store_external_url(client):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='post', scheme='https')
-    def api_store(url, request):
-        return response(200, {'handle': HANDLE})
-
-    with HTTMock(api_store):
-        filelink = client.upload_url(url="someurl", store_params={'filename': 'something.jpg'})
+    responses.add(
+        responses.POST, 'https://cdn.filestackcontent.com/process', json={'handle': HANDLE}
+    )
+    filelink = client.upload_url(url='http://a.bc')
 
     assert isinstance(filelink, Filelink)
     assert filelink.handle == HANDLE
@@ -80,35 +78,15 @@ def test_transform_external(client):
     assert isinstance(new_transform, Transformation)
 
 
+@responses.activate
 def test_zip(client):
-    @urlmatch(netloc=r'cdn.filestackcontent\.com', method='get', scheme='https')
-    def api_zip(url, request):
-        return response(200, b'zip-bytes')
-
+    responses.add(
+        responses.GET, re.compile('https://cdn.filestackcontent.com/APIKEY/zip*'),
+        body=b'zip-bytes'
+    )
     m = mock_open()
     with patch('filestack.models.client.open', m):
-        with HTTMock(api_zip):
-            zip_size = client.zip('test.zip', ['handle1', 'handle2'])
+        zip_size = client.zip('test.zip', ['handle1', 'handle2'])
 
     assert zip_size == 9
     m().write.assert_called_once_with(b'zip-bytes')
-
-
-@patch('requests.put')
-@patch('requests.post')
-def test_upload_multipart_workflows(post_mock, put_mock, client):
-
-    workflow_ids = ['workflow-id-1', 'workflow-id-2']
-    store_params = {'workflows': workflow_ids}
-    put_mock.return_value = DummyHttpResponse(headers={'ETag': 'some_tag'})
-    post_mock.side_effect = [
-        DummyHttpResponse(json_dict=defaultdict(str)),
-        DummyHttpResponse(json_dict=defaultdict(str)),
-        DummyHttpResponse(json_dict={'handle': 'new_handle'})
-    ]
-
-    new_filelink = client.upload(filepath='tests/data/bird.jpg', store_params=store_params)
-
-    post_args, post_kwargs = post_mock.call_args
-    assert post_kwargs['json']['store']['workflows'] == workflow_ids
-    assert new_filelink.handle == 'new_handle'

@@ -1,13 +1,13 @@
-from unittest.mock import patch
+import json
 
 import pytest
+import responses
 
-from tests.helpers import DummyHttpResponse
-from filestack import config
 from filestack.uploads.external_url import upload_external_url
 
 url = 'http://image.url'
 apikey = 'TESTAPIKEY'
+PROCESS_URL = 'https://cdn.filestackcontent.com/process'
 
 
 @pytest.mark.parametrize('default_storage, store_params, security, expected_store_tasks', [
@@ -35,18 +35,17 @@ apikey = 'TESTAPIKEY'
         ]
     )
 ])
-@patch('filestack.uploads.external_url.requests.post')
-def test_upload_with_store_params(post_mock, default_storage, store_params, security, expected_store_tasks):
+@responses.activate
+def test_upload_with_store_params(default_storage, store_params, security, expected_store_tasks):
     expected_payload = {
         'apikey': 'TESTAPIKEY',
         'sources': ['http://image.url'],
         'tasks': expected_store_tasks
     }
-    post_mock.return_value = DummyHttpResponse(json_dict={'handle': 'newHandle'})
-
+    responses.add(responses.POST, PROCESS_URL, json={'handle': 'newHandle'})
     upload_response = upload_external_url(
         url, apikey, default_storage, store_params=store_params, security=security
     )
     assert upload_response['handle'] == 'newHandle'
-    post_args, _ = post_mock.call_args
-    post_mock.assert_called_once_with('{}/process'.format(config.CDN_URL), json=expected_payload)
+    req_payload = json.loads(responses.calls[0].request.body.decode())
+    assert req_payload == expected_payload
