@@ -2,12 +2,14 @@ import io
 import os
 import sys
 import mimetypes
+import multiprocessing
 import hashlib
 import logging
 import functools
 import threading
 from urllib3.util.retry import Retry
-from multiprocessing.pool import ThreadPool
+# from multiprocessing.pool import ThreadPool
+from concurrent.futures import ThreadPoolExecutor
 
 from base64 import b64encode
 
@@ -27,7 +29,7 @@ DEFAULT_PART_SIZE = 8 * MB
 CHUNK_SIZE = 8 * MB
 MIN_CHUNK_SIZE = 32 * 1024
 MAX_DELAY = 4
-NUM_THREADS = 4
+NUM_THREADS = multiprocessing.cpu_count() #4
 
 lock = threading.Lock()
 
@@ -130,8 +132,8 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
         upload_part, apikey, filename, filepath, filesize, storage, start_response
     )
 
-    with ThreadPool(NUM_THREADS) as pool:
-        pool.map(fii_upload, parts)
+    with ThreadPoolExecutor(max_workers=NUM_THREADS) as executor:
+        list(executor.map(fii_upload, parts))
 
     payload.update({
         'uri': start_response['uri'],
@@ -147,7 +149,7 @@ def upload(apikey, filepath, file_obj, storage, params=None, security=None):
 
     complete_url = 'https://{}/multipart/complete'.format(start_response['location_url'])
     session = requests.Session()
-    retries = Retry(total=7, backoff_factor=0.2, status_forcelist=[202], method_whitelist=frozenset(['POST']))
+    retries = Retry(total=7, backoff_factor=0.2, status_forcelist=[202], allowed_methods=frozenset(['POST']))
     session.mount('http://', requests.adapters.HTTPAdapter(max_retries=retries))
     response = session.post(complete_url, json=payload, headers=config.HEADERS)
     if response.status_code != 200:

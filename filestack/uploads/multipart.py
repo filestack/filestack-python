@@ -4,7 +4,8 @@ import mimetypes
 import multiprocessing
 from base64 import b64encode
 from functools import partial
-from multiprocessing.pool import ThreadPool
+# from multiprocessing.pool import ThreadPool
+from concurrent.futures import ThreadPoolExecutor
 
 from filestack import config
 from filestack.utils import requests
@@ -113,10 +114,10 @@ def multipart_upload(apikey, filepath, file_obj, storage, params=None, security=
     chunks = make_chunks(filepath, file_obj, filesize)
     start_response = multipart_request(config.MULTIPART_START_URL, payload, params, security)
     upload_func = partial(upload_chunk, apikey, filename, storage, start_response)
-
-    with ThreadPool(upload_processes) as pool:
-        uploaded_parts = pool.map(upload_func, chunks)
-
+    
+    with ThreadPoolExecutor(max_workers=upload_processes) as executor:
+        uploaded_parts = list(executor.map(upload_func, chunks))
+    
     location_url = start_response.pop('location_url')
     payload.update(start_response)
     payload['parts'] = uploaded_parts
