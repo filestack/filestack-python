@@ -1,5 +1,8 @@
 # Filestack-Python Changelog
 
+### 3.6.0 (May 9th, 2024)
+- Bumped requests lib version from 2.25.1 to >=2.31.0 [#75](https://github.com/filestack/filestack-python/pull/75)
+
 ### 3.5.0 (September 17th, 2021)
 - Broaden pinned requests version from 2.24.0 to >=2.25.1 [#61](https://github.com/filestack/filestack-python/pull/61)
 - Use Client's storage when uploading external urls [#62](https://github.com/filestack/filestack-python/pull/62)
