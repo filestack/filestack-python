@@ -4,7 +4,6 @@ import mimetypes
 import multiprocessing
 from base64 import b64encode
 from functools import partial
-# from multiprocessing.pool import ThreadPool
 from concurrent.futures import ThreadPoolExecutor
 
 from filestack import config

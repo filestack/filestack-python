@@ -8,7 +8,6 @@ import logging
 import functools
 import threading
 from urllib3.util.retry import Retry
-# from multiprocessing.pool import ThreadPool
 from concurrent.futures import ThreadPoolExecutor
 
 from base64 import b64encode
@@ -29,7 +28,7 @@ DEFAULT_PART_SIZE = 8 * MB
 CHUNK_SIZE = 8 * MB
 MIN_CHUNK_SIZE = 32 * 1024
 MAX_DELAY = 4
-NUM_THREADS = multiprocessing.cpu_count() #4
+NUM_THREADS = multiprocessing.cpu_count()
 
 lock = threading.Lock()
 
