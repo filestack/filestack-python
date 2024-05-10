@@ -22,7 +22,7 @@ def test_createpdf(transform):
     assert obj.url
 
 def test_animate(transform):
-    target_url = '{}/{}//animate=fit:scale,width:200,height:300/{}/[OjKeBAuBTIWygi1NE8fx,WTY6jjIaTPOvWY9KsNh9]'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
+    target_url = '{}/{}/animate=fit:scale,width:200,height:300/{}/[OjKeBAuBTIWygi1NE8fx,WTY6jjIaTPOvWY9KsNh9]'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
     obj = transform.animate(fit='scale',width=200,height=300,loop=0,delay=1000)
     assert obj.url
 
