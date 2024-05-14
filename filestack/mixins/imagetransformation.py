@@ -117,13 +117,13 @@ class ImageTransformationMixin:
     def zip(self):
         return self._add_transform_task('zip', locals())
 
-    def fallback(self, handle=None, cache=None):
+    def fallback(self, file=None, cache=None):
         return self._add_transform_task('fallback', locals())
 
     def pdf_info(self, colorinfo=None):
         return self._add_transform_task('pdfinfo', locals())
 
-    def pdf_convert(self, pageorientation=None, pageformat=None, pages=None):
+    def pdf_convert(self, pageorientation=None, pageformat=None, pages=None, metadata=None):
         return self._add_transform_task('pdfconvert', locals())
 
     def minify_js(self, gzip=None, use_babel_polyfill=None, keep_fn_name=None, keep_class_name=None,
@@ -152,6 +152,18 @@ class ImageTransformationMixin:
 
     def auto_image(self):
         return self._add_transform_task('auto_image', locals())
+
+    def doc_to_images(self, pages=None, engine=None, format=None, quality=None, density=None, hidden_slides=None):
+        return self._add_transform_task('doc_to_images', locals())
+    
+    def smart_crop(self, mode=None, width=None, height=None, fill_color=None, coords=None):
+        return self._add_transform_task('smart_crop', locals())
+    
+    def pdfcreate(self, engine=None):
+        return self._add_transform_task('pdfcreate', locals())
+
+    def animate(self, delay=None, loop=None, width=None, height=None, fit=None, align=None, background=None):
+        return self._add_transform_task('animate', locals())
 
     def _add_transform_task(self, transformation, params):
         if isinstance(self, filestack.models.Transformation):
