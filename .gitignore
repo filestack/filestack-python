@@ -10,3 +10,5 @@ tests/data/test_download.jpg
 .venv
 
 docs/build/*
+
+venv
