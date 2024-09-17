@@ -1,6 +1,6 @@
 # Filestack-Python Changelog
 
-### 3.6.0 (May 9th, 2024)
+### 4.0.0 (September 17th, 2024)
 - Compatibility fix for AWS Lambda with Python 3.11 [#73](https://github.com/filestack/filestack-python/pull/73)
 - A bunch of transform features added [#74](https://github.com/filestack/filestack-python/pull/75)
 - Bumped requests lib version from 2.25.1 to >=2.31.0 [#75](https://github.com/filestack/filestack-python/pull/75)
