@@ -155,10 +155,10 @@ class ImageTransformationMixin:
 
     def doc_to_images(self, pages=None, engine=None, format=None, quality=None, density=None, hidden_slides=None):
         return self._add_transform_task('doc_to_images', locals())
-    
+
     def smart_crop(self, mode=None, width=None, height=None, fill_color=None, coords=None):
         return self._add_transform_task('smart_crop', locals())
-    
+
     def pdfcreate(self, engine=None):
         return self._add_transform_task('pdfcreate', locals())
 

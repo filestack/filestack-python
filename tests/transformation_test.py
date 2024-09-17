@@ -242,8 +242,8 @@ def test_zip(transform):
 
 
 def test_fallback(transform):
-    target_url = '{}/{}/fallback=cache:12,handle:fallbackHandle/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL)
-    result = transform.fallback(handle='fallbackHandle', cache=12)
+    target_url = '{}/{}/fallback=cache:12,file:{}/{}'.format(config.CDN_URL, APIKEY, EXTERNAL_URL, EXTERNAL_URL)
+    result = transform.fallback(file=EXTERNAL_URL, cache=12)
     assert result.url == target_url
 
 
